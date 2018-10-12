@@ -2,6 +2,10 @@
 
 PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. Additionally, this version intends to be more up to date with recent versions of python and make liberal use of the typing capabilities of python for improved future maintainability.
 
+## Documentation
+
+See documentation [here](https://asosnovsky.github.io/pdfmajor/).
+
 ## Why Another Fork?
 
 `PDFMiner` was designed to run in python 2.7>, `PDFMiner.six` was written to bring cross-version support for python 2 and 3. This versions intends to make use of the latest improvement in the python language while remaining fairly simple to develop with. 
