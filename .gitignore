@@ -1,0 +1,11 @@
+*.pyc
+*.pyo
+pdfmajor.egg-info
+.settings
+docs/_build
+/build/
+/dist/
+tests/*.xml
+tests/*.txt
+.idea/
+.vscode
