@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>API - PDF Major</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "API";
+    var mkdocs_page_input_path = "api.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> PDF Major</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">API</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#api">API</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#interpreter">interpreter</a></li>
+        
+            <li><a class="toctree-l3" href="#converters">converters</a></li>
+        
+            <li><a class="toctree-l3" href="#imagewriter">imagewriter</a></li>
+        
+            <li><a class="toctree-l3" href="#layouts">layouts</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">PDF Major</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>API</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="api">API</h1>
+<p>The library is constructed from 4 base modules:</p>
+<ul>
+<li><strong>interpreter</strong>: contains low-level classes for extracting fundamental data-structures from the documents</li>
+<li><strong>converters</strong>: contains high-level classes for conversion of the fundamental pdf structures to other formats</li>
+<li><strong>imagewriter</strong>: contains a simple implementation for converting PDF Image Streams to png/bmp/img formats</li>
+<li><strong>layouts</strong>: contains an abstraction layer for the data-structures found in the pdf</li>
+</ul>
+<h2 id="interpreter">interpreter</h2>
+<pre><code>WIP
+</code></pre>
+<h2 id="converters">converters</h2>
+<p>Contains high-level classes for conversion of the fundamental pdf structures to other formats. This library includes 4 high-level conversion classes:</p>
+<ul>
+<li>HTMLConverter</li>
+<li>JSONConverter</li>
+<li>XMLConverter</li>
+<li>TextConverter</li>
+</ul>
+<p>These classes all extend the <a href="#converters.PDFConverter">PDFConverter</a>. To use them simply call the static method <a href="#converterspdfconverterparse_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos">parse_file</a>.</p>
+<h3 id="example">Example</h3>
+<pre><code class="py">from pdfmajor.converters import HTMLConverter
+
+input_file = open('path/to/input/file.pdf', 'rb')
+output_file = open('path/to/output/file.html', 'wb')
+HTMLConverter.parse_file(
+    input_file,
+    output_file
+)
+input_file.close()
+output_file.close()
+</code></pre>
+
+<h3 id="convertersconvert_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos-out_type">converters.convert_file(input_file, output_file, image_folder_path, codec, maxpages, password, caching, check_extractable, pagenos, out_type)</h3>
+<p>A high-level abstraction for the conversion classes.</p>
+<ul>
+<li><code>input_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
+<li><code>output_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
+<li><code>image_folder_path</code>: <a href="#">str</a> defaults to None</li>
+<li><code>codec</code>: <a href="#">str</a> defaults to 'utf-8'</li>
+<li><code>maxpages</code>: <a href="#">int</a> defaults to 0 </li>
+<li><code>password</code>: <a href="#">str</a> defaults to None </li>
+<li><code>caching</code>: <a href="#">bool</a> defaults to True </li>
+<li><code>check_extractable</code>: <a href="#">bool</a> defaults to True</li>
+<li><code>pagenos</code>: <a href="#">List[int]</a> defaults to None</li>
+<li><code>out_type</code>: <a href="#">str</a> defaults to 'html'</li>
+</ul>
+<h3 id="example-convertersconvert_file">Example (converters.convert_file)</h3>
+<pre><code class="py">from pdfmajor.converters import convert_file
+
+input_file = open('path/to/input/file.pdf', 'rb')
+output_file = open('path/to/output/file.html', 'wb')
+convert_file(
+    input_file,
+    output_file
+)
+input_file.close()
+output_file.close()
+</code></pre>
+
+<h3 id="converterspdfconverter">converters.PDFConverter</h3>
+<p>Extends <code>layouts.PDFLayoutAnalyzer</code>.</p>
+<h4 id="converterspdfconverter9595init9595rsrcmgr-outfp-imagewriter-codec-pageno">converters.PDFConverter.__init__(rsrcmgr, outfp, imagewriter, codec, pageno)</h4>
+<ul>
+<li><code>rsrcmgr</code>: <a href="#interpreter.PDFResourceManager">PDFResourceManager</a></li>
+<li><code>outfp</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a></li>
+<li><code>imagewriter</code>: <a href="#imagewriter.ImageWriter">ImageWriter</a></li>
+<li><code>codec</code>: <a href="#">str</a> defaults to 'utf-8'</li>
+<li><code>pageno</code>: <a href="#">int</a> defaults to 1</li>
+</ul>
+<p>initialization function for the class</p>
+<h4 id="converterspdfconverterparse_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos">converters.PDFConverter.parse_file(input_file, output_file, image_folder_path, codec, maxpages, password, caching, check_extractable, pagenos)</h4>
+<p>returns the output file <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a>.</p>
+<ul>
+<li><code>input_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
+<li><code>output_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
+<li><code>image_folder_path</code>: <a href="#">str</a> defaults to None</li>
+<li><code>codec</code>: <a href="#">str</a> defaults to 'utf-8'</li>
+<li><code>maxpages</code>: <a href="#">int</a> defaults to 0 </li>
+<li><code>password</code>: <a href="#">str</a> defaults to None </li>
+<li><code>caching</code>: <a href="#">bool</a> defaults to True </li>
+<li><code>check_extractable</code>: <a href="#">bool</a> defaults to True</li>
+<li><code>pagenos</code>: <a href="#">List[int]</a> defaults to None</li>
+</ul>
+<h2 id="imagewriter">imagewriter</h2>
+<p>WIP </p>
+<h2 id="layouts">layouts</h2>
+<p>WIP </p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>
