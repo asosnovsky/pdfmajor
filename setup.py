@@ -1,19 +1,21 @@
 from setuptools import setup, find_namespace_packages
 import sys
 
-import pdfmajor as package
 packages = find_namespace_packages(include=['pdfmajor.*'])
+
+with open('README.md') as file:
+    long_description = file.read()
 
 setup(
     name='pdfmajor',
-    version=package.__version__,
+    version='1.0.1',
     packages=packages,
     install_requires=[
         'pycryptodome', 
         'chardet'
     ],
     description='PDF parser',
-    long_description=package.__doc__,
+    long_description=long_description,
     license='MIT/X',
     author='Ariel Sosnovsky + Yusuke Shinyama + Philippe Guglielmetti',
     author_email='ariel@sosnovsky.ca',
@@ -28,7 +30,7 @@ setup(
     ],
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.6.4',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',

@@ -36,6 +36,12 @@ See documentation [here](https://asosnovsky.github.io/pdfmajor/).
 
     `python setup.py install`
 
+### Pypi
+  * Install Python 3.6.4 or newer.
+  * install repo
+
+    `pip install pdfmajor`
+
 ## Terms and Conditions
 
 (This is so-called MIT/X License)

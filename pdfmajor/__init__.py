@@ -8,9 +8,3 @@ It includes a PDF converter that can transform PDF files into other text
 formats (such as HTML, XML, JSON). It has an extensible PDF parser that can be used for
 other purposes instead of text analysis.
 """
-__version__ = '1.0.0'
-
-if __name__ == '__main__':
-    print(__version__)
-
-from .converters import convert_file
