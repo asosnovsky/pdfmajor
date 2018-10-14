@@ -27,10 +27,17 @@ class PDFConverter(PDFLayoutAnalyzer):
         password: str = None, 
         caching: bool = True, 
         check_extractable: bool = True,
-        pagenos: List[int] = None 
+        pagenos: List[int] = None,
+        debug: bool = False, 
     ) -> TextIOWrapper:
+        
+        if debug:
+            log.setLevel(logging.DEBUG)
+        
         if image_folder_path is None:
             image_folder_path = os.path.dirname(output_file.name)
+
+        log.debug("Creating resources....")
         rsrcmgr = PDFResourceManager(caching=caching)
         imagewriter=ImageWriter(image_folder_path)
         device = cls(
@@ -40,8 +47,10 @@ class PDFConverter(PDFLayoutAnalyzer):
             imagewriter=imagewriter
         )
         interpreter = PDFPageInterpreter(rsrcmgr, device)
+        log.debug("Reading pages....")
         pages = PDFPage.get_pages(input_file, pagenos=pagenos, maxpages=maxpages, password=password, caching=caching, check_extractable=check_extractable)
-        for page in pages:
+        for idx, page in enumerate(pages):
+            print(f"processing pages page #{idx}")
             interpreter.process_page(page)    
         device.close()
         return output_file

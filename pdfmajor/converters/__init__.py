@@ -19,7 +19,8 @@ def convert_file(
         caching: bool = True, 
         check_extractable: bool = True,
         pagenos: List[int] = None,
-        out_type: str = 'html'
+        debug: bool = False,
+        out_type: str = 'html',
     ):
     if output_file is None:
         output_file = open(
@@ -43,7 +44,8 @@ def convert_file(
             password, 
             caching, 
             check_extractable,
-            pagenos
+            pagenos,
+            debug,
         )
     elif out_type == 'xml':
         return XMLConverter.parse_file(
@@ -55,7 +57,8 @@ def convert_file(
             password, 
             caching, 
             check_extractable,
-            pagenos
+            pagenos,
+            debug,
         )
     elif out_type == 'json':
         return JSONConverter.parse_file(
@@ -67,7 +70,8 @@ def convert_file(
             password, 
             caching, 
             check_extractable,
-            pagenos
+            pagenos,
+            debug,
         )
     elif out_type == 'text':
         return TextConverter.parse_file(
@@ -79,6 +83,7 @@ def convert_file(
             password, 
             caching, 
             check_extractable,
-            pagenos
+            pagenos,
+            debug,
         )
     else: raise Exception("Please specify out_type as 'html' or 'xml' or 'json' or 'text'")
