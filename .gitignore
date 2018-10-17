@@ -11,3 +11,4 @@ tests/*.txt
 .vscode
 samples/output
 samples/pdfmajor
+**__pycache**
