@@ -138,8 +138,10 @@ class JSONConverter(PDFConverter):
             return self.place_elm_close('line', attr)
 
         with self.place_elm_with_child('curve', attr):
-            for x, y in item.pts:
-                self.place_elm_close('point', { 'x': x, 'y': y })
+            for path in item.paths:
+                with self.place_elm_with_child('path', { "type": path.method.name }):
+                    for point in path.points:
+                        self.place_elm_close('point', { 'x': point.x, 'y': point.y })
 
     def receive_layout(self, ltpage: LTPage):
         def render(item: LTItem):

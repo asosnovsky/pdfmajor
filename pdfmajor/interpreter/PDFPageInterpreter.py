@@ -1,6 +1,8 @@
 import logging
 import operator
 
+from typing import List
+
 
 from .PDFColorSpace import PDFColorSpace
 from .PDFColorSpace import PREDEFINED_COLORSPACE
@@ -26,6 +28,7 @@ from .PDFContentParser import PDFContentParser
 
 from ..utils import settings, mult_matrix, MATRIX_IDENTITY
 from .constants import LITERAL_FORM, LITERAL_IMAGE
+from .types import CurvePoint, CurvePath
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +42,7 @@ class PDFPageInterpreter(object):
     def __init__(self, rsrcmgr, device):
         self.rsrcmgr = rsrcmgr
         self.device = device
+        self.curpath: List[CurvePath] = []
         return
 
     def dup(self):
@@ -180,47 +184,60 @@ class PDFPageInterpreter(object):
         return
 
     # moveto
-    def do_m(self, x, y):
-        self.curpath.append(('m', x, y))
+    def do_m(self, x: float, y: float):
+        self.curpath.append(CurvePath(CurvePath.METHOD.MOVE_TO, CurvePoint(x, y)))
         return
 
     # lineto
-    def do_l(self, x, y):
-        self.curpath.append(('l', x, y))
+    def do_l(self, x: float, y: float):
+        self.curpath.append(CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x, y)))
         return
 
     # curveto
-    def do_c(self, x1, y1, x2, y2, x3, y3):
-        self.curpath.append(('c', x1, y1, x2, y2, x3, y3))
+    def do_c(self, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float):
+        self.curpath.append(CurvePath(
+            CurvePath.METHOD.CURVE_BOTH_TO, 
+            CurvePoint(x1, y1), 
+            CurvePoint(x2, y2), 
+            CurvePoint(x3, y3),
+        ))
         return
 
     # urveto
-    def do_v(self, x2, y2, x3, y3):
-        self.curpath.append(('v', x2, y2, x3, y3))
+    def do_v(self, x2: float, y2: float, x3: float, y3: float):
+        self.curpath.append(CurvePath(
+            CurvePath.METHOD.CURVE_NEXT_TO, 
+            CurvePoint(x2, y2), 
+            CurvePoint(x3, y3),
+        ))
         return
 
     # rveto
-    def do_y(self, x1, y1, x3, y3):
-        self.curpath.append(('y', x1, y1, x3, y3))
+    def do_y(self, x1: float, y1: float, x3: float, y3: float):
+        self.curpath.append(CurvePath(
+            CurvePath.METHOD.CURVE_FIRST_TO, 
+            CurvePoint(x1, y1), 
+            CurvePoint(x3, y3)
+        ))
         return
 
     # closepath
     def do_h(self):
-        self.curpath.append(('h',))
+        self.curpath.append(CurvePath(CurvePath.METHOD.CLOSE_PATH))
         return
 
     # rectangle
     def do_re(self, x, y, w, h):
-        self.curpath.append(('m', x, y))
-        self.curpath.append(('l', x+w, y))
-        self.curpath.append(('l', x+w, y+h))
-        self.curpath.append(('l', x, y+h))
-        self.curpath.append(('h',))
+        self.curpath.append(CurvePath(CurvePath.METHOD.MOVE_TO, CurvePoint(x, y) ))
+        self.curpath.append(CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x+w, y) ))
+        self.curpath.append(CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x+w, y+h) ))
+        self.curpath.append(CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x, y+h) ))
+        self.curpath.append(CurvePath(CurvePath.METHOD.CLOSE_PATH))
         return
 
     # stroke
     def do_S(self):
-        self.device.paint_path(self.graphicstate, False, self.curpath)
+        self.device.paint_path(self.graphicstate.copy(), False, self.curpath)
         self.curpath = []
         return
 
@@ -232,7 +249,7 @@ class PDFPageInterpreter(object):
 
     # fill
     def do_f(self):
-        self.device.paint_path(self.graphicstate, False, self.curpath)
+        self.device.paint_path(self.graphicstate.copy(), False, self.curpath)
         self.curpath = []
         return
     # fill (obsolete)
@@ -240,19 +257,19 @@ class PDFPageInterpreter(object):
 
     # fill-even-odd
     def do_f_a(self):
-        self.device.paint_path(self.graphicstate, True, self.curpath)
+        self.device.paint_path(self.graphicstate.copy(), True, self.curpath)
         self.curpath = []
         return
 
     # fill-and-stroke
     def do_B(self):
-        self.device.paint_path(self.graphicstate, False, self.curpath)
+        self.device.paint_path(self.graphicstate.copy(), False, self.curpath)
         self.curpath = []
         return
 
     # fill-and-stroke-even-odd
     def do_B_a(self):
-        self.device.paint_path(self.graphicstate, True, self.curpath)
+        self.device.paint_path(self.graphicstate.copy(), True, self.curpath)
         self.curpath = []
         return
 
@@ -343,7 +360,7 @@ class PDFPageInterpreter(object):
             if settings.STRICT:
                 raise PDFInterpreterError('No colorspace specified!')
             n = 1
-        self.graphicstate.scolor = self.pop(n)
+        self.pop(n)
         return
 
     def do_scn(self):
@@ -353,7 +370,7 @@ class PDFPageInterpreter(object):
             if settings.STRICT:
                 raise PDFInterpreterError('No colorspace specified!')
             n = 1
-        self.graphicstate.ncolor = self.pop(n)
+        self.pop(n)
         return
 
     def do_SC(self):
@@ -595,7 +612,6 @@ class PDFPageInterpreter(object):
                     nargs = func.__code__.co_argcount-1
                     if nargs:
                         args = self.pop(nargs)
-                        log.debug('exec: %s %r', name, args)
                         if len(args) == nargs:
                             func(*args)
                     else:

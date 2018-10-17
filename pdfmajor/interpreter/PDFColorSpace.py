@@ -10,9 +10,9 @@ LITERAL_DEVICE_CMYK = LIT('DeviceCMYK')
 
 class PDFColorSpace(object):
 
-    def __init__(self, name, ncomponents):
-        self.name = name
-        self.ncomponents = ncomponents
+    def __init__(self, name: str, ncomponents: int):
+        self.name: str = name
+        self.ncomponents: int = ncomponents
         return
 
     def __repr__(self):

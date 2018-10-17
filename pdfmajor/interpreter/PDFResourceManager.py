@@ -58,7 +58,7 @@ class PDFResourceManager(object):
                 raise
             return CMap()
 
-    def get_font(self, objid, spec):
+    def get_font(self, objid: int, spec: dict):
         if objid and objid in self._cached_fonts:
             font = self._cached_fonts[objid]
         else:

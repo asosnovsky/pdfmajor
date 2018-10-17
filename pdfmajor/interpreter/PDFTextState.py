@@ -1,18 +1,20 @@
+from .PDFFont import PDFFont
 from ..utils import MATRIX_IDENTITY
+
 
 ##  PDFTextState
 ##
 class PDFTextState(object):
 
     def __init__(self):
-        self.font = None
-        self.fontsize = 0
-        self.charspace = 0
-        self.wordspace = 0
-        self.scaling = 100
-        self.leading = 0
-        self.render = 0
-        self.rise = 0
+        self.font: PDFFont = None
+        self.fontsize: int = 0
+        self.charspace: int = 0
+        self.wordspace: int = 0
+        self.scaling: int = 100
+        self.leading: int = 0
+        self.render: int = 0
+        self.rise: int = 0
         self.reset()
         # self.matrix is set
         # self.linematrix is set

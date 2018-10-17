@@ -1,5 +1,6 @@
 ##  Basic PostScript Types
 ##
+from typing import Union
 
 ##  PSObject
 ##

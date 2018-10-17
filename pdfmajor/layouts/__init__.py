@@ -7,12 +7,12 @@ from typing import Tuple, List
 
 from ._base import LTItem
 from .LTPage import LTPage
-from .LTCurves import LTCurve, LTLine, LTRect
+from .LTCurves import LTCurve, LTLine, LTRect, LTHorizontalLine, LTVerticalLine
 from .LTFigure import LTFigure
 from .LTImage import LTImage
 from .LTChar import LTChar
 
-from ..utils import Point, Bbox
+from ..utils import Point, Bbox, INF
 from ..utils import apply_matrix_pt, mult_matrix
 
 from ..interpreter.PDFFont import PDFUnicodeNotDefined
@@ -21,6 +21,7 @@ from ..interpreter.PDFGraphicState import PDFGraphicState, PDFGraphicStateColor
 from ..interpreter.PDFdevice import PDFTextDevice
 from ..interpreter.PDFPage import PDFPage
 from ..interpreter.PDFStream import PDFStream
+from ..interpreter.types import CurvePath
 
 log = logging.getLogger(__name__)
 
@@ -85,59 +86,94 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         self.cur_item.add(item)
         return
 
-    def paint_path(self, gstate: PDFGraphicState, evenodd: bool, path: list):
-        shape = ''.join(x[0] for x in path)
+    def paint_path(self, gstate: PDFGraphicState, evenodd: bool, paths: List[CurvePath]):
+        shape = ''.join(x.method.value for x in paths)
         if shape == 'ml':
             # horizontal/vertical line
-            (_, x0, y0) = path[0]
-            (_, x1, y1) = path[1]
-            (x0, y0) = apply_matrix_pt(self.ctm, (x0, y0))
-            (x1, y1) = apply_matrix_pt(self.ctm, (x1, y1))
-            if x0 == x1 or y0 == y1:
-                self.cur_item.add(LTLine(
-                    gstate.linewidth, 
-                    (x0, y0), (x1, y1),
+            pt0 = paths[0].points[0]
+            pt1 = paths[1].points[0]
+            (x0, y0) = apply_matrix_pt(self.ctm, (pt0.x, pt0.y))
+            (x1, y1) = apply_matrix_pt(self.ctm, (pt1.x, pt1.y))
+            if x0 == x1:
+                self.cur_item.add(LTVerticalLine(
+                    linewidth=gstate.linewidth, 
+                    paths=paths,
+                    bbox=Bbox( x0, y0, x1, y1 ),
                     stroke=gstate.scolor, 
                     fill=gstate.ncolor, 
                     evenodd=evenodd, 
                 ))
-                return
-        if shape == 'mlllh':
+            elif y0 == y1:
+                self.cur_item.add(LTHorizontalLine(
+                    linewidth=gstate.linewidth, 
+                    paths=paths,
+                    bbox=Bbox( x0, y0, x1, y1 ),
+                    stroke=gstate.scolor, 
+                    fill=gstate.ncolor, 
+                    evenodd=evenodd, 
+                ))
+            else:
+                self.cur_item.add(LTLine(
+                    linewidth=gstate.linewidth, 
+                    paths=paths,
+                    bbox=Bbox( x0, y0, x1, y1 ),
+                    stroke=gstate.scolor, 
+                    fill=gstate.ncolor, 
+                    evenodd=evenodd, 
+                ))
+        elif shape == 'mlllh':
             # rectangle
-            (_, x0, y0) = path[0]
-            (_, x1, y1) = path[1]
-            (_, x2, y2) = path[2]
-            (_, x3, y3) = path[3]
-            (x0, y0) = apply_matrix_pt(self.ctm, (x0, y0))
-            (x1, y1) = apply_matrix_pt(self.ctm, (x1, y1))
-            (x2, y2) = apply_matrix_pt(self.ctm, (x2, y2))
-            (x3, y3) = apply_matrix_pt(self.ctm, (x3, y3))
+            pt0 = paths[0].points[0]
+            pt1 = paths[1].points[0]
+            pt2 = paths[2].points[0]
+            pt3 = paths[3].points[0]
+            (x0, y0) = apply_matrix_pt(self.ctm, (pt0.x, pt0.y))
+            (x1, y1) = apply_matrix_pt(self.ctm, (pt1.x, pt1.y))
+            (x2, y2) = apply_matrix_pt(self.ctm, (pt2.x, pt2.y))
+            (x3, y3) = apply_matrix_pt(self.ctm, (pt3.x, pt3.y))
             if ((x0 == x1 and y1 == y2 and x2 == x3 and y3 == y0) or
                 (y0 == y1 and x1 == x2 and y2 == y3 and x3 == x0)):
                 self.cur_item.add(LTRect( 
                     linewidth=gstate.linewidth, 
-                    pts=[
-                        (x0, y0), (x0, y2), 
-                        (x2, y0), (x2, y2)
-                    ],
+                    paths=paths,
+                    bbox=Bbox(
+                        x0=min(x0,x1,x2,x3),
+                        x1=max(x0,x1,x2,x3),
+                        y0=min(y0,y1,y2,y3),
+                        y1=max(y0,y1,y2,y3),
+                    ),
                     evenodd=evenodd, 
                     stroke=gstate.scolor, 
                     fill=gstate.ncolor,
                 ))
-                return
-        # other shapes
-        pts = []
-        for p in path:
-            for i in range(1, len(p), 2):
-                pts.append(apply_matrix_pt(self.ctm, (p[i], p[i+1])))
-        self.cur_item.add(LTCurve(
-            linewidth=gstate.linewidth, 
-            pts=pts, 
-            evenodd=evenodd,
-            stroke=gstate.scolor, 
-            fill=gstate.ncolor
-        ))
-        return
+        else:
+            (x0, y0, x1, y1) = (INF, INF, -INF, -INF)
+            for path in paths:
+                if path.method in [CurvePath.METHOD.MOVE_TO, CurvePath.METHOD.LINE_TO]:
+                    x0 = min(x0, path.points[0].x)
+                    y0 = min(y0, path.points[0].y)
+                    x1 = max(x1, path.points[0].x)
+                    y1 = max(y1, path.points[0].y)
+                elif path.method in [CurvePath.METHOD.CURVE_BOTH_TO]:
+                    x0 = min(x0, path.points[2].x)
+                    y0 = min(y0, path.points[2].y)
+                    x1 = max(x1, path.points[2].x)
+                    y1 = max(y1, path.points[2].y)
+                elif path.method in [CurvePath.METHOD.CURVE_NEXT_TO, CurvePath.METHOD.CURVE_FIRST_TO]:
+                    x0 = min(x0, path.points[1].x)
+                    y0 = min(y0, path.points[1].y)
+                    x1 = max(x1, path.points[1].x)
+                    y1 = max(y1, path.points[1].y)
+        # for p in path:
+        #     paths.append(apply_matrix_pt(self.ctm, (p.x, p.y)))
+            self.cur_item.add(LTCurve(
+                linewidth=gstate.linewidth, 
+                paths=paths,
+                bbox=Bbox(x0,y0,x1,y1), 
+                evenodd=evenodd,
+                stroke=gstate.scolor, 
+                fill=gstate.ncolor
+            ))
 
     def render_char(self, matrix: List[Point], font, fontsize, scaling, rise, cid, ncs, graphicstate):
         try:

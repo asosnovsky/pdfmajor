@@ -1,6 +1,6 @@
 
 import logging
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 from ..utils import settings
 
 from .PSStackParser import PSStackParser
@@ -42,7 +42,7 @@ class PDFParser(PSStackParser):
 
     """
 
-    def __init__(self, fp):
+    def __init__(self, fp: TextIOWrapper):
         PSStackParser.__init__(self, fp)
         self.doc = None
         self.fallback = False

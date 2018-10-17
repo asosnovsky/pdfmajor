@@ -50,7 +50,6 @@ class PDFConverter(PDFLayoutAnalyzer):
         log.debug("Reading pages....")
         pages = PDFPage.get_pages(input_file, pagenos=pagenos, maxpages=maxpages, password=password, caching=caching, check_extractable=check_extractable)
         for idx, page in enumerate(pages):
-            print(f"processing pages page #{idx}")
             interpreter.process_page(page)    
         device.close()
         return output_file

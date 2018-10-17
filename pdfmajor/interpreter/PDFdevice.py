@@ -7,6 +7,8 @@ from ..utils import Bbox, mult_matrix, translate_matrix
 
 from .PDFResourceManager import PDFResourceManager
 from .PDFGraphicState import PDFGraphicState
+from .PDFTextState import PDFTextState
+from .PDFColorSpace import PDFColorSpace
 
 ##  PDFDevice
 ##
@@ -68,7 +70,7 @@ class PDFDevice(object):
 ##
 class PDFTextDevice(PDFDevice):
 
-    def render_string(self, textstate, seq, ncs, graphicstate: PDFGraphicState):
+    def render_string(self, textstate: PDFTextState, seq: bytearray, ncs: PDFColorSpace, graphicstate: PDFGraphicState):
         matrix = mult_matrix(textstate.matrix, self.ctm)
         font = textstate.font
         fontsize = textstate.fontsize
@@ -76,60 +78,40 @@ class PDFTextDevice(PDFDevice):
         charspace = textstate.charspace * scaling
         wordspace = textstate.wordspace * scaling
         rise = textstate.rise
+       
         if font.is_multibyte():
             wordspace = 0
         dxscale = .001 * fontsize * scaling
-        if font.is_vertical():
-            textstate.linematrix = self.render_string_vertical(
+
+        if textstate.font.is_vertical():
+            textstate.linematrix = self.__render_string_along(1,
                 seq, matrix, textstate.linematrix, font, fontsize,
                 scaling, charspace, wordspace, rise, dxscale, ncs, graphicstate)
         else:
-            textstate.linematrix = self.render_string_horizontal(
+            textstate.linematrix = self.__render_string_along(0,
                 seq, matrix, textstate.linematrix, font, fontsize,
                 scaling, charspace, wordspace, rise, dxscale, ncs, graphicstate)
-        return
 
-    def render_string_horizontal(self, seq, matrix, pos,
+    def __render_string_along(self, idx: int, seq: bytearray, matrix: list, pos: tuple,
                                  font, fontsize, scaling, charspace, wordspace,
                                  rise, dxscale, ncs, graphicstate: PDFGraphicState):
-        (x, y) = pos
+        pos_copy = [*pos]
         needcharspace = False
         for obj in seq:
             if isnumber(obj):
-                x -= obj*dxscale
+                pos_copy[idx] -= obj*dxscale
                 needcharspace = True
             else:
                 for cid in font.decode(obj):
                     if needcharspace:
-                        x += charspace
-                    x += self.render_char(translate_matrix(matrix, (x, y)),
+                        pos_copy[idx] += charspace
+                    pos_copy[idx] += self.render_char(translate_matrix(matrix, pos_copy),
                                           font, fontsize, scaling, rise, cid,
                                           ncs, graphicstate)
                     if cid == 32 and wordspace:
-                        x += wordspace
+                        pos_copy[idx] += wordspace
                     needcharspace = True
-        return (x, y)
-
-    def render_string_vertical(self, seq, matrix, pos,
-                               font, fontsize, scaling, charspace, wordspace,
-                               rise, dxscale, ncs, graphicstate: PDFGraphicState):
-        (x, y) = pos
-        needcharspace = False
-        for obj in seq:
-            if isnumber(obj):
-                y -= obj*dxscale
-                needcharspace = True
-            else:
-                for cid in font.decode(obj):
-                    if needcharspace:
-                        y += charspace
-                    y += self.render_char(translate_matrix(matrix, (x, y)),
-                                          font, fontsize, scaling, rise, cid,
-                                          ncs, graphicstate)
-                    if cid == 32 and wordspace:
-                        y += wordspace
-                    needcharspace = True
-        return (x, y)
+        return pos_copy
 
     def render_char(self, matrix, font, fontsize, scaling, rise, cid, ncs, graphicstate: PDFGraphicState):
-        return 0
+        return NotImplementedError

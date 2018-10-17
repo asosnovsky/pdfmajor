@@ -6,7 +6,7 @@ from contextlib import contextmanager
 
 from ..layouts import LTPage
 from ..layouts import LTItem
-from ..layouts import LTCurve
+from ..layouts import LTCurve, LTLine, LTRect, CurvePath
 from ..layouts import LTFigure
 from ..layouts import LTImage
 from ..layouts import LTChar
@@ -127,10 +127,43 @@ class HTMLConverter(PDFConverter):
             'bottom': f'{item.y0}px', 
             'width': f'{item.width}px', 
             'height': f'{item.height}px',
-            "border-color": get_color(item.stroke),
-            "background-color": get_color(item.fill),
         }
-        self.place_elm_close('div', {'class': 'curve'}, css)
+        if isinstance(item, LTRect):
+            pass
+            # self.place_elm_close('div', {'class': 'curve rect'}, {**css, 
+            #     "border-color": get_color(item.stroke),
+            #     "background-color": get_color(item.fill),
+            # })
+        elif isinstance(item, LTLine):
+            self.place_elm_close('div', {'class': 'curve line'}, {**css, 
+                "background-color": get_color(item.fill),
+                "border-color": get_color(item.stroke),
+            })
+        else:
+            path = ""
+
+
+            dx = (item.width/item.height)/(item.x1-item.x0)
+            dy = 1.0/(item.y1-item.y0)
+
+            for p in item.paths:
+                if p.method == CurvePath.METHOD.MOVE_TO:
+                    path += f'M{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {(item.height- (p.y-item.y0) )*dy}" for p in p.points )} '
+                if p.method == CurvePath.METHOD.LINE_TO:
+                    path += f'L{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {( item.height - (p.y-item.y0) )*dy}" for p in p.points )} '
+                if p.method == CurvePath.METHOD.CLOSE_PATH:
+                    path += 'Z'
+            with self.place_elm_with_child('svg', {
+                    'class': 'curve',
+                    "viewBox": f"0 0 {item.width/item.height} 1",
+                    'width': f'{item.width}px', 
+                    'height': f'{item.height}px',
+                }, css):
+                self.place_elm_close('path', {
+                    "d": path,
+                    'stroke': get_color(item.stroke),
+                    'fill': get_color(item.fill),
+                })
 
     def receive_layout(self, ltpage: LTPage):
         def render(item: LTItem):
@@ -158,7 +191,7 @@ class HTMLConverter(PDFConverter):
                 with self.place_elm_with_child('span', { 'class': 'char' }, {
                     'font-size': f'{item.size}px',
                     'font-family': item.fontname,
-                    'color': get_color(item.graphicstate.scolor),
+                    'color': get_color(item.graphicstate.ncolor),
                     'position': 'absolute',
                     'left': f'{item.x0}',
                     'bottom': f'{item.y0}',

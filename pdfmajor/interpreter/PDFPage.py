@@ -37,7 +37,7 @@ class PDFPage(object):
       beads: a chain that represents natural reading order.
     """
 
-    def __init__(self, doc, pageid, attrs):
+    def __init__(self, doc: PDFDocument, pageid, attrs):
         """Initialize a page object.
 
         doc: a PDFDocument object.
@@ -72,7 +72,7 @@ class PDFPage(object):
     INHERITABLE_ATTRS = set(['Resources', 'MediaBox', 'CropBox', 'Rotate'])
 
     @classmethod
-    def create_pages(klass, document):
+    def create_pages(cls, document):
         def search(obj, parent):
             if isinstance(obj, int):
                 objid = obj
@@ -81,7 +81,7 @@ class PDFPage(object):
                 objid = obj.objid
                 tree = dict_value(obj).copy()
             for (k, v) in parent.items():
-                if k in klass.INHERITABLE_ATTRS and k not in tree:
+                if k in cls.INHERITABLE_ATTRS and k not in tree:
                     tree[k] = v
 
             tree_type = tree.get('Type')
@@ -96,10 +96,11 @@ class PDFPage(object):
             elif tree_type is LITERAL_PAGE:
                 log.info('Page: %r', tree)
                 yield (objid, tree)
+        
         pages = False
         if 'Pages' in document.catalog:
             for (objid, tree) in search(document.catalog['Pages'], document.catalog):
-                yield klass(document, objid, tree)
+                yield cls(document, objid, tree)
                 pages = True
         if not pages:
             # fallback when /Pages is missing.
@@ -108,13 +109,13 @@ class PDFPage(object):
                     try:
                         obj = document.getobj(objid)
                         if isinstance(obj, dict) and obj.get('Type') is LITERAL_PAGE:
-                            yield klass(document, objid, obj)
+                            yield cls(document, objid, obj)
                     except PDFObjectNotFound:
                         pass
         return
 
     @classmethod
-    def get_pages(klass, fp,
+    def get_pages(cls, fp,
                   pagenos=None, maxpages=0, password='',
                   caching=True, check_extractable=True):
         # Create a PDF parser object associated with the file object.
@@ -125,7 +126,7 @@ class PDFPage(object):
         if check_extractable and not doc.is_extractable:
             raise PDFTextExtractionNotAllowed('Text extraction is not allowed: %r' % fp)
         # Process each page contained in the document.
-        for (pageno, page) in enumerate(klass.create_pages(doc)):
+        for (pageno, page) in enumerate(cls.create_pages(doc)):
             if pagenos and (pageno not in pagenos):
                 continue
             yield page

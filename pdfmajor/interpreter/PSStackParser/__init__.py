@@ -1,4 +1,5 @@
 import logging
+from io import TextIOWrapper
 
 from ...utils import choplist, settings
 
@@ -38,7 +39,7 @@ def keyword_name(x):
 
 class PSStackParser(PSBaseParser):
 
-    def __init__(self, fp):
+    def __init__(self, fp: TextIOWrapper):
         PSBaseParser.__init__(self, fp)
         self.reset()
         return

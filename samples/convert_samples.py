@@ -1,12 +1,13 @@
 import re
 import os
+
 from typing import List
 from pdfmajor.converters import convert_file
 
 def rel_path(*arg: List[str]) -> str:
     return os.path.join(os.path.dirname(__file__), *arg)
 
-EXT = 'html'
+EXT = 'xml'
 INPUT_FOLDER = rel_path("./pdf")
 OUTPUT_FOLDER = rel_path(f"./output/{EXT}")
 
@@ -14,6 +15,8 @@ if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
 
 files = os.listdir(INPUT_FOLDER)
+# files = ['colors.pdf']
+# files = ['bar-charts.pdf']
 
 TOTAL = len(files)
 for idx, file_name in enumerate(files):
