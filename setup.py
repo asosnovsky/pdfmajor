@@ -8,7 +8,7 @@ with open('README.md') as file:
 
 setup(
     name='pdfmajor',
-    version='1.0.1',
+    version='1.0.2',
     packages=packages,
     install_requires=[
         'pycryptodome', 
