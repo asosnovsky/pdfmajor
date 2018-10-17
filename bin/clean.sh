@@ -4,7 +4,6 @@ WK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $WK_DIR
 cd ..
 
-sh bin/clean/sh
-
-python setup.py sdist bdist_wheel
-twine upload dist/*
+rm build -rf
+rm dist -rf
+rm pdfmajor.egg-info -rf
