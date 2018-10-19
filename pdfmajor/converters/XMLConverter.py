@@ -42,8 +42,8 @@ class XMLConverter(PDFConverter):
         self.__levels_deep = 0
         self.write_header()
     
-    def write(self, text: str):
-        text = " "*self.__levels_deep + text + '\n'
+    def write(self, text: str, lineend: str = '\n', deep_space: str = ' '):
+        text = deep_space*self.__levels_deep + text + lineend
         self.write_raw(text)
     
     def write_raw(self, text):
@@ -64,16 +64,21 @@ class XMLConverter(PDFConverter):
         self.write('</pages>')
 
     @contextmanager
-    def place_elm_with_child(self, tag_name: str, attr_dict: Dict[str, str] = {}):
+    def place_elm_with_child(self, tag_name: str, attr_dict: Dict[str, str] = {}, no_additional_char = False):
+        lineend = '\n'
+        deep_space = ' '
+        if no_additional_char:
+            lineend = ''
+            deep_space = ''
         attrs = " ".join([
             f'{name}="{value}"'
             for name, value in attr_dict.items()
         ])
-        self.write(f"<{tag_name} {attrs}>")
+        self.write(f"<{tag_name} {attrs}>", lineend=lineend)
         self.__levels_deep += 1
         yield
         self.__levels_deep -= 1
-        self.write(f"</{tag_name}>")
+        self.write(f"</{tag_name}>", deep_space=deep_space)
 
     def place_elm_close(self, tag_name: str, attr_dict: Dict[str, str] = {}, as_childless = True):
         attrs = " ".join([
@@ -117,8 +122,8 @@ class XMLConverter(PDFConverter):
             "y1": char.y1,
             "stroke-color": get_color(char.graphicstate.scolor),
             "fill-color": get_color(char.graphicstate.ncolor),
-        }):
-            self.write(char.get_text())
+        }, no_additional_char=True):
+            self.write(char.get_text(), lineend='', deep_space="")
 
     def render_curve(self, item: LTCurve):
         attr = {

@@ -28,13 +28,17 @@ class PDFConverter(PDFLayoutAnalyzer):
         caching: bool = True, 
         check_extractable: bool = True,
         pagenos: List[int] = None,
+        dont_export_images: bool = False,
         debug: bool = False, 
     ) -> TextIOWrapper:
         
         if debug:
             log.setLevel(logging.DEBUG)
         
-        if image_folder_path is None:
+        if dont_export_images:
+            image_folder_path = None
+
+        if not dont_export_images and image_folder_path is None and output_file.name is not None:
             image_folder_path = os.path.dirname(output_file.name)
 
         log.debug("Creating resources....")
@@ -50,6 +54,7 @@ class PDFConverter(PDFLayoutAnalyzer):
         log.debug("Reading pages....")
         pages = PDFPage.get_pages(input_file, pagenos=pagenos, maxpages=maxpages, password=password, caching=caching, check_extractable=check_extractable)
         for idx, page in enumerate(pages):
+            log.debug(f"Reading page #{idx}")
             interpreter.process_page(page)    
         device.close()
         return output_file

@@ -60,13 +60,19 @@ class BMPWriter(object):
 ##
 class ImageWriter(object):
 
-    def __init__(self, outdir: str):
-        self.outdir = outdir
-        if not os.path.exists(self.outdir):
-            os.makedirs(self.outdir)
-        return
+    def __init__(self, outdir: str = None):
+        if outdir is None:
+            self.inactive = True
+        else:
+            self.inactive = False
+            self.outdir = outdir
+            if not os.path.exists(self.outdir):
+                os.makedirs(self.outdir)
 
-    def export_image(self, image: LTImage):
+    def export_image(self, image: LTImage) -> str:
+        if self.inactive:
+            return "N/A"
+        
         stream = image.stream
         filters = stream.get_filters()
         (width, height) = image.srcsize
