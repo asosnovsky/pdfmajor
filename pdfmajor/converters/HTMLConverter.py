@@ -129,15 +129,16 @@ class HTMLConverter(PDFConverter):
             'height': f'{item.height}px',
         }
         if isinstance(item, LTRect):
-            pass
-            # self.place_elm_close('div', {'class': 'curve rect'}, {**css, 
-            #     "border-color": get_color(item.stroke),
-            #     "background-color": get_color(item.fill),
-            # })
+            self.place_elm_close('div', {'class': 'curve rect'}, {**css, 
+                "border-color": get_color(item.stroke),
+                "background-color": get_color(item.fill),
+                'z-index': 0
+            })
         elif isinstance(item, LTLine):
             self.place_elm_close('div', {'class': 'curve line'}, {**css, 
                 "background-color": get_color(item.fill),
                 "border-color": get_color(item.stroke),
+                'z-index': 0
             })
         else:
             path = ""
@@ -158,6 +159,7 @@ class HTMLConverter(PDFConverter):
                     "viewBox": f"0 0 {item.width/item.height} 1",
                     'width': f'{item.width}px', 
                     'height': f'{item.height}px',
+                    'z-index': 2
                 }, css):
                 self.place_elm_close('path', {
                     "d": path,
@@ -168,7 +170,7 @@ class HTMLConverter(PDFConverter):
     def receive_layout(self, ltpage: LTPage):
         def render(item: LTItem):
             if isinstance(item, LTPage):
-                with self.place_elm_with_child('div', { "class": 'page' }, { 'width': f'{item.width}px', 'height': f'{item.height}px' }):
+                with self.place_elm_with_child('div', { "class": 'page', "id": f"page-{item.pageid}" }, { 'width': f'{item.width}px', 'height': f'{item.height}px' }):
                     self.__current_height = item.height
                     self.__current_width = item.width
                     for child in item:
