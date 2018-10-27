@@ -1,7 +1,7 @@
 # ==============
 # Dependencies
 # ==============
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 import sys
 
 # ==============
@@ -11,7 +11,7 @@ with open('README.md') as readme_file:
     SETUP = {
         "name": "pdfmajor",
         "version": "1.0.7",
-        "packages": find_namespace_packages(include=['pdfmajor*']),
+        "packages": find_packages(include=['pdfmajor*']),
         "install_requires": [
             'pycryptodome', 
             'chardet'

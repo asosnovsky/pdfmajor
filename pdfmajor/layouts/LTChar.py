@@ -1,6 +1,8 @@
 from ._base import LTComponent
 from ..utils import apply_matrix_norm, apply_matrix_pt, matrix2str, Bbox
 from ..interpreter.PDFGraphicState import PDFGraphicState
+from ..interpreter.PDFFont import PDFFont
+from ..interpreter.PDFColorSpace import PDFColorSpace
 
 ##  LTChar
 ##
@@ -8,19 +10,19 @@ class LTChar(LTComponent):
 
     def __init__(self, 
         matrix, 
-        font, 
-        fontsize, 
-        scaling, 
-        rise,
-        text, 
-        textwidth, 
-        textdisp, 
-        ncs, 
+        font: PDFFont, 
+        fontsize: float, 
+        scaling: float, 
+        rise: float,
+        text: str, 
+        textwidth: float, 
+        textdisp: tuple, 
+        ncs: PDFColorSpace, 
         graphicstate: PDFGraphicState
     ):
         self._text = text
         self.matrix = matrix
-        self.fontname = font.fontname
+        self.font = font
         self.ncs = ncs
         self.graphicstate = graphicstate
         self.adv = textwidth * fontsize * scaling
@@ -72,3 +74,7 @@ class LTChar(LTComponent):
     def is_compatible(self, obj):
         """Returns True if two characters can coexist in the same line."""
         return True
+    
+    @property
+    def fontname(self) -> str:
+        return self.font.fontname

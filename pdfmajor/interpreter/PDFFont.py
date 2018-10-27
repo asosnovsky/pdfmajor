@@ -23,6 +23,7 @@ from .PDFStream import list_value
 from .PDFStream import dict_value
 from .PDFStream import PDFStream
 from ..utils import settings, FONT_METRICS, apply_matrix_norm, nunpack, choplist, isnumber
+from .constants import COMMON_FONT_ATTRIBUTES
 
 def get_widths(seq):
     widths = {}

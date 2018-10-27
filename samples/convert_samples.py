@@ -7,16 +7,18 @@ from pdfmajor.converters import convert_file
 def rel_path(*arg: List[str]) -> str:
     return os.path.join(os.path.dirname(__file__), *arg)
 
-EXT = 'xml'
+EXT = 'html'
 INPUT_FOLDER = rel_path("./pdf")
 OUTPUT_FOLDER = rel_path(f"./output/{EXT}")
 
 if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
 
-files = os.listdir(INPUT_FOLDER)
-# files = ['colors.pdf']
+# files = os.listdir(INPUT_FOLDER)
+# files = ['fonts.pdf']
 # files = ['bar-charts.pdf']
+# files = ['font-color.pdf']
+files = ['tables.pdf']
 
 TOTAL = len(files)
 for idx, file_name in enumerate(files):

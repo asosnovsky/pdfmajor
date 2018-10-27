@@ -72,7 +72,7 @@ class PDFPage(object):
     INHERITABLE_ATTRS = set(['Resources', 'MediaBox', 'CropBox', 'Rotate'])
 
     @classmethod
-    def create_pages(cls, document):
+    def create_pages(cls, document: PDFDocument):
         def search(obj, parent):
             if isinstance(obj, int):
                 objid = obj

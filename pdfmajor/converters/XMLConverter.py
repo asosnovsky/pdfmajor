@@ -113,16 +113,18 @@ class XMLConverter(PDFConverter):
         })
 
     def place_text(self, char: LTChar):
-        with self.place_elm_with_child('char', {
-            'font-size': char.size,
-            'font-family': char.fontname,
+        attr = {
+            'size': char.size,
+            "color": get_color(char.graphicstate.ncolor),
             "x0": char.x0,
             "x1": char.x1,
             "y0": char.y0,
             "y1": char.y1,
-            "stroke-color": get_color(char.graphicstate.scolor),
-            "fill-color": get_color(char.graphicstate.ncolor),
-        }, no_additional_char=True):
+        }
+        for key, value in char.font.descriptor.items():
+            if key != "Type" and "FontFile" not in key:
+                attr["font:" + key] = value
+        with self.place_elm_with_child('char', attr, no_additional_char=True):
             self.write(char.get_text(), lineend='', deep_space="")
 
     def render_curve(self, item: LTCurve):
