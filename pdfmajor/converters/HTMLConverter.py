@@ -125,47 +125,66 @@ class HTMLConverter(PDFConverter):
             'position': 'absolute', 
             'left': f'{item.x0}px', 
             'bottom': f'{item.y0}px', 
-            'width': f'{item.width}px', 
-            'height': f'{item.height}px',
+            # 'width': f'{item.width}px', 
+            # 'height': f'{item.height}px',
         }
-        if isinstance(item, LTRect):
-            self.place_elm_close('div', {'class': 'curve rect'}, {**css, 
-                "border-color": get_color(item.stroke),
-                "background-color": get_color(item.fill),
-                'z-index': 0
+        # if isinstance(item, LTRect):
+        #     self.place_elm_close('div', {'class': 'curve rect'}, {**css, 
+        #         "border-color": get_color(item.stroke),
+        #         "background-color": get_color(item.fill),
+        #         'z-index': 0
+        #     })
+        # elif isinstance(item, LTLine):
+        #     self.place_elm_close('div', {'class': 'curve line'}, {**css, 
+        #         "background-color": get_color(item.fill),
+        #         "border-color": get_color(item.stroke),
+        #         'z-index': 0
+        #     })
+        # else:
+        path = ""
+        svg_attr = {
+            'class': 'curve',
+            'z-index': 2
+        }
+
+        if item.height > 1:
+            dx = (item.width/item.height)/(item.x1-item.x0)
+            dy = 1.0/item.height
+            svg_attr.update({
+                "viewBox": f"0 0 {item.width/item.height} 1",
+                'width': f'{item.width}px', 
+                'height': f'{item.height}px',
             })
-        elif isinstance(item, LTLine):
-            self.place_elm_close('div', {'class': 'curve line'}, {**css, 
-                "background-color": get_color(item.fill),
-                "border-color": get_color(item.stroke),
-                'z-index': 0
+        elif item.height > 0:
+            dx = (item.width/item.height)/(item.x1-item.x0)
+            dy = 1.0/item.height
+            svg_attr.update({
+                "viewBox": f"0 0 {item.width/item.height} 1",
+                'width': f'{item.width}px', 
+                'height': f'1px',
             })
         else:
-            path = ""
+            dx = 1.0/(item.x1-item.x0)
+            dy = 1.0
+            svg_attr.update({
+                "viewBox": "0 0 1 1",
+                'width': f'{item.width}px', 
+                'height': '1px',
+            })
 
-
-            dx = (item.width/item.height)/(item.x1-item.x0)
-            dy = 1.0/(item.y1-item.y0)
-
-            for p in item.paths:
-                if p.method == CurvePath.METHOD.MOVE_TO:
-                    path += f'M{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {(item.height- (p.y-item.y0) )*dy}" for p in p.points )} '
-                if p.method == CurvePath.METHOD.LINE_TO:
-                    path += f'L{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {( item.height - (p.y-item.y0) )*dy}" for p in p.points )} '
-                if p.method == CurvePath.METHOD.CLOSE_PATH:
-                    path += 'Z'
-            with self.place_elm_with_child('svg', {
-                    'class': 'curve',
-                    "viewBox": f"0 0 {item.width/item.height} 1",
-                    'width': f'{item.width}px', 
-                    'height': f'{item.height}px',
-                    'z-index': 2
-                }, css):
-                self.place_elm_close('path', {
-                    "d": path,
-                    'stroke': get_color(item.stroke),
-                    'fill': get_color(item.fill),
-                })
+        for p in item.paths:
+            if p.method == CurvePath.METHOD.MOVE_TO:
+                path += f'M{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {(item.height- (p.y-item.y0) )*dy}" for p in p.points )} '
+            if p.method == CurvePath.METHOD.LINE_TO:
+                path += f'L{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {( item.height - (p.y-item.y0) )*dy}" for p in p.points )} '
+            if p.method == CurvePath.METHOD.CLOSE_PATH:
+                path += 'Z'
+        with self.place_elm_with_child('svg', svg_attr, css):
+            self.place_elm_close('path', {
+                "d": path,
+                'stroke': get_color(item.stroke),
+                'fill': get_color(item.fill),
+            })
 
     def receive_layout(self, ltpage: LTPage):
         def render(item: LTItem):
@@ -193,10 +212,12 @@ class HTMLConverter(PDFConverter):
                 with self.place_elm_with_child('span', { 'class': 'char' }, {
                     'font-size': f'{item.size}px',
                     'font-family': item.fontname,
+                    'font-weight': 'bold' if 'bold' in item.fontname.lower() else '',
                     'color': get_color(item.graphicstate.ncolor),
                     'position': 'absolute',
                     'left': f'{item.x0}',
                     'bottom': f'{item.y0}',
+                    'transform': f'skew({item.font.italic_angle}deg, 0deg)'
                 }):
                     self.write(item.get_text())
         render(ltpage)
