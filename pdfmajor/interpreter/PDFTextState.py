@@ -44,7 +44,7 @@ class PDFTextState(object):
 
     def reset(self):
         self.matrix = MATRIX_IDENTITY
-        self.linematrix = (0, 0)
+        self.linematrix = [0, 0]
         return
 
     @property

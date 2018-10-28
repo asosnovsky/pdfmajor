@@ -468,7 +468,7 @@ class PDFPageInterpreter(object):
     def do_Td(self, tx, ty):
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
-        self.textstate.linematrix = (0, 0)
+        self.textstate.linematrix = [0, 0]
         return
 
     # text-move
@@ -476,20 +476,20 @@ class PDFPageInterpreter(object):
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.leading = ty
-        self.textstate.linematrix = (0, 0)
+        self.textstate.linematrix = [0, 0]
         return
 
     # textmatrix
     def do_Tm(self, a, b, c, d, e, f):
         self.textstate.matrix = (a, b, c, d, e, f)
-        self.textstate.linematrix = (0, 0)
+        self.textstate.linematrix = [0, 0]
         return
 
     # nextline
     def do_T_a(self):
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, self.textstate.leading*c+e, self.textstate.leading*d+f)
-        self.textstate.linematrix = (0, 0)
+        self.textstate.linematrix = [0, 0]
         return
 
     # show-pos

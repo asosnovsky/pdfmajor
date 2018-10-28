@@ -82,33 +82,32 @@ class PDFTextDevice(PDFDevice):
         dxscale = .001 * textstate.fontsize * textstate.scaling
 
         if textstate.font.is_vertical():
-            textstate.linematrix = self.__render_string_along(1,
+            self.__render_string_along(1,
                 seq, textstate, dxscale, ncs, graphicstate
             )
         else:
-            textstate.linematrix = self.__render_string_along(0,
+            self.__render_string_along(0,
                 seq, textstate, dxscale, ncs, graphicstate
             )
 
     def __render_string_along(self, idx: int, seq: bytearray, 
         textstate: PDFTextState, dxscale: float, ncs: PDFColorSpace, graphicstate: PDFGraphicState):
         needcharspace = False
-        pos_copy = [*textstate.linematrix]
         for obj in seq:
             if isnumber(obj):
-                pos_copy[idx] -= obj*dxscale
+                textstate.linematrix[idx] -= obj*dxscale
                 needcharspace = True
             else:
                 for cid in textstate.font.decode(obj):
                     if needcharspace:
-                        pos_copy[idx] += textstate.charspace
+                        textstate.linematrix[idx] += textstate.charspace
                     
                     text = textstate.font.to_unichr(cid)
                     assert isinstance(text, str), str(type(text))
 
-                    matrix = translate_matrix(textstate.matrix, pos_copy)
+                    matrix = translate_matrix(textstate.matrix, textstate.linematrix)
                     adv, bbox = self.__compute_char_bbox(matrix, cid, textstate)
-                    pos_copy[idx] += adv
+                    textstate.linematrix[idx] += adv
 
                     self.render_char(
                         text,
@@ -118,9 +117,8 @@ class PDFTextDevice(PDFDevice):
                         ncs
                     )
                     if cid == 32 and textstate.wordspace:
-                        pos_copy[idx] += textstate.wordspace
+                        textstate.linematrix[idx] += textstate.wordspace
                     needcharspace = True
-        return pos_copy
 
     def __compute_char_bbox(self, matrix, char_id: int, textstate: PDFTextState):
         font = textstate.font
