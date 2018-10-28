@@ -2,7 +2,7 @@
 
 from .PDFFont import PDFUnicodeNotDefined
 
-from ..utils import isnumber
+from ..utils import isnumber, apply_matrix_pt
 from ..utils import Bbox, mult_matrix, translate_matrix
 
 from .PDFResourceManager import PDFResourceManager
@@ -103,59 +103,65 @@ class PDFTextDevice(PDFDevice):
                     if needcharspace:
                         pos_copy[idx] += textstate.charspace
                     
-                    # text = font.to_unichr(cid)
-                    # assert isinstance(text, str), str(type(text))
+                    text = textstate.font.to_unichr(cid)
+                    assert isinstance(text, str), str(type(text))
 
-                    # textwidth = font.char_width(cid)
-                    # textdisp = font.char_disp(cid)
+                    matrix = translate_matrix(textstate.matrix, pos_copy)
+                    adv, bbox = self.__compute_char_bbox(matrix, cid, textstate)
+                    pos_copy[idx] += adv
 
-                    pos_copy[idx] += self.render_char(
-                        translate_matrix(textstate.matrix, pos_copy),
-                        textstate.font, 
-                        textstate.fontsize, 
-                        textstate.scaling, 
-                        textstate.rise, 
-                        cid,
-                        ncs, 
-                        graphicstate
+                    self.render_char(
+                        text,
+                        bbox,
+                        textstate,
+                        graphicstate,
+                        ncs
                     )
                     if cid == 32 and textstate.wordspace:
                         pos_copy[idx] += textstate.wordspace
                     needcharspace = True
         return pos_copy
 
-    def __compute_char_bbox(self, font: PDFFont):
-        pass
+    def __compute_char_bbox(self, matrix, char_id: int, textstate: PDFTextState):
+        font = textstate.font
+        fontsize = textstate.fontsize
+        rise = textstate.rise
+        scaling = textstate.scaling
+
+        textwidth = font.char_width(char_id)
+        textdisp = font.char_disp(char_id)
+        adv = textwidth * fontsize * scaling
+
         # compute the boundary rectangle.
-        # if font.is_vertical():
-        #     # vertical
-        #     width = font.get_width() * fontsize
-        #     (vx, vy) = textdisp
-        #     if vx is None:
-        #         vx = width * 0.5
-        #     else:
-        #         vx = vx * fontsize * .001
-        #     vy = (1000 - vy) * fontsize * .001
-        #     tx = -vx
-        #     ty = vy + rise
-        #     bll = (tx, ty+self.adv)
-        #     bur = (tx+width, ty)
-        # else:
-        #     # horizontal
-        #     height = font.get_height() * fontsize
-        #     descent = font.get_descent() * fontsize
-        #     ty = descent + rise
-        #     bll = (0, ty)
-        #     bur = (self.adv, ty+height)
-        # (a, b, c, d, _, _) = self.matrix
-        # self.upright = (0 < a*d*scaling and b*c <= 0)
-        # (x0, y0) = apply_matrix_pt(self.matrix, bll)
-        # (x1, y1) = apply_matrix_pt(self.matrix, bur)
-        # if x1 < x0:
-        #     (x0, x1) = (x1, x0)
-        # if y1 < y0:
-        #     (y0, y1) = (y1, y0)
+        if font.is_vertical():
+            # vertical
+            width = font.get_width() * fontsize
+            (vx, vy) = textdisp
+            if vx is None:
+                vx = width * 0.5
+            else:
+                vx = vx * fontsize * .001
+            vy = (1000 - vy) * fontsize * .001
+            tx = -vx
+            ty = vy + rise
+            bll = (tx, ty+adv)
+            bur = (tx+width, ty)
+        else:
+            # horizontal
+            height = font.get_height() * fontsize
+            descent = font.get_descent() * fontsize
+            ty = descent + rise
+            bll = (0, ty)
+            bur = (adv, ty+height)
+        (x0, y0) = apply_matrix_pt(matrix, bll)
+        (x1, y1) = apply_matrix_pt(matrix, bur)
+        if x1 < x0:
+            (x0, x1) = (x1, x0)
+        if y1 < y0:
+            (y0, y1) = (y1, y0)
+        
+        return (adv, ((x0, y0), (x1, y1)))
 
 
-    def render_char(self, matrix, font, fontsize, scaling, rise, cid, ncs, graphicstate: PDFGraphicState):
+    def render_char(self, char: str, bbox: tuple, textstate: PDFTextState, graphicstate: PDFGraphicState, ncs: PDFColorSpace):
         return NotImplementedError

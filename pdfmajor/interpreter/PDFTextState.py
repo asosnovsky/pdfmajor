@@ -46,3 +46,8 @@ class PDFTextState(object):
         self.matrix = MATRIX_IDENTITY
         self.linematrix = (0, 0)
         return
+
+    @property
+    def is_upright(self):
+        (a, b, c, d, _, _) = self.matrix
+        return (0 < a*d*self.scaling and b*c <= 0)

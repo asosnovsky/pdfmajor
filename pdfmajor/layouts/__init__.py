@@ -19,6 +19,8 @@ from ..interpreter.PDFFont import PDFUnicodeNotDefined
 from ..interpreter.PDFResourceManager import PDFResourceManager
 from ..interpreter.PDFGraphicState import PDFGraphicState, PDFGraphicStateColor
 from ..interpreter.PDFdevice import PDFTextDevice
+from ..interpreter.PDFTextState import PDFTextState
+from ..interpreter.PDFColorSpace import PDFColorSpace
 from ..interpreter.PDFPage import PDFPage
 from ..interpreter.PDFStream import PDFStream
 from ..interpreter.types import CurvePath
@@ -164,8 +166,6 @@ class PDFLayoutAnalyzer(PDFTextDevice):
                     y0 = min(y0, path.points[1].y)
                     x1 = max(x1, path.points[1].x)
                     y1 = max(y1, path.points[1].y)
-        # for p in path:
-        #     paths.append(apply_matrix_pt(self.ctm, (p.x, p.y)))
             self.cur_item.add(LTCurve(
                 linewidth=gstate.linewidth, 
                 paths=paths,
@@ -175,24 +175,15 @@ class PDFLayoutAnalyzer(PDFTextDevice):
                 fill=gstate.ncolor
             ))
 
-    def render_char(self, matrix: List[Point], font, fontsize, scaling, rise, cid, ncs, graphicstate):
-        try:
-            text = font.to_unichr(cid)
-            assert isinstance(text, str), str(type(text))
-        except PDFUnicodeNotDefined:
-            text = self.handle_undefined_char(font, cid)
-        textwidth = font.char_width(cid)
-        textdisp = font.char_disp(cid)
-        item = LTChar(
-            matrix, 
-            font, fontsize, 
-            scaling, 
-            rise, text, 
-            textwidth, textdisp, 
-            ncs, graphicstate
-        )
-        self.cur_item.add(item)
-        return item.adv
+    def render_char(self, char: str, bbox: tuple, textstate: PDFTextState, graphicstate: PDFGraphicState, ncs: PDFColorSpace):
+        ((x0, y0), (x1, y1)) = bbox
+        self.cur_item.add(LTChar(
+            bbox=Bbox(x0, y0, x1, y1), 
+            char=char, 
+            textstate=textstate, 
+            ncs=ncs, 
+            graphicstate=graphicstate
+        ))
 
     def handle_undefined_char(self, font: str, cid: int):
         log.info('undefined: %r, %r', font, cid)
