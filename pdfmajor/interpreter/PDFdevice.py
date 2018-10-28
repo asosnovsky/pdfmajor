@@ -9,6 +9,7 @@ from .PDFResourceManager import PDFResourceManager
 from .PDFGraphicState import PDFGraphicState
 from .PDFTextState import PDFTextState
 from .PDFColorSpace import PDFColorSpace
+from .PDFFont import PDFFont
 
 ##  PDFDevice
 ##
@@ -71,47 +72,90 @@ class PDFDevice(object):
 class PDFTextDevice(PDFDevice):
 
     def render_string(self, textstate: PDFTextState, seq: bytearray, ncs: PDFColorSpace, graphicstate: PDFGraphicState):
-        matrix = mult_matrix(textstate.matrix, self.ctm)
-        font = textstate.font
-        fontsize = textstate.fontsize
-        scaling = textstate.scaling * .01
-        charspace = textstate.charspace * scaling
-        wordspace = textstate.wordspace * scaling
-        rise = textstate.rise
+        textstate.matrix = mult_matrix(textstate.matrix, self.ctm)
+        textstate.scaling = textstate.scaling * .01
+        textstate.charspace = textstate.charspace * textstate.scaling
+        textstate.wordspace = textstate.wordspace * textstate.scaling
        
-        if font.is_multibyte():
-            wordspace = 0
-        dxscale = .001 * fontsize * scaling
+        if textstate.font.is_multibyte():
+            textstate.wordspace = 0
+        dxscale = .001 * textstate.fontsize * textstate.scaling
 
         if textstate.font.is_vertical():
             textstate.linematrix = self.__render_string_along(1,
-                seq, matrix, textstate.linematrix, font, fontsize,
-                scaling, charspace, wordspace, rise, dxscale, ncs, graphicstate)
+                seq, textstate, dxscale, ncs, graphicstate
+            )
         else:
             textstate.linematrix = self.__render_string_along(0,
-                seq, matrix, textstate.linematrix, font, fontsize,
-                scaling, charspace, wordspace, rise, dxscale, ncs, graphicstate)
+                seq, textstate, dxscale, ncs, graphicstate
+            )
 
-    def __render_string_along(self, idx: int, seq: bytearray, matrix: list, pos: tuple,
-                                 font, fontsize, scaling, charspace, wordspace,
-                                 rise, dxscale, ncs, graphicstate: PDFGraphicState):
-        pos_copy = [*pos]
+    def __render_string_along(self, idx: int, seq: bytearray, 
+        textstate: PDFTextState, dxscale: float, ncs: PDFColorSpace, graphicstate: PDFGraphicState):
         needcharspace = False
+        pos_copy = [*textstate.linematrix]
         for obj in seq:
             if isnumber(obj):
                 pos_copy[idx] -= obj*dxscale
                 needcharspace = True
             else:
-                for cid in font.decode(obj):
+                for cid in textstate.font.decode(obj):
                     if needcharspace:
-                        pos_copy[idx] += charspace
-                    pos_copy[idx] += self.render_char(translate_matrix(matrix, pos_copy),
-                                          font, fontsize, scaling, rise, cid,
-                                          ncs, graphicstate)
-                    if cid == 32 and wordspace:
-                        pos_copy[idx] += wordspace
+                        pos_copy[idx] += textstate.charspace
+                    
+                    # text = font.to_unichr(cid)
+                    # assert isinstance(text, str), str(type(text))
+
+                    # textwidth = font.char_width(cid)
+                    # textdisp = font.char_disp(cid)
+
+                    pos_copy[idx] += self.render_char(
+                        translate_matrix(textstate.matrix, pos_copy),
+                        textstate.font, 
+                        textstate.fontsize, 
+                        textstate.scaling, 
+                        textstate.rise, 
+                        cid,
+                        ncs, 
+                        graphicstate
+                    )
+                    if cid == 32 and textstate.wordspace:
+                        pos_copy[idx] += textstate.wordspace
                     needcharspace = True
         return pos_copy
+
+    def __compute_char_bbox(self, font: PDFFont):
+        pass
+        # compute the boundary rectangle.
+        # if font.is_vertical():
+        #     # vertical
+        #     width = font.get_width() * fontsize
+        #     (vx, vy) = textdisp
+        #     if vx is None:
+        #         vx = width * 0.5
+        #     else:
+        #         vx = vx * fontsize * .001
+        #     vy = (1000 - vy) * fontsize * .001
+        #     tx = -vx
+        #     ty = vy + rise
+        #     bll = (tx, ty+self.adv)
+        #     bur = (tx+width, ty)
+        # else:
+        #     # horizontal
+        #     height = font.get_height() * fontsize
+        #     descent = font.get_descent() * fontsize
+        #     ty = descent + rise
+        #     bll = (0, ty)
+        #     bur = (self.adv, ty+height)
+        # (a, b, c, d, _, _) = self.matrix
+        # self.upright = (0 < a*d*scaling and b*c <= 0)
+        # (x0, y0) = apply_matrix_pt(self.matrix, bll)
+        # (x1, y1) = apply_matrix_pt(self.matrix, bur)
+        # if x1 < x0:
+        #     (x0, x1) = (x1, x0)
+        # if y1 < y0:
+        #     (y0, y1) = (y1, y0)
+
 
     def render_char(self, matrix, font, fontsize, scaling, rise, cid, ncs, graphicstate: PDFGraphicState):
         return NotImplementedError
