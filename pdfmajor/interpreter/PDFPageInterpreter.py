@@ -493,12 +493,12 @@ class PDFPageInterpreter(object):
         return
 
     # show-pos
-    def do_TJ(self, seq):
+    def do_TJ(self, seq: bytearray):
         if self.textstate.font is None:
             if settings.STRICT:
                 raise PDFInterpreterError('No font specified!')
             return
-        self.device.render_string(self.textstate, seq, self.ncs, self.graphicstate.copy())
+        self.device.render_string(self.textstate.copy(), seq, self.ncs, self.graphicstate.copy())
         return
 
     # show
