@@ -26,6 +26,9 @@ def get_color(col: PDFGraphicStateColor):
             return f"cmyk({','.join(map(str, color_val))})"
         elif color_type == 'gray':
             return f'rgba(0,0,0,{1-color_val})'
+        elif color_type == "custom":
+            # Todo: convert these to more friendly color types
+            return f"custom({col.custom['type']})"
     return "none"
 
 class HTMLConverter(PDFConverter):

@@ -16,9 +16,9 @@ if not os.path.exists(OUTPUT_FOLDER):
 
 # files = os.listdir(INPUT_FOLDER)
 # files = ['fonts.pdf']
-# files = ['bar-charts.pdf']
+files = ['bar-charts.pdf']
 # files = ['font-color.pdf']
-files = ['tables.pdf']
+# files = ['tables.pdf']
 
 TOTAL = len(files)
 for idx, file_name in enumerate(files):

@@ -100,7 +100,6 @@ class PSBaseParser(object):
                 linebuf += self.buf[self.charpos:]
                 self.charpos = len(self.buf)
         log.debug('nextline: %r, %r', linepos, linebuf)
-
         return (linepos, linebuf)
 
     def revreadlines(self):

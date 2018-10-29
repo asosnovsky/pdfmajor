@@ -9,7 +9,7 @@ cd ..
 python setup.py sdist bdist_wheel
 
 git add .
-git commit -m "Deployong new version - $(cat .version)"
+git commit
 git push
 
 git tag $(cat .version)

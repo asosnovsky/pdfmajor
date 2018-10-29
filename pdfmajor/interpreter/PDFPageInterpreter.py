@@ -1,6 +1,7 @@
 import logging
 import operator
 
+from collections import OrderedDict
 from typing import List
 
 
@@ -54,7 +55,7 @@ class PDFPageInterpreter(object):
         self.resources = resources
         self.fontmap = {}
         self.xobjmap = {}
-        self.csmap = PREDEFINED_COLORSPACE.copy()
+        self.csmap:OrderedDict = PREDEFINED_COLORSPACE.copy()
         if not resources:
             return
 
@@ -351,20 +352,33 @@ class PDFPageInterpreter(object):
         return
 
     # setcolor
-    def do_SCN(self):
-        if self.scs:
-            n = self.scs.ncomponents
-        else:
-            raise PDFInterpreterError('No colorspace specified!')
-        self.pop(n)
-        return
-
-    def do_scn(self):
+    def __process_scn(self):
         if self.ncs:
             n = self.ncs.ncomponents
         else:
             raise PDFInterpreterError('No colorspace specified!')
-        self.pop(n)
+        components = self.pop(n)
+        obj_id = components[0]
+        if self.ncs.name not in self.resources.keys():
+            raise PDFInterpreterError("Color space not in resources")
+        if obj_id.name not in self.resources[self.ncs.name].keys():
+            raise PDFInterpreterError("Invalid Color reference")
+
+        color_data = self.resources[self.ncs.name][obj_id.name].resolve()
+
+        if isinstance(color_data, PDFStream):
+            color_data = color_data.attrs
+        
+        return {
+            "type": self.ncs.name,
+            "defintion": color_data
+        }
+    def do_SCN(self):
+        self.graphicstate.scolor.custom = self.__process_scn()
+        return
+
+    def do_scn(self):
+        self.graphicstate.ncolor.custom = self.__process_scn()
         return
 
     def do_SC(self):
