@@ -4,7 +4,7 @@ WK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $WK_DIR
 cd ..
 
-sh bin/clean.sh
+./bin/clean.sh
 
 python setup.py sdist bdist_wheel
 
