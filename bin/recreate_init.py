@@ -27,3 +27,7 @@ def update_pdfmajor__init___(version: str, doc: str):
             long_description=doc,
             version_tuple=re.sub(r"\.", ", ", version, count=2)
         ))
+
+def update_current_version_lock(version: str):
+    with open(".version", 'w') as file:
+        file.write("v"+version)

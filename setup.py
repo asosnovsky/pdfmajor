@@ -10,7 +10,7 @@ import sys
 with open('README.md') as readme_file:
     SETUP = {
         "name": "pdfmajor",
-        "version": "1.1.1",
+        "version": "1.1.2",
         "packages": find_packages(include=['pdfmajor*']),
         "install_requires": [
             'pycryptodome', 
@@ -46,8 +46,9 @@ with open('README.md') as readme_file:
 # ==============
 # Update __init__.py
 # ==============
-from bin.recreate_init import update_pdfmajor__init___
+from bin.recreate_init import update_pdfmajor__init___, update_current_version_lock
 update_pdfmajor__init___(SETUP["version"], SETUP["long_description"])
+update_current_version_lock(SETUP["version"])
 
 # ==============
 # Run Setup
