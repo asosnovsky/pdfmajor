@@ -1,6 +1,6 @@
 import logging
 
-from typing import Dict
+from typing import Dict, Union
 
 from io import BytesIO
 from contextlib import contextmanager
@@ -12,7 +12,7 @@ from ..layouts import LTLine
 from ..layouts import LTRect
 from ..layouts import LTFigure
 from ..layouts import LTImage
-from ..layouts import LTChar
+from ..layouts import LTChar, LTCharBlock
 from ..utils import enc
 
 from .PDFConverter import PDFConverter
@@ -110,19 +110,6 @@ class JSONConverter(PDFConverter):
             "y1": item.y1,
         })
 
-    def place_text(self, char: LTChar):
-        self.place_elm_close('char', {
-            'font-size': char.size,
-            'font-family': char.fontname,
-            "x0": char.x0,
-            "x1": char.x1,
-            "y0": char.y0,
-            "y1": char.y1,
-            "stroke-color": get_color(char.graphicstate.scolor),
-            "fill-color": get_color(char.graphicstate.ncolor),
-            "text": char.get_text()
-        })
-
     def render_curve(self, item: LTCurve):
         attr = {
             "x0": item.x0,
@@ -166,7 +153,29 @@ class JSONConverter(PDFConverter):
             elif isinstance(item, LTImage):
                 self.place_image(item)
             elif isinstance(item, LTChar):
-                self.place_text(item)
+                self.place_elm_close('char', {
+                    'font-size': item.size,
+                    'font-family': item.fontname,
+                    "x0": item.x0,
+                    "x1": item.x1,
+                    "y0": item.y0,
+                    "y1": item.y1,
+                    "stroke-color": get_color(item.graphicstate.scolor),
+                    "fill-color": get_color(item.graphicstate.ncolor),
+                    "text": item.get_text()
+                })
+            elif isinstance(item, LTCharBlock):
+                self.place_elm_close('char-block', {
+                    'font-size': item.size,
+                    'font-family': item.fontname,
+                    "x0": item.x0,
+                    "x1": item.x1,
+                    "y0": item.y0,
+                    "y1": item.y1,
+                    "stroke-color": get_color(item.graphicstate.scolor),
+                    "fill-color": get_color(item.graphicstate.ncolor),
+                    "text": item.get_text()
+                })
         render(ltpage)
 
     def close(self):

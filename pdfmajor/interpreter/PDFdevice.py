@@ -93,6 +93,7 @@ class PDFTextDevice(PDFDevice):
     def __render_string_along(self, idx: int, seq: bytearray, 
         textstate: PDFTextState, dxscale: float, ncs: PDFColorSpace, graphicstate: PDFGraphicState):
         needcharspace = False
+        char_meta_datas = []
         for obj in seq:
             if isnumber(obj):
                 textstate.linematrix[idx] -= obj*dxscale
@@ -109,16 +110,14 @@ class PDFTextDevice(PDFDevice):
                     adv, bbox = self.__compute_char_bbox(matrix, cid, textstate)
                     textstate.linematrix[idx] += adv
 
-                    self.render_char(
-                        text,
-                        bbox,
-                        textstate,
-                        graphicstate,
-                        ncs
+                    char_meta_datas.append(
+                        ( text, bbox, )
                     )
                     if cid == 32 and textstate.wordspace:
                         textstate.linematrix[idx] += textstate.wordspace
                     needcharspace = True
+                    
+        self.render_char_box(char_meta_datas, textstate, graphicstate, ncs)
 
     def __compute_char_bbox(self, matrix, char_id: int, textstate: PDFTextState):
         font = textstate.font
@@ -160,6 +159,5 @@ class PDFTextDevice(PDFDevice):
         
         return (adv, ((x0, y0), (x1, y1)))
 
-
-    def render_char(self, char: str, bbox: tuple, textstate: PDFTextState, graphicstate: PDFGraphicState, ncs: PDFColorSpace):
-        return NotImplementedError
+    def render_char_box(self, chars: list, textstate: PDFTextState, graphicstate: PDFGraphicState, ncs: PDFColorSpace):
+        pass

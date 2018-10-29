@@ -113,6 +113,9 @@ class XMLConverter(PDFConverter):
         })
 
     def place_text(self, char: LTChar):
+        tag_name = 'char'
+        if isinstance(char, LTCharBlock):
+            tag_name = 'char-block'
         attr = {
             'size': char.size,
             "color": get_color(char.graphicstate.ncolor),
@@ -124,7 +127,7 @@ class XMLConverter(PDFConverter):
         for key, value in char.font.descriptor.items():
             if key != "Type" and "FontFile" not in key:
                 attr["font:" + key] = value
-        with self.place_elm_with_child('char', attr, no_additional_char=True):
+        with self.place_elm_with_child(tag_name, attr, no_additional_char=True):
             self.write(char.get_text(), lineend='', deep_space="")
 
     def render_curve(self, item: LTCurve):
@@ -161,7 +164,7 @@ class XMLConverter(PDFConverter):
                         render(child)
             elif isinstance(item, LTImage):
                 self.place_image(item)
-            elif isinstance(item, LTChar):
+            elif isinstance(item, LTChar) or isinstance(item, LTCharBlock):
                 self.place_text(item)
         render(ltpage)
 

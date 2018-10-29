@@ -11,7 +11,7 @@ from ..layouts import LTLine
 from ..layouts import LTRect
 from ..layouts import LTFigure
 from ..layouts import LTImage
-from ..layouts import LTChar
+from ..layouts import LTChar, LTCharBlock
 from ..interpreter.PDFGraphicState import PDFGraphicStateColor
 from ..utils import enc
 
@@ -47,6 +47,6 @@ class TextConverter(PDFConverter):
             elif isinstance(item, LTFigure):
                 for child in item:
                     render(child)
-            elif isinstance(item, LTChar):
+            elif isinstance(item, LTChar) or isinstance(item, LTCharBlock):
                 self.place_text(item)
         render(ltpage)

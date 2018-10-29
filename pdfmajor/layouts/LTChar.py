@@ -29,18 +29,19 @@ class LTChar(LTComponent):
         return
 
     def __repr__(self):
-        return ('<%s %s matrix=%s font=%r text=%r>' %
-                (self.__class__.__name__, str(self.bbox),
-                 matrix2str(self.matrix), self.fontname,
-                 self.get_text()))
+        return (
+            '<%s %s font=%r text=%r>' %
+            (
+                self.__class__.__name__, 
+                str(self.bbox),
+                self.fontname, 
+                self.get_text()
+            )
+        )
 
     def get_text(self):
         return self._text
 
-    def is_compatible(self, obj):
-        """Returns True if two characters can coexist in the same line."""
-        return True
-    
     @property
     def fontname(self) -> str:
         return self.font.fontname

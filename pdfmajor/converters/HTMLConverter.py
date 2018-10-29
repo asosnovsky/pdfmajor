@@ -9,7 +9,7 @@ from ..layouts import LTItem
 from ..layouts import LTCurve, LTLine, LTRect, CurvePath
 from ..layouts import LTFigure
 from ..layouts import LTImage
-from ..layouts import LTChar
+from ..layouts import LTChar, LTCharBlock
 from ..utils import enc
 
 from .PDFConverter import PDFConverter
@@ -125,51 +125,42 @@ class HTMLConverter(PDFConverter):
             'position': 'absolute', 
             'left': f'{item.x0}px', 
             'bottom': f'{item.y0}px', 
-            # 'width': f'{item.width}px', 
-            # 'height': f'{item.height}px',
         }
-        # if isinstance(item, LTRect):
-        #     self.place_elm_close('div', {'class': 'curve rect'}, {**css, 
-        #         "border-color": get_color(item.stroke),
-        #         "background-color": get_color(item.fill),
-        #         'z-index': 0
-        #     })
-        # elif isinstance(item, LTLine):
-        #     self.place_elm_close('div', {'class': 'curve line'}, {**css, 
-        #         "background-color": get_color(item.fill),
-        #         "border-color": get_color(item.stroke),
-        #         'z-index': 0
-        #     })
-        # else:
         path = ""
         svg_attr = {
             'class': 'curve',
             'z-index': 2
         }
 
-        if item.height > 1:
-            dx = (item.width/item.height)/(item.x1-item.x0)
+        if item.height > 0:
             dy = 1.0/item.height
-            svg_attr.update({
-                "viewBox": f"0 0 {item.width/item.height} 1",
-                'width': f'{item.width}px', 
-                'height': f'{item.height}px',
-            })
-        elif item.height > 0:
             dx = (item.width/item.height)/(item.x1-item.x0)
-            dy = 1.0/item.height
             svg_attr.update({
-                "viewBox": f"0 0 {item.width/item.height} 1",
-                'width': f'{item.width}px', 
-                'height': f'1px',
+                "viewBox": "0 0 %s %s" % ( item.width/item.height, 1 )
             })
         else:
             dx = 1.0/(item.x1-item.x0)
             dy = 1.0
             svg_attr.update({
-                "viewBox": "0 0 1 1",
-                'width': f'{item.width}px', 
+                "viewBox": "0 0 1 1"
+            })
+
+        if item.height > 1:
+            svg_attr.update({
+                'height': f'{item.height}px',
+            })
+        else:
+            svg_attr.update({
                 'height': '1px',
+            })
+        
+        if item.width > 1:
+            svg_attr.update({
+                'width': f'{item.width}px',
+            })
+        else:
+            svg_attr.update({
+                'width': '1px',
             })
 
         for p in item.paths:
@@ -210,6 +201,18 @@ class HTMLConverter(PDFConverter):
                 self.place_image(item)
             elif isinstance(item, LTChar):
                 with self.place_elm_with_child('span', { 'class': 'char' }, {
+                    'font-size': f'{item.size}px',
+                    'font-family': item.fontname,
+                    'font-weight': 'bold' if 'bold' in item.fontname.lower() else '',
+                    'color': get_color(item.graphicstate.ncolor),
+                    'position': 'absolute',
+                    'left': f'{item.x0}',
+                    'bottom': f'{item.y0}',
+                    'transform': f'skew({item.font.italic_angle}deg, 0deg)'
+                }):
+                    self.write(item.get_text())
+            elif isinstance(item, LTCharBlock):
+                with self.place_elm_with_child('span', { 'class': 'char-block' }, {
                     'font-size': f'{item.size}px',
                     'font-family': item.fontname,
                     'font-weight': 'bold' if 'bold' in item.fontname.lower() else '',

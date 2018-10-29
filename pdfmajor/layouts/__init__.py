@@ -11,6 +11,7 @@ from .LTCurves import LTCurve, LTLine, LTRect, LTHorizontalLine, LTVerticalLine
 from .LTFigure import LTFigure
 from .LTImage import LTImage
 from .LTChar import LTChar
+from .LTCharBlock import LTCharBlock
 
 from ..utils import Point, Bbox, INF
 from ..utils import apply_matrix_pt, mult_matrix
@@ -175,20 +176,13 @@ class PDFLayoutAnalyzer(PDFTextDevice):
                 fill=gstate.ncolor
             ))
 
-    def render_char(self, char: str, bbox: tuple, textstate: PDFTextState, graphicstate: PDFGraphicState, ncs: PDFColorSpace):
-        ((x0, y0), (x1, y1)) = bbox
-        self.cur_item.add(LTChar(
-            bbox=Bbox(x0, y0, x1, y1), 
-            char=char, 
+    def render_char_box(self, chars: list, textstate: PDFTextState, graphicstate: PDFGraphicState, ncs: PDFColorSpace):
+        self.cur_item.add(LTCharBlock(
+            chars=chars, 
             textstate=textstate, 
             ncs=ncs, 
             graphicstate=graphicstate
         ))
-
-    def handle_undefined_char(self, font: str, cid: int):
-        log.info('undefined: %r, %r', font, cid)
-        return '(cid:%d)' % cid
-
 
     @abstractmethod
     def receive_layout(self, ltpage: LTPage):
