@@ -60,6 +60,9 @@ class LTCharBlock(LTComponent):
     def __repr__(self):
         return f"""<{self.__class__.__name__} font="{self.fontname}" text="{self.get_text()}"/>"""
 
+    def __iter__(self):
+        return iter(self.chars)
+
     def get_text(self):
         return "".join([ c.get_text() for c in self.chars ])
 

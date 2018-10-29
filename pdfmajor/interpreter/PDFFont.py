@@ -531,6 +531,19 @@ class PDFFont(object):
     @abstractmethod
     def to_unichr(self, cid):
         raise NotImplementedError
+    
+    @property
+    def font_weight(self):
+        if 'FontWeight' in self.descriptor.keys():
+            return self.descriptor['FontWeight']
+        elif 'bold' in self.fontname.lower():
+            return 'bold'
+        else:
+            return None
+    
+    @property
+    def is_bold(self):
+        return self.font_weight == 'bold' or self.font_weight > 549
 
 
 # PDFSimpleFont

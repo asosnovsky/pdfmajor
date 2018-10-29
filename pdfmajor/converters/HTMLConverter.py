@@ -42,8 +42,8 @@ class HTMLConverter(PDFConverter):
         self.__current_width = None
         self.write_header()
     
-    def write(self, text: str):
-        text = " "*self.__levels_deep + text + '\n'
+    def write(self, text: str, lineend: str = '\n', deep_space: str = ' '):
+        text = deep_space*self.__levels_deep + text + lineend
         self.write_raw(text)
     
     def write_raw(self, text):
@@ -78,7 +78,13 @@ class HTMLConverter(PDFConverter):
         self.__levels_deep -= 1
 
     @contextmanager
-    def place_elm_with_child(self, tag_name: str, attr_dict: Dict[str, str] = {}, css: Dict[str, str] = None):
+    def place_elm_with_child(self, tag_name: str, attr_dict: Dict[str, str] = {}, css: Dict[str, str] = None, no_additional_char = False):
+        lineend = '\n'
+        deep_space = ' '
+        if no_additional_char:
+            lineend = ''
+            deep_space = ''
+
         if css is not None:
             attr_dict['style'] = ";".join([
                 f'{name}: {value}'
@@ -88,11 +94,11 @@ class HTMLConverter(PDFConverter):
             f'{name}="{value}"'
             for name, value in attr_dict.items()
         ])
-        self.write(f"<{tag_name} {attrs}>")
+        self.write(f"<{tag_name} {attrs}>", lineend=lineend)
         self.__levels_deep += 1
         yield
         self.__levels_deep -= 1
-        self.write(f"</{tag_name}>")
+        self.write(f"</{tag_name}>", deep_space=deep_space)
 
     def place_elm_close(self, tag_name: str, attr_dict: Dict[str, str] = {}, css: Dict[str, str] = None, as_childless = True):
         if css is not None:
@@ -201,28 +207,39 @@ class HTMLConverter(PDFConverter):
                 self.place_image(item)
             elif isinstance(item, LTChar):
                 with self.place_elm_with_child('span', { 'class': 'char' }, {
-                    'font-size': f'{item.size}px',
-                    'font-family': item.fontname,
-                    'font-weight': 'bold' if 'bold' in item.fontname.lower() else '',
-                    'color': get_color(item.graphicstate.ncolor),
-                    'position': 'absolute',
-                    'left': f'{item.x0}',
-                    'bottom': f'{item.y0}',
-                    'transform': f'skew({item.font.italic_angle}deg, 0deg)'
+                    'width': item.width,
+                    'min-width': item.width,
+                    'max-width': item.width,
+                    'height': item.height,
+                    'min-height': item.height,
+                    'max-height': item.height,
                 }):
                     self.write(item.get_text())
             elif isinstance(item, LTCharBlock):
                 with self.place_elm_with_child('span', { 'class': 'char-block' }, {
-                    'font-size': f'{item.size}px',
-                    'font-family': item.fontname,
-                    'font-weight': 'bold' if 'bold' in item.fontname.lower() else '',
-                    'color': get_color(item.graphicstate.ncolor),
-                    'position': 'absolute',
-                    'left': f'{item.x0}',
-                    'bottom': f'{item.y0}',
-                    'transform': f'skew({item.font.italic_angle}deg, 0deg)'
-                }):
-                    self.write(item.get_text())
+                        'position': 'absolute',
+                        'left': f'{item.x0}',
+                        'bottom': f'{item.y0}',
+                        'text-align': 'justify',
+                        'font-size': f'{item.size}px',
+                        'font-family': item.fontname,
+                        'font-weight': item.font.font_weight,
+                        'color': get_color(item.graphicstate.ncolor),
+                        'width': item.width,
+                        'min-width': item.width,
+                        'max-width': item.width,
+                        'height': item.height,
+                        'min-height': item.height,
+                        'max-height': item.height,
+                        'transform': f'skew({item.font.italic_angle}deg, 0deg)',
+                        'text-align': 'center',
+                        'display': 'flex',
+                        'flex-flow': 'row nowrap',
+                        'justify-content': 'space-between',
+                        'padding-left': item.font.leading
+                    }):
+                    for char in item:
+                        render(char)
         render(ltpage)
 
     def close(self):

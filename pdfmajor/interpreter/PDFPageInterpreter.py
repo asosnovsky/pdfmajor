@@ -26,7 +26,7 @@ from .PDFGraphicState import PDFGraphicState
 from .PDFTextState import PDFTextState
 from .PDFContentParser import PDFContentParser
 
-from ..utils import settings, mult_matrix, MATRIX_IDENTITY
+from ..utils import mult_matrix, MATRIX_IDENTITY
 from .constants import LITERAL_FORM, LITERAL_IMAGE
 from .types import CurvePoint, CurvePath
 
@@ -303,8 +303,7 @@ class PDFPageInterpreter(object):
         try:
             self.scs = self.csmap[literal_name(name)]
         except KeyError:
-            if settings.STRICT:
-                raise PDFInterpreterError('Undefined ColorSpace: %r' % name)
+            raise PDFInterpreterError('Undefined ColorSpace: %r' % name)
         return
 
     # setcolorspace-non-strokine
@@ -312,8 +311,7 @@ class PDFPageInterpreter(object):
         try:
             self.ncs = self.csmap[literal_name(name)]
         except KeyError:
-            if settings.STRICT:
-                raise PDFInterpreterError('Undefined ColorSpace: %r' % name)
+            raise PDFInterpreterError('Undefined ColorSpace: %r' % name)
         return
 
     # setgray-stroking
@@ -357,9 +355,7 @@ class PDFPageInterpreter(object):
         if self.scs:
             n = self.scs.ncomponents
         else:
-            if settings.STRICT:
-                raise PDFInterpreterError('No colorspace specified!')
-            n = 1
+            raise PDFInterpreterError('No colorspace specified!')
         self.pop(n)
         return
 
@@ -367,9 +363,7 @@ class PDFPageInterpreter(object):
         if self.ncs:
             n = self.ncs.ncomponents
         else:
-            if settings.STRICT:
-                raise PDFInterpreterError('No colorspace specified!')
-            n = 1
+            raise PDFInterpreterError('No colorspace specified!')
         self.pop(n)
         return
 
@@ -432,6 +426,8 @@ class PDFPageInterpreter(object):
     def do_Tw(self, space):
         self.textstate.wordspace = space
         return
+    
+    # def do_Th(self, )
 
     # textscale
     def do_Tz(self, scale):
@@ -448,9 +444,8 @@ class PDFPageInterpreter(object):
         try:
             self.textstate.font = self.fontmap[literal_name(fontid)]
         except KeyError:
-            if settings.STRICT:
-                raise PDFInterpreterError('Undefined Font id: %r' % fontid)
-            self.textstate.font = self.rsrcmgr.get_font(None, {})
+            raise PDFInterpreterError('Undefined Font id: %r' % fontid)
+            # self.textstate.font = self.rsrcmgr.get_font(None, {})
         self.textstate.fontsize = fontsize
         return
 
@@ -495,9 +490,7 @@ class PDFPageInterpreter(object):
     # show-pos
     def do_TJ(self, seq: bytearray):
         if self.textstate.font is None:
-            if settings.STRICT:
-                raise PDFInterpreterError('No font specified!')
-            return
+            raise PDFInterpreterError('No font specified!')
         self.device.render_string(self.textstate.copy(), seq, self.ncs, self.graphicstate.copy())
         return
 
@@ -540,9 +533,7 @@ class PDFPageInterpreter(object):
         try:
             xobj = PDFStream.validated_stream(self.xobjmap[xobjid])
         except KeyError:
-            if settings.STRICT:
-                raise PDFInterpreterError('Undefined xobject id: %r' % xobjid)
-            return
+            raise PDFInterpreterError('Undefined xobject id: %r' % xobjid)
         log.info('Processing xobj: %r', xobj)
         subtype = xobj.get('Subtype')
         if subtype is LITERAL_FORM and 'BBox' in xobj:
@@ -618,8 +609,7 @@ class PDFPageInterpreter(object):
                         log.debug('exec: %s', name)
                         func()
                 else:
-                    if settings.STRICT:
-                        raise PDFInterpreterError('Unknown operator: %r' % name)
+                    raise PDFInterpreterError('Unknown operator: %r' % name)
             else:
                 self.push(obj)
         return
