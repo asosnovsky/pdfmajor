@@ -239,7 +239,7 @@ class HTMLConverter(PDFConverter):
                         'display': 'flex',
                         'flex-flow': 'row nowrap',
                         'justify-content': 'space-between',
-                        'padding-left': item.font.leading
+                        # 'padding-left': item.font.leading
                     }):
                     for char in item:
                         render(char)
