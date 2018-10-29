@@ -7,7 +7,7 @@ from pdfmajor.converters import convert_file
 def rel_path(*arg: List[str]) -> str:
     return os.path.join(os.path.dirname(__file__), *arg)
 
-EXT = 'html'
+EXT = 'xml'
 INPUT_FOLDER = rel_path("./pdf")
 OUTPUT_FOLDER = rel_path(f"./output/{EXT}")
 

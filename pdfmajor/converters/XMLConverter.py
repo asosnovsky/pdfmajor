@@ -11,7 +11,7 @@ from ..layouts import LTLine
 from ..layouts import LTRect
 from ..layouts import LTFigure
 from ..layouts import LTImage
-from ..layouts import LTChar
+from ..layouts import LTChar, LTCharBlock
 from ..interpreter.PDFGraphicState import PDFGraphicStateColor
 from ..utils import enc
 
