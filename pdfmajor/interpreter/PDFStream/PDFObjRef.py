@@ -13,8 +13,6 @@ from .exceptions import * # pylint: disable=W0614
 class PDFObjRef(PDFObject):
 
     def __init__(self, doc, objid, a):
-        if objid == 15:
-            print(doc, a)
         if objid == 0:
             if settings.STRICT:
                 raise PDFValueError('PDF object id cannot be 0.')
