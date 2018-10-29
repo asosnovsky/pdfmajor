@@ -126,7 +126,7 @@ class XMLConverter(PDFConverter):
         }
         for key, value in char.font.descriptor.items():
             if key != "Type" and "FontFile" not in key:
-                attr["font:" + key] = value
+                attr["font-" + key] = value
         with self.place_elm_with_child(tag_name, attr, no_additional_char=True):
             self.write(char.get_text(), lineend='', deep_space="")
 
