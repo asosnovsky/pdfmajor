@@ -33,9 +33,9 @@ def get_color(col: PDFGraphicStateColor):
 
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
 ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
-def convert_capcase_to_camelcase(text: str) -> str:
-    s1 = FIRST_CAP_RE.sub(r'\1_\2', text)
-    return ALL_CAP_RE.sub(r'\1_\2', s1).lower()
+def convert_capcase_to_snakecase(text: str) -> str:
+    s1 = FIRST_CAP_RE.sub(r'\1-\2', text)
+    return ALL_CAP_RE.sub(r'\1-\2', s1).lower()
 
 class XMLConverter(PDFConverter):
     def __init__(self, 
@@ -134,11 +134,10 @@ class XMLConverter(PDFConverter):
             "x1": char_block.x1,
             "y0": char_block.y0,
             "y1": char_block.y1,
-            "is_bold": char_block.font.is_bold,
         }
         for key, value in char_block.font.descriptor.items():
             if key != "Type" and "FontFile" not in key:
-                attr[convert_capcase_to_camelcase(key)] = value
+                attr[convert_capcase_to_snakecase(key)] = value
         with self.place_elm_with_child("char-block", attr):
             for char in char_block:
                 self.place_text(char)
