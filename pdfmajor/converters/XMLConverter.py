@@ -1,4 +1,5 @@
 import logging
+import re
 
 from typing import Dict
 
@@ -29,6 +30,12 @@ def get_color(col: PDFGraphicStateColor):
         elif color_type == 'gray':
             return f'gray({color_val})'
     return ""
+
+FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
+ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
+def convert_capcase_to_camelcase(text: str) -> str:
+    s1 = FIRST_CAP_RE.sub(r'\1_\2', text)
+    return ALL_CAP_RE.sub(r'\1_\2', s1).lower()
 
 class XMLConverter(PDFConverter):
     def __init__(self, 
@@ -113,22 +120,28 @@ class XMLConverter(PDFConverter):
         })
 
     def place_text(self, char: LTChar):
-        tag_name = 'char'
-        if isinstance(char, LTCharBlock):
-            tag_name = 'char-block'
-        attr = {
-            'size': char.size,
-            "color": get_color(char.graphicstate.ncolor),
-            "x0": char.x0,
-            "x1": char.x1,
-            "y0": char.y0,
-            "y1": char.y1,
-        }
-        for key, value in char.font.descriptor.items():
-            if key != "Type" and "FontFile" not in key:
-                attr["font-" + key] = value
-        with self.place_elm_with_child(tag_name, attr, no_additional_char=True):
+        with self.place_elm_with_child('char', {
+            'width': char.width,
+            'height': char.height,
+        }, no_additional_char=True):
             self.write(char.get_text(), lineend='', deep_space="")
+
+    def render_char_block(self, char_block: LTCharBlock):
+        attr = {
+            'size': char_block.size,
+            "color": get_color(char_block.graphicstate.ncolor),
+            "x0": char_block.x0,
+            "x1": char_block.x1,
+            "y0": char_block.y0,
+            "y1": char_block.y1,
+            "is_bold": char_block.font.is_bold,
+        }
+        for key, value in char_block.font.descriptor.items():
+            if key != "Type" and "FontFile" not in key:
+                attr[convert_capcase_to_camelcase(key)] = value
+        with self.place_elm_with_child("char-block", attr):
+            for char in char_block:
+                self.place_text(char)
 
     def render_curve(self, item: LTCurve):
         attr = {
@@ -164,8 +177,8 @@ class XMLConverter(PDFConverter):
                         render(child)
             elif isinstance(item, LTImage):
                 self.place_image(item)
-            elif isinstance(item, LTChar) or isinstance(item, LTCharBlock):
-                self.place_text(item)
+            elif isinstance(item, LTCharBlock):
+                self.render_char_block(item)
         render(ltpage)
 
     def close(self):
