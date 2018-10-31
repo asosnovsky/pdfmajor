@@ -125,8 +125,10 @@ class XMLConverter(PDFConverter):
 
     def place_text(self, char: LTChar):
         with self.place_elm_with_child('char', {
-            'width': char.width,
-            'height': char.height,
+            'x0': char.x0,
+            'x1': char.x1,
+            'y0': char.y0,
+            'y1': char.y1,
         }, no_additional_char=True):
             self.write(char.get_text(), lineend='', deep_space="")
 
