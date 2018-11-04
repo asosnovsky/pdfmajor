@@ -3,7 +3,18 @@
 # DO NOT EDIT THIS PAGE
 # 
 """
-# PDFMajor
+# PDFMajor 
+
+<table>
+<tr>
+  <td>Latest Release</td>
+  <td>
+    <a href="https://pypi.org/project/pdfmajor/">
+    <img src="https://img.shields.io/pypi/v/pdfmajor.svg" alt="latest release" />
+    </a>
+  </td>
+</tr>
+</table>
 
 PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. Additionally, this version intends to be more up to date with recent versions of python and make liberal use of the typing capabilities of python for improved future maintainability.
 
@@ -75,7 +86,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-__version__ = (1, 1, 6)
+__version__ = (1, 1, 7)
 
 if __name__ == '__main__':
     print(

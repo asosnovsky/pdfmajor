@@ -4,6 +4,7 @@ import json
 
 from typing import Dict
 
+from xml.sax import saxutils
 from contextlib import contextmanager
 
 from ..layouts import LTPage
@@ -82,7 +83,7 @@ class XMLConverter(PDFConverter):
             lineend = ''
             deep_space = ''
         attrs = " ".join([
-            f'{name}="{value}"'
+            f'{name}="{saxutils.escape(str(value))}"'
             for name, value in attr_dict.items()
         ])
         self.write(f"<{tag_name} {attrs}>", lineend=lineend)
@@ -93,7 +94,7 @@ class XMLConverter(PDFConverter):
 
     def place_elm_close(self, tag_name: str, attr_dict: Dict[str, str] = {}, as_childless = True):
         attrs = " ".join([
-            f'{name}="{value}"'
+            f'{name}="{saxutils.escape(str(value))}"'
             for name, value in attr_dict.items()
         ])
         if as_childless:
