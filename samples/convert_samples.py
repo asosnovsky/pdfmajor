@@ -17,22 +17,34 @@ if not os.path.exists(OUTPUT_FOLDER):
 
 files = os.listdir(INPUT_FOLDER)
 
-TOTAL = len(files)
-for idx, file_name in enumerate(files):
-    file_name_no_ext = re.sub(r'\.pdf$',"", file_name)
-    input_file_path = os.path.join(INPUT_FOLDER, file_name)
-    output_file_path = os.path.join(OUTPUT_FOLDER, file_name_no_ext + "." + EXT)
+input_file_path = '/media/ari/sd/projects/School/Schulich/acp/pdf-extraction/data/input/Supplemental_User_Agreement_Settlement_Custodian.pdf'
+output_file_path = os.path.join(OUTPUT_FOLDER, 'demo.xml')
 
-    if len(file_name) > len(file_name_no_ext):
-        print(f"processing {file_name} {idx}/{TOTAL}")
-        with open(input_file_path, 'rb') as input_file:
-            with open(output_file_path, 'wb') as output_file:
-                convert_file(
-                    input_file=input_file,
-                    output_file=output_file,
-                    out_type=EXT,
-                    debug=True,
-                )
-        print(f" > testing format {file_name} {idx}/{TOTAL}")
-        ElementTree.parse(output_file_path)
-        print(f"processing {idx+1}/{TOTAL}")
+with open(input_file_path, 'rb') as input_file:
+    with open(output_file_path, 'wb') as output_file:
+        convert_file(
+            input_file=input_file,
+            output_file=output_file,
+            out_type=EXT,
+            debug=True,
+        )
+
+# TOTAL = len(files)
+# for idx, file_name in enumerate(files):
+#     file_name_no_ext = re.sub(r'\.pdf$',"", file_name)
+#     input_file_path = os.path.join(INPUT_FOLDER, file_name)
+#     output_file_path = os.path.join(OUTPUT_FOLDER, file_name_no_ext + "." + EXT)
+
+#     if len(file_name) > len(file_name_no_ext):
+#         print(f"processing {file_name} {idx}/{TOTAL}")
+        # with open(input_file_path, 'rb') as input_file:
+        #     with open(output_file_path, 'wb') as output_file:
+        #         convert_file(
+        #             input_file=input_file,
+        #             output_file=output_file,
+        #             out_type=EXT,
+        #             debug=True,
+        #         )
+#         print(f" > testing format {file_name} {idx}/{TOTAL}")
+#         ElementTree.parse(output_file_path)
+#         print(f"processing {idx+1}/{TOTAL}")
