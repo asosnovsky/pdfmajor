@@ -33,7 +33,7 @@ def get_color(col: PDFGraphicStateColor):
             return f'gray({color_val})'
         elif color_type == "custom":
             # Todo: convert these to more friendly color types
-            return f"custom({col.custom['type']})"
+            return f"{col.custom['type']}({col.custom['defintion']})"
     return ""
 
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')

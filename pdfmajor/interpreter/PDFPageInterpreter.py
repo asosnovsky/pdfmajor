@@ -351,6 +351,24 @@ class PDFPageInterpreter(object):
         #self.do_cs(LITERAL_DEVICE_CMYK)
         return
 
+    def __process_ICCBased(self, n: int, components: list):
+        if n == 1:
+            return {
+                "type": "gray",
+                "definition": components
+            }
+        elif n == 3:
+            return {
+                "type": "rgb",
+                "definition": components
+            }
+        elif n == 4:
+            return {
+                "type": "cmyk",
+                "definition": components
+            }
+        raise PDFInterpreterError("Unsupported ICCBased color")
+
     # setcolor
     def __process_scn(self):
         if self.ncs:
@@ -359,8 +377,14 @@ class PDFPageInterpreter(object):
             raise PDFInterpreterError('No colorspace specified!')
         components = self.pop(n)
         obj_id = components[0]
+        if self.ncs.name == "ICCBased":
+            return self.__process_ICCBased(n, components)
         if self.ncs.name not in self.resources.keys():
-            raise PDFInterpreterError("Color space not in resources")
+            log.warning("Color space not in resources")
+            return {
+                "type": self.ncs.name,
+                "defintion": f"{n}|({','.join(map(str, components))})"
+            }
         if obj_id.name not in self.resources[self.ncs.name].keys():
             raise PDFInterpreterError("Invalid Color reference")
 
@@ -374,11 +398,27 @@ class PDFPageInterpreter(object):
             "defintion": color_data
         }
     def do_SCN(self):
-        self.graphicstate.scolor.custom = self.__process_scn()
+        processed_col = self.__process_scn()
+        if processed_col['type'] == 'rgb':
+            self.graphicstate.scolor.rgb = processed_col['definition']
+        elif processed_col['type'] == 'gray':
+            self.graphicstate.scolor.gray = processed_col['definition'][0]
+        elif processed_col['type'] == 'cmyk':
+            self.graphicstate.scolor.cmyk = processed_col['definition']
+        else:    
+            self.graphicstate.scolor.custom = processed_col
         return
 
     def do_scn(self):
-        self.graphicstate.ncolor.custom = self.__process_scn()
+        processed_col = self.__process_scn()
+        if processed_col['type'] == 'rgb':
+            self.graphicstate.ncolor.rgb = processed_col['definition']
+        elif processed_col['type'] == 'gray':
+            self.graphicstate.ncolor.gray = processed_col['definition'][0]
+        elif processed_col['type'] == 'cmyk':
+            self.graphicstate.ncolor.cmyk = processed_col['definition']
+        else:    
+            self.graphicstate.ncolor.custom = processed_col
         return
 
     def do_SC(self):
