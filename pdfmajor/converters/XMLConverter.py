@@ -131,7 +131,7 @@ class XMLConverter(PDFConverter):
             'y0': char.y0,
             'y1': char.y1,
         }, no_additional_char=True):
-            self.write(char.get_text(), lineend='', deep_space="")
+            self.write(saxutils.escape(char.get_text()), lineend='', deep_space="")
 
     def render_char_block(self, char_block: LTCharBlock):
         attr = {
