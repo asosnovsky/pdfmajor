@@ -1,17 +1,19 @@
-import logging
 import re
 import os
 
 from typing import List
 from io import BytesIO, StringIO, TextIOWrapper
 
+from tqdm import tqdm
+
 from ..layouts import PDFLayoutAnalyzer
 from ..interpreter.PDFResourceManager import PDFResourceManager
 from ..interpreter.PDFPage import PDFPage
 from ..interpreter.PDFPageInterpreter import PDFPageInterpreter
 from ..imagewriter import ImageWriter
+from ..utils import set_log_level, get_logger, logging
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 ##  PDFConverter
 ##
@@ -29,11 +31,10 @@ class PDFConverter(PDFLayoutAnalyzer):
         check_extractable: bool = True,
         pagenos: List[int] = None,
         dont_export_images: bool = False,
-        debug: bool = False, 
+        debug_level: int = logging.WARNING, 
     ) -> TextIOWrapper:
         
-        if debug:
-            log.setLevel(logging.DEBUG)
+        set_log_level(debug_level)
         
         if dont_export_images:
             image_folder_path = None
@@ -53,9 +54,12 @@ class PDFConverter(PDFLayoutAnalyzer):
         interpreter = PDFPageInterpreter(rsrcmgr, device)
         log.debug("Reading pages....")
         pages = PDFPage.get_pages(input_file, pagenos=pagenos, maxpages=maxpages, password=password, caching=caching, check_extractable=check_extractable)
-        for idx, page in enumerate(pages):
-            log.debug(f"Reading page #{idx}")
-            interpreter.process_page(page)    
+        
+        page_waiter = tqdm(enumerate(pages), disable=debug_level > logging.INFO)
+        for _, page in page_waiter:
+            page_waiter.set_description("Processing pdf...")
+            interpreter.process_page(page)   
+        page_waiter.close() 
         device.close()
         return output_file
         

@@ -10,3 +10,4 @@ from .lzw import *
 from .matrix import *
 from .text import *
 from .types import *
+from .log import *

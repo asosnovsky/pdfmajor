@@ -8,6 +8,7 @@ from .HTMLConverter import HTMLConverter
 from .JSONConverter import JSONConverter
 from .XMLConverter import XMLConverter
 from .TextConverter import TextConverter
+from ..utils import logging
 
 def convert_file(
         input_file: io.TextIOWrapper, 
@@ -19,7 +20,8 @@ def convert_file(
         caching: bool = True, 
         check_extractable: bool = True,
         pagenos: List[int] = None,
-        debug: bool = False,
+        dont_export_images: bool = False,
+        debug_level: int = logging.WARNING,
         out_type: str = 'html',
     ):
     if output_file is None:
@@ -36,54 +38,58 @@ def convert_file(
         raise Exception("Please make sure that the file name and output type match!")
     if out_type == 'html':
         return HTMLConverter.parse_file(
-            input_file, 
-            output_file, 
-            image_folder_path,
-            codec,
-            maxpages, 
-            password, 
-            caching, 
-            check_extractable,
-            pagenos,
-            debug,
+            input_file=input_file, 
+            output_file=output_file, 
+            image_folder_path=image_folder_path,
+            codec=codec,
+            maxpages=maxpages, 
+            password=password, 
+            caching=caching, 
+            check_extractable=check_extractable,
+            pagenos=pagenos,
+            dont_export_images=dont_export_images,
+            debug_level=debug_level,
         )
     elif out_type == 'xml':
         return XMLConverter.parse_file(
-            input_file, 
-            output_file, 
-            image_folder_path,
-            codec,
-            maxpages, 
-            password, 
-            caching, 
-            check_extractable,
-            pagenos,
-            debug,
+            input_file=input_file, 
+            output_file=output_file, 
+            image_folder_path=image_folder_path,
+            codec=codec,
+            maxpages=maxpages, 
+            password=password, 
+            caching=caching, 
+            check_extractable=check_extractable,
+            pagenos=pagenos,
+            dont_export_images=dont_export_images,
+            debug_level=debug_level,
         )
     elif out_type == 'json':
         return JSONConverter.parse_file(
-            input_file, 
-            output_file, 
-            image_folder_path,
-            codec,
-            maxpages, 
-            password, 
-            caching, 
-            check_extractable,
-            pagenos,
-            debug,
+            input_file=input_file, 
+            output_file=output_file, 
+            image_folder_path=image_folder_path,
+            codec=codec,
+            maxpages=maxpages, 
+            password=password, 
+            caching=caching, 
+            check_extractable=check_extractable,
+            pagenos=pagenos,
+            dont_export_images=dont_export_images,
+            debug_level=debug_level,
         )
     elif out_type == 'text':
         return TextConverter.parse_file(
-            input_file, 
-            output_file, 
-            image_folder_path,
-            codec,
-            maxpages, 
-            password, 
-            caching, 
-            check_extractable,
-            pagenos,
-            debug,
+            input_file=input_file, 
+            output_file=output_file, 
+            image_folder_path=image_folder_path,
+            codec=codec,
+            maxpages=maxpages, 
+            password=password, 
+            caching=caching, 
+            check_extractable=check_extractable,
+            pagenos=pagenos,
+            dont_export_images=dont_export_images,
+            debug_level=debug_level,
         )
     else: raise Exception("Please specify out_type as 'html' or 'xml' or 'json' or 'text'")
