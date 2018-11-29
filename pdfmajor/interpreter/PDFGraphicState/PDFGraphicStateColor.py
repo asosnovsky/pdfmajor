@@ -34,7 +34,7 @@ class PDFGraphicStateColor:
 
     @property
     def gray(self):
-        if self.__gray is not None: return float(self.__gray)
+        if self.__gray is not None: return [float(self.__gray)]
         else: raise self.NotSet
 
     @property

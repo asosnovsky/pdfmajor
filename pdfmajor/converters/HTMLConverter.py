@@ -25,7 +25,7 @@ def get_color(col: PDFGraphicStateColor):
         elif color_type == 'cmyk':
             return f"cmyk({','.join(map(str, color_val))})"
         elif color_type == 'gray':
-            return f'rgba(0,0,0,{1-color_val})'
+            return f'rgba(0,0,0,{1-color_val[0]})'
         elif color_type == "custom":
             # Todo: convert these to more friendly color types
             return f"custom({col.custom['type']})"
@@ -134,6 +134,8 @@ class HTMLConverter(PDFConverter):
             'position': 'absolute', 
             'left': f'{item.x0}px', 
             'bottom': f'{item.y0}px', 
+            'width': f'{item.width}px',
+            'height': f'{item.height}px',
         }
         path = ""
         svg_attr = {
@@ -141,42 +143,36 @@ class HTMLConverter(PDFConverter):
             'z-index': 2
         }
 
-        if item.height > 0:
-            dy = 1.0/item.height
-            dx = (item.width/item.height)/(item.x1-item.x0)
-            svg_attr.update({
-                "viewBox": "0 0 %s %s" % ( item.width/item.height, 1 )
-            })
-        else:
-            dx = 1.0/(item.x1-item.x0)
-            dy = 1.0
-            svg_attr.update({
-                "viewBox": "0 0 1 1"
-            })
+        p_vals = { "x": [], "y": []  }
 
-        if item.height > 1:
-            svg_attr.update({
-                'height': f'{item.height}px',
-            })
-        else:
-            svg_attr.update({
-                'height': '1px',
-            })
-        
-        if item.width > 1:
-            svg_attr.update({
-                'width': f'{item.width}px',
-            })
-        else:
-            svg_attr.update({
-                'width': '1px',
-            })
+        for p in item.paths:
+            for pt in p.points:
+                p_vals['x'].append(pt.x)
+                p_vals['y'].append(pt.y)
+
+        mx_x = max([*p_vals['x'], 1])
+        mn_x = min([*p_vals['x'], 0])
+        mx_y = max([*p_vals['y'], 1])
+        mn_y = min([*p_vals['y'], 0])
+
+        if mx_x == mn_x:
+            mn_x -= 1
+        if mx_y == mn_y:
+            mn_y -= 1
+
+        dx = 1/( mx_x - mn_x )
+        dy = (item.height/item.width)/( mx_y - mn_y )
+        ROUND_VAL = 5
+        svg_attr.update({
+            # "viewBox": f"{min(p_vals['x'])} {min(p_vals['y'])} {max(p_vals['x'])} {max(p_vals['y'])}",
+            "viewBox": f"{round(mn_x*dx, ROUND_VAL)} {round(mn_y*dy, ROUND_VAL)} {round(mx_x*dx , ROUND_VAL)} {round(mx_y*dy, ROUND_VAL)}",
+        })
 
         for p in item.paths:
             if p.method == CurvePath.METHOD.MOVE_TO:
-                path += f'M{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {(item.height- (p.y-item.y0) )*dy}" for p in p.points )} '
+                path += f'M{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
             if p.method == CurvePath.METHOD.LINE_TO:
-                path += f'L{" ".join( f"{(item.width - (p.x-item.x0) )*dx} {( item.height - (p.y-item.y0) )*dy}" for p in p.points )} '
+                path += f'L{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
             if p.method == CurvePath.METHOD.CLOSE_PATH:
                 path += 'Z'
         with self.place_elm_with_child('svg', svg_attr, css):
