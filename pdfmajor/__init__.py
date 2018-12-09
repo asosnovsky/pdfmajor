@@ -18,9 +18,23 @@
 
 PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. Additionally, this version intends to be more up to date with recent versions of python and make liberal use of the typing capabilities of python for improved future maintainability.
 
+The ultimate goal is to have a functional-programming with typing fork of the original library.
+
 ## Documentation
 
 See documentation [here](https://asosnovsky.github.io/pdfmajor/).
+
+## Basic Example
+```py
+from pdfmajor.extractor import extract_items_from_pdf
+
+for page in extract_items_from_pdf('path/to/your/file.pdf'):
+    print('page-start', page)
+    for item in page:
+        print(' ', item)
+    print('page-end', page)
+    
+```
 
 ## Why Another Fork?
 
@@ -29,6 +43,7 @@ See documentation [here](https://asosnovsky.github.io/pdfmajor/).
 
 ## Features
 
+ * Functional extraction method based on generators
  * Written entirely in Python.
  * Parse, analyze, and convert PDF documents.
  * PDF-1.7 specification support. (well, almost)
@@ -86,7 +101,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-__version__ = (1, 1, 12)
+__version__ = (1, 2, 0)
 
 if __name__ == '__main__':
     print(

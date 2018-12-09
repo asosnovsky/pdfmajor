@@ -90,9 +90,9 @@ class LTComponent(LTItem):
 ##
 class LTContainer(LTComponent):
 
-    def __init__(self, bbox: Bbox):
+    def __init__(self, bbox: Bbox, objs: List[LTItem] = []):
         LTComponent.__init__(self, bbox)
-        self._objs: List[LTItem] = []
+        self._objs: List[LTItem] = objs
         return
 
     def __iter__(self):
