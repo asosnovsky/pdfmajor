@@ -95,6 +95,14 @@ class PSStackParser(PSBaseParser):
     def do_keyword(self, pos, token):
         return
 
+    def __iter__(self):
+        while True:
+            try:
+                (_, obj) = self.nextobject()
+                yield obj
+            except PSEOF:
+                break
+
     def nextobject(self):
         """Yields a list of objects.
 
