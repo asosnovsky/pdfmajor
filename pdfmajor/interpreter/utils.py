@@ -1,8 +1,8 @@
-from pdfmajor.interpreter.PDFParser import PDFStream
-from pdfmajor.interpreter.PDFStream import list_value, dict_value, resolve1
-from pdfmajor.interpreter.PDFStream.PDFObjRef import PDFObjRef
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.constants import LITERAL_PDF, LITERAL_TEXT
+from pdfmajor.parser.PDFParser import PDFStream
+from pdfmajor.parser.PDFStream import list_value, dict_value, resolve1
+from pdfmajor.parser.PDFStream.PDFObjRef import PDFObjRef
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.constants import LITERAL_PDF, LITERAL_TEXT
 
 from .commands import PDFColorSpace, PREDEFINED_COLORSPACE
 from .commands import PDFStateStack, get_font

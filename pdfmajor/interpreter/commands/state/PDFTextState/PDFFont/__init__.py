@@ -1,9 +1,9 @@
 from pdfmajor.utils import get_logger, settings
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.PDFStream import list_value
-from pdfmajor.interpreter.PDFStream import dict_value
-from pdfmajor.interpreter.PDFStream import resolve1
-from pdfmajor.interpreter.constants import LITERAL_FONT
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.PDFStream import list_value
+from pdfmajor.parser.PDFStream import dict_value
+from pdfmajor.parser.PDFStream import resolve1
+from pdfmajor.parser.constants import LITERAL_FONT
 
 from .fonts import PDFType1Font, PDFTrueTypeFont, PDFType3Font, PDFCIDFont, PDFFont
 

@@ -1,14 +1,14 @@
 from io import BytesIO
 
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.PDFStream import int_value
-from pdfmajor.interpreter.PDFStream import num_value
-from pdfmajor.interpreter.PDFStream import list_value
-from pdfmajor.interpreter.PDFStream import dict_value
-from pdfmajor.interpreter.PDFStream import PDFStream
-from pdfmajor.interpreter.PDFStream import resolve1
-from pdfmajor.interpreter.cmapdb import CMap, CMapDB, CMapParser
-from pdfmajor.interpreter.cmapdb import FileUnicodeMap
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.PDFStream import int_value
+from pdfmajor.parser.PDFStream import num_value
+from pdfmajor.parser.PDFStream import list_value
+from pdfmajor.parser.PDFStream import dict_value
+from pdfmajor.parser.PDFStream import PDFStream
+from pdfmajor.parser.PDFStream import resolve1
+from pdfmajor.parser.cmapdb import CMap, CMapDB, CMapParser
+from pdfmajor.parser.cmapdb import FileUnicodeMap
 from pdfmajor.utils import settings, apply_matrix_norm
 
 from .PDFFont import PDFFont, PDFSimpleFont

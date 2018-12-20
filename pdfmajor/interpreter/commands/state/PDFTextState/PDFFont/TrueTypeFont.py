@@ -1,7 +1,7 @@
 ##  TrueTypeFont
 ##
 import struct
-from pdfmajor.interpreter.cmapdb import FileUnicodeMap
+from pdfmajor.parser.cmapdb import FileUnicodeMap
 
 class TrueTypeFont(object):
 

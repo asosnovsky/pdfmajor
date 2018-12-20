@@ -1,8 +1,8 @@
-from pdfmajor.interpreter.PSStackParser import PSStackParser
-from pdfmajor.interpreter.PSStackParser import PSEOF, KWD
-from pdfmajor.interpreter.PSStackParser import PSLiteral
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.EncodingDB import name2unicode
+from pdfmajor.parser.PSStackParser import PSStackParser
+from pdfmajor.parser.PSStackParser import PSEOF, KWD
+from pdfmajor.parser.PSStackParser import PSLiteral
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.EncodingDB import name2unicode
 
 ##  Type1FontHeaderParser
 ##

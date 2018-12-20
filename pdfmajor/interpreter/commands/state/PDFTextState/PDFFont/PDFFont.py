@@ -2,18 +2,18 @@
 from abc import abstractmethod
 from io import BytesIO
 
-from pdfmajor.interpreter.EncodingDB import EncodingDB
-from pdfmajor.interpreter.PSStackParser import LIT
-from pdfmajor.interpreter.PSStackParser import PSLiteral
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.PDFStream import resolve1
-from pdfmajor.interpreter.PDFStream import int_value
-from pdfmajor.interpreter.PDFStream import num_value
-from pdfmajor.interpreter.PDFStream import list_value
-from pdfmajor.interpreter.PDFStream import PDFException
-from pdfmajor.interpreter.PDFStream import PDFStream
-from pdfmajor.interpreter.cmapdb import FileUnicodeMap
-from pdfmajor.interpreter.cmapdb import CMapParser
+from pdfmajor.parser.EncodingDB import EncodingDB
+from pdfmajor.parser.PSStackParser import LIT
+from pdfmajor.parser.PSStackParser import PSLiteral
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.PDFStream import resolve1
+from pdfmajor.parser.PDFStream import int_value
+from pdfmajor.parser.PDFStream import num_value
+from pdfmajor.parser.PDFStream import list_value
+from pdfmajor.parser.PDFStream import PDFException
+from pdfmajor.parser.PDFStream import PDFStream
+from pdfmajor.parser.cmapdb import FileUnicodeMap
+from pdfmajor.parser.cmapdb import CMapParser
 
 ##  Literals
 ##

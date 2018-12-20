@@ -1,47 +1,41 @@
-from pdfmajor.interpreter.PDFPage import PDFPage
-from pdfmajor.interpreter.PDFStream import list_value
-from pdfmajor.interpreter.PDFContentParser import PDFContentParser
-from pdfmajor.interpreter.PSStackParser import PSKeyword
-from pdfmajor.interpreter.PSStackParser import keyword_name
+from pdfmajor.utils import MATRIX_IDENTITY
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.PDFParser import PDFStream
+from pdfmajor.parser.PSStackParser import PSEOF
+from pdfmajor.parser.PSStackParser import PSKeyword
+from pdfmajor.parser.PSStackParser import keyword_name
+from pdfmajor.parser.PSStackParser import PSStackParser
+from pdfmajor.parser.constants import LITERAL_PDF, LITERAL_TEXT, LITERAL_FONT
 
-from .commands import PDFStateStack, PDFCommands
-from .commands import LTXObject
+from pdfmajor.parser.PDFStream import resolve1, list_value, dict_value
+from pdfmajor.parser.PDFStream.PDFObjRef import PDFObjRef
+from pdfmajor.parser.PDFContentParser import PDFContentParser
+
+from .commands.state import PDFStateStack, PDFColorSpace, PREDEFINED_COLORSPACE
+from .commands import PDFCommands, LTXObject
 from .utils import init_resources
-from .XObjectInterpreter import XObjectInterpreter
 
-class PageInterpreter:
+class XObjectInterpreter:
+
     class PDFInterpreterError(Exception): pass
 
-    def __init__(self, page: PDFPage, page_num: int, font_cache: dict = {}):
-        (x0, y0, x1, y1) = page.mediabox
-        if page.rotate == 90:
-            ctm = [0, -1, 1, 0, -y0, x1]
-        elif page.rotate == 180:
-            ctm = [-1, 0, 0, -1, x1, y1]
-        elif page.rotate == 270:
-            ctm = [0, 1, -1, 0, y1, -x0]
-        else:
-            ctm = [1, 0, 0, 1, -x0, -y0]
-
-        # Locals
-        self.font_cache = font_cache
-        self.page = page
-        self.page_num = page_num
-
-        # Init State
-        self.state: PDFStateStack = PDFStateStack()
+    def __init__(self, streams, resources, ctm):
+        self.streams = streams
+        self.font_cache = {}
+        
+        self.state = PDFStateStack()
         self.state.t_matrix = ctm
-        self.state.resources = page.resources
+        self.state.resources = resources
+
         # set some global states.
         self.state.graphics.ncolor.color_space = self.state.graphics.scolor.color_space = None 
         if self.state.colorspace_map:
             col_space = next(iter(self.state.colorspace_map.values()))
             self.state.graphics.ncolor.color_space = self.state.graphics.scolor.color_space = col_space
-        # Init Resources
         init_resources(self.state, self.font_cache)
-    
+        
     def __iter__(self):
-        parser = PDFContentParser(list_value(self.page.contents))
+        parser = PDFContentParser(self.streams)
         for obj in parser:
             if isinstance(obj, PSKeyword):
                 name = keyword_name(obj)
@@ -65,7 +59,7 @@ class PageInterpreter:
             
             for complete_item in self.state.complete_layout_items:
                 if isinstance(complete_item, LTXObject):
-                    interpeter = XObjectInterpreter(
+                    interpeter = self.__class__(
                         streams=[complete_item.stream],
                         resources=complete_item.resources,
                         ctm=complete_item.t_matrix
@@ -74,5 +68,3 @@ class PageInterpreter:
                         complete_item.add(item)
                 yield complete_item
             self.state.complete_layout_items = []
-    def __repr__(self) -> str:
-        return f"<Page:{self.page_num}/>"

@@ -1,4 +1,4 @@
-from pdfmajor.interpreter.PDFStream import PDFStream
+from pdfmajor.parser.PDFStream import PDFStream
 from ._base import PDFItem
 
 class PDFImage(PDFItem):

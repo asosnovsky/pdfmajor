@@ -1,7 +1,7 @@
 from pdfmajor.utils import mult_matrix, MATRIX_IDENTITY, apply_matrix_pt
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.PDFStream import PDFStream, list_value, dict_value
-from pdfmajor.interpreter.constants import LITERAL_FORM, LITERAL_IMAGE
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.PDFStream import PDFStream, list_value, dict_value
+from pdfmajor.parser.constants import LITERAL_FORM, LITERAL_IMAGE
 
 from .PDFCommands import PDFCommands
 from .state import PDFStateStack, PDFGraphicState

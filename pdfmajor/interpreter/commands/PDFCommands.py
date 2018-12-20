@@ -1,9 +1,9 @@
 from typing import List
 
 from pdfmajor.utils import MATRIX_IDENTITY, mult_matrix
-from pdfmajor.interpreter.PSStackParser import literal_name
-from pdfmajor.interpreter.PDFStream import PDFStream, list_value, dict_value
-from pdfmajor.interpreter.constants import LITERAL_FORM, LITERAL_IMAGE
+from pdfmajor.parser.PSStackParser import literal_name
+from pdfmajor.parser.PDFStream import PDFStream, list_value, dict_value
+from pdfmajor.parser.constants import LITERAL_FORM, LITERAL_IMAGE
 from .state import PDFStateStack, PDFColorSpace
 from .state.Curves import CurveMethod, CurvePath, CurvePoint
 

@@ -1,15 +1,14 @@
 import os
 
 # from pdfmajor.extractor import extract_items_from_pdf
-from pdfmajor.interpreter_v2 import LTCharBlock, PDFInterpreter, logging
-from pdfmajor.interpreter_v2 import PageInterpreter
-from pdfmajor.interpreter_v2.commands import LTItem
-from pdfmajor.interpreter_v2.commands import LTCharBlock, LTChar
+from pdfmajor.interpreter import LTCharBlock, PDFInterpreter, logging
+from pdfmajor.interpreter import PageInterpreter
+from pdfmajor.interpreter.commands import LTItem
+from pdfmajor.interpreter.commands import LTCharBlock, LTChar
 
 CUR_PATH = os.path.dirname(os.path.dirname(__file__))
-
 FILE_NAME = os.path.join(
-    CUR_PATH,
+    "../" if CUR_PATH == "" else CUR_PATH,
     "samples/pdf/tables.pdf"
 )
 

@@ -1,7 +1,7 @@
 from typing import List
 
 from pdfmajor.utils import Bbox, Point, matrix2str
-from pdfmajor.interpreter.PDFStream import PDFStream
+from pdfmajor.parser.PDFStream import PDFStream
 
 from ._base import LTContainer
 
