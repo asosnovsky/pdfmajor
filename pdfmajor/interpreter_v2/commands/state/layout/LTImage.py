@@ -1,5 +1,5 @@
 from pdfmajor.utils import Bbox
-from ..interpreter.PDFStream import PDFStream
+from pdfmajor.interpreter.PDFStream import PDFStream
 from ._base import LTComponent
 
 ##  LTImage

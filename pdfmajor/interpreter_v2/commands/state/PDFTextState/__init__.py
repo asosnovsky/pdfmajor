@@ -1,4 +1,4 @@
-from .PDFFont import PDFFont
+from .PDFFont import PDFFont, get_font
 from pdfmajor.utils import MATRIX_IDENTITY
 
 ##  PDFTextState

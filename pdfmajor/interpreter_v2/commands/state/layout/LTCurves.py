@@ -2,8 +2,8 @@
 from typing import List, Tuple
 
 from pdfmajor.utils import Bbox
-from ..state.PDFGraphicState import PDFGraphicStateColor
-from ..state.Curves import CurvePath
+from ..PDFGraphicState import PDFColor
+from ..Curves import CurvePath
 
 from ._base import LTComponent, Bbox
 
@@ -13,8 +13,8 @@ class LTCurve(LTComponent):
         linewidth: float, 
         paths: List[CurvePath], 
         bbox: Bbox,
-        stroke: PDFGraphicStateColor, 
-        fill: PDFGraphicStateColor, 
+        stroke: PDFColor, 
+        fill: PDFColor, 
         evenodd: bool, 
     ):
         LTComponent.__init__(self, bbox)

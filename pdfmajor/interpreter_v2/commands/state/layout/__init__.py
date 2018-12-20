@@ -1,5 +1,5 @@
 from typing import List
-from pdfmajor.utils import apply_matrix_pt, INF, Bbox
+from pdfmajor.utils import apply_matrix_pt, INF, Bbox, Point, MATRIX_IDENTITY, mult_matrix
 
 from ..Curves import CurvePath
 from ..PDFGraphicState import PDFGraphicState, PDFColor
@@ -7,7 +7,9 @@ from ..PDFTextState import PDFTextState
 
 from ._base import LTItem, LTComponent, LTContainer
 from .LTCharBlock import LTCharBlock
-from .LTCurves import LTCurve, LTHorizontalLine, LTRect, LTVerticalLine
+from .LTCurves import LTCurve, LTLine, LTHorizontalLine, LTRect, LTVerticalLine
+from .LTImage import LTImage
+from .LTXObject import LTXObject
 from .utils.textdecoder import decode_text_seq
 
 
@@ -19,7 +21,7 @@ def make_char_block(seq: bytearray, ctm: tuple, textstate: PDFTextState, color: 
         textstate=textstate
     )
 
-def make_figure(ctm: tuple, gstate: PDFGraphicState, evenodd: bool, paths: List[CurvePath]):
+def make_curve(ctm: tuple, gstate: PDFGraphicState, evenodd: bool, paths: List[CurvePath]):
     shape = ''.join(x.method.value for x in paths)
     if shape == 'ml':
         # horizontal/vertical line
@@ -105,3 +107,27 @@ def make_figure(ctm: tuple, gstate: PDFGraphicState, evenodd: bool, paths: List[
             stroke=gstate.scolor, 
             fill=gstate.ncolor
         )
+
+def make_image(obj, ctm):
+    matrix = mult_matrix(MATRIX_IDENTITY, ctm)
+    return LTImage(
+        name=str(id(obj)),
+        stream=obj,
+        bbox=Bbox.from_points([
+            apply_matrix_pt(matrix, (p, q))
+            for (p, q) in ((0, 0), (1, 0), (0, 1), (1, 1))
+        ])
+    )
+
+def make_xobject(obj, bbox, ctm, matrix, resources):
+    (x, y, w, h) = bbox
+    return LTXObject(
+        name=str(id(obj)),
+        bbox=Bbox.from_points([
+            apply_matrix_pt(matrix, (p, q))
+            for (p, q) in ((x, y), (x+w, y), (x, y+h), (x+w, y+h))
+        ]),
+        xobj_stream=obj,
+        resources=resources,
+        t_matrix = ctm
+    )

@@ -1,0 +1,22 @@
+import os
+
+# from pdfmajor.extractor import extract_items_from_pdf
+from pdfmajor.interpreter_v2 import LTCharBlock, PDFInterpreter, logging
+from pdfmajor.interpreter_v2 import PageInterpreter
+from pdfmajor.interpreter_v2.commands import LTItem
+from pdfmajor.interpreter_v2.commands import LTCharBlock, LTChar
+
+CUR_PATH = os.path.dirname(os.path.dirname(__file__))
+
+FILE_NAME = os.path.join(
+    CUR_PATH,
+    "samples/pdf/tables.pdf"
+)
+
+for page in PDFInterpreter(FILE_NAME, debug_level=logging.INFO):
+    assert isinstance(page, PageInterpreter)
+    for item in page:
+        assert isinstance(item, LTItem)
+        if isinstance(item, LTCharBlock):
+            for char in item:
+                assert(char, LTChar)

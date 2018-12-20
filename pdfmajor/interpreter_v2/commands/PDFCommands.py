@@ -4,8 +4,8 @@ from pdfmajor.utils import MATRIX_IDENTITY, mult_matrix
 from pdfmajor.interpreter.PSStackParser import literal_name
 from pdfmajor.interpreter.PDFStream import PDFStream, list_value, dict_value
 from pdfmajor.interpreter.constants import LITERAL_FORM, LITERAL_IMAGE
-from ..state import PDFStateStack, PDFColorSpace
-from ..state.Curves import CurveMethod, CurvePath, CurvePoint
+from .state import PDFStateStack, PDFColorSpace
+from .state.Curves import CurveMethod, CurvePath, CurvePoint
 
 class PDFCommands:
     commands = {}

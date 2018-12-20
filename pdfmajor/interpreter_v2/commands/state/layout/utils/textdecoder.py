@@ -41,7 +41,7 @@ def __render_string_along(idx: int, seq: bytearray,
                 textstate.linematrix[idx] += adv
 
                 char_meta_datas.append(
-                    ( text, Bbox.from_points(bbox), )
+                    ( text, bbox )
                 )
                 if cid == 32 and textstate.wordspace:
                     textstate.linematrix[idx] += textstate.wordspace

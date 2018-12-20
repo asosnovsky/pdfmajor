@@ -1,4 +1,4 @@
-from pdfmajor.utils import mult_matrix, MATRIX_IDENTITY
+from pdfmajor.utils import mult_matrix, MATRIX_IDENTITY, apply_matrix_pt
 from pdfmajor.interpreter.PSStackParser import literal_name
 from pdfmajor.interpreter.PDFStream import PDFStream, list_value, dict_value
 from pdfmajor.interpreter.constants import LITERAL_FORM, LITERAL_IMAGE
@@ -6,7 +6,8 @@ from pdfmajor.interpreter.constants import LITERAL_FORM, LITERAL_IMAGE
 from .PDFCommands import PDFCommands
 from .state import PDFStateStack, PDFGraphicState
 from .state.Curves import CurveMethod, CurvePath, CurvePoint
-from .state.PDFItem import PDFImage, PDFShape, PDFText, PDFXObject
+# from .state.PDFItem import PDFImage, PDFShape, PDFText, PDFXObject
+from .state import make_char_block, make_curve, make_image, make_xobject
 
 # No Support
 @PDFCommands.add('W','W_a', 'sh', 'ET', 'BX', 'EX' ,'BI', 'ID', 'gs')
@@ -15,17 +16,17 @@ def do_no_support(stack: PDFStateStack) -> PDFStateStack:
 
 # marked content operators
 @PDFCommands.add('MP', 'DP')
-def do_MP(stack: PDFStateStack, tag) -> PDFStateStack:
+def do_MP(stack: PDFStateStack) -> PDFStateStack:
     # self.device.do_tag(tag)
     return stack
 
 @PDFCommands.add('BMC', 'BDC')
-def do_BMC(stack: PDFStateStack, tag) -> PDFStateStack:
+def do_BMC(stack: PDFStateStack) -> PDFStateStack:
     # self.device.begin_tag(tag)
     return stack
 
 @PDFCommands.add('EMC')
-def do_EMC(stack: PDFStateStack, tag) -> PDFStateStack:
+def do_EMC(stack: PDFStateStack) -> PDFStateStack:
     # self.device.end_tag(tag)
     return stack
 
@@ -166,7 +167,8 @@ def do_re(stack: PDFStateStack, x, y, w, h) -> PDFStateStack:
 # stroke, fill
 @PDFCommands.add('S', 'f', 'F', 'B')
 def do_complete_path(stack: PDFStateStack) -> PDFStateStack:
-    stack.complete_items.append(PDFShape(
+    stack.complete_layout_items.append(make_curve(
+        stack.t_matrix,
         stack.graphics.copy(),
         False,
         stack.curvestacks
@@ -177,7 +179,8 @@ def do_complete_path(stack: PDFStateStack) -> PDFStateStack:
 # sroke, fill-even-odd
 @PDFCommands.add('f_a', 'B_a')
 def do_complete_path_evenodd(stack: PDFStateStack) -> PDFStateStack:
-    stack.complete_items.append(PDFShape(
+    stack.complete_layout_items.append(make_curve(
+        stack.t_matrix,
         stack.graphics.copy(),
         True,
         stack.curvestacks
@@ -191,7 +194,8 @@ def do_close_complete(stack: PDFStateStack) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CLOSE_PATH
     ))
-    stack.complete_items.append(PDFShape(
+    stack.complete_layout_items.append(make_curve(
+        stack.t_matrix,
         stack.graphics.copy(),
         False,
         stack.curvestacks
@@ -205,7 +209,8 @@ def do_close_complete_evenodd(stack: PDFStateStack) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CLOSE_PATH
     ))
-    stack.complete_items.append(PDFShape(
+    stack.complete_layout_items.append(make_curve(
+        stack.t_matrix,
         stack.graphics.copy(),
         True,
         stack.curvestacks
@@ -411,11 +416,11 @@ def do_T_a(stack: PDFStateStack) -> PDFStateStack:
 def do_TJ(stack: PDFStateStack, seq: bytearray) -> PDFStateStack:
     if stack.text.font is None:
         raise PDFCommands.InvalidOperation("No Font Specified")
-    stack.complete_items.append(PDFText.make(
+    stack.complete_layout_items.append(make_char_block(
         seq,
         stack.t_matrix,
         stack.text.copy(),
-        stack.graphics.copy()
+        stack.graphics.ncolor.copy()
     ))
     return stack
 
@@ -439,7 +444,9 @@ def do__w(stack: PDFStateStack, wordspace, charspace, b) -> PDFStateStack:
 @PDFCommands.add('EI')
 def do_EI(stack: PDFStateStack, obj) -> PDFStateStack:
     if 'W' in obj and 'H' in obj:
-        stack.complete_items.append(PDFImage(obj))
+        stack.complete_layout_items.append(make_image(
+            obj,  stack.ctm
+        ))
     return stack
 
 # invoke an XObject
@@ -460,11 +467,17 @@ def do_Do(stack: PDFStateStack, xobjid) -> PDFStateStack:
         # instead of having their own Resources entry.
         xobjres = xobj.get('Resources')
         resources = dict_value(xobjres) if xobjres else stack.resources.copy()
-        stack.complete_items.append(PDFXObject(
-            xobj, bbox, resources, mult_matrix(stack.t_matrix, matrix)
+        stack.complete_layout_items.append(make_xobject(
+            obj=xobj, 
+            bbox=bbox, 
+            ctm=stack.t_matrix, 
+            matrix=matrix, 
+            resources=resources
         ))
     elif subtype is LITERAL_IMAGE and 'Width' in xobj and 'Height' in xobj:
-        stack.complete_items.append(PDFImage(obj))
+        stack.complete_layout_items.append(make_image(
+            obj,  stack.ctm
+        ))
     else:
         # unsupported xobject type.
         pass

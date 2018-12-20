@@ -5,10 +5,17 @@ from .PDFGraphicState import PDFGraphicState
 from .PDFGraphicState.PDFColor import PDFColor
 from .PDFGraphicState.PDFColorSpace import PREDEFINED_COLORSPACE, OrderedDict, PDFColorSpace
 
-from .PDFTextState import PDFTextState
+from .PDFTextState import PDFTextState, PDFFont, get_font
 
 from .Curves import CurvePath
-from .PDFItem import PDFItem, PDFImage, PDFShape, PDFXObject, PDFText
+
+from .layout import LTItem, LTComponent, LTContainer
+from .layout import LTCharBlock, LTChar
+from .layout import LTCurve, LTLine, LTHorizontalLine, LTVerticalLine, LTRect
+from .layout import LTXObject
+from .layout import LTImage
+
+from .layout import make_char_block, make_curve, make_image, make_xobject
 
 class PDFStateStack:
     def __init__(self):
@@ -18,7 +25,7 @@ class PDFStateStack:
         self.graphicstack : List[PDFGraphicState] = []
         self.curvestacks: List[CurvePath] = []
         self.argstack: List[bytes] = []
-        self.complete_items : List[PDFItem] = []
+        self.complete_layout_items : List[LTItem] = []
         self.colorspace_map: OrderedDict = PREDEFINED_COLORSPACE.copy()
         self.fontmap = {}
         self.xobjmap = {}
