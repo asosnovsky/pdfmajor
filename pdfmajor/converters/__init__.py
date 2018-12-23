@@ -7,10 +7,7 @@ from typing import List
 from .html import convert_to_html
 from .xml import convert_to_xml
 from .json import convert_to_json
-# from .HTMLConverter import HTMLConverter
-# from .JSONConverter import JSONConverter
-# from .XMLConverter import XMLConverter
-# from .TextConverter import TextConverter
+from .text import convert_to_text
 from ..utils import logging
 
 def convert_file(
@@ -78,18 +75,18 @@ def convert_file(
             dont_export_images=dont_export_images,
             debug_level=debug_level,
         )
-    # elif out_type == 'text':
-    #     return TextConverter.parse_file(
-    #         input_file=input_file, 
-    #         output_file=output_file, 
-    #         image_folder_path=image_folder_path,
-    #         codec=codec,
-    #         maxpages=maxpages, 
-    #         password=password, 
-    #         caching=caching, 
-    #         check_extractable=check_extractable,
-    #         pagenos=pagenos,
-    #         dont_export_images=dont_export_images,
-    #         debug_level=debug_level,
-    #     )
+    elif out_type == 'text':
+        return convert_to_text(
+            input_file_path=input_file, 
+            output_file_path=output_file, 
+            image_folder_path=image_folder_path,
+            codec=codec,
+            maxpages=maxpages, 
+            password=password, 
+            caching=caching, 
+            check_extractable=check_extractable,
+            pagenos=pagenos,
+            dont_export_images=dont_export_images,
+            debug_level=debug_level,
+        )
     else: raise Exception("Please specify out_type as 'html' or 'xml' or 'json' or 'text'")

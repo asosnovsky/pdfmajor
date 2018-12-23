@@ -2,34 +2,37 @@
 
 The library is constructed from 4 base modules:
 
- * **extractor**: contains a high-level function for functional extraction of pdf-assets
- * **interpreter**: contains low-level classes for extracting fundamental data-structures from the documents
- * **converters**: contains high-level classes for conversion of the fundamental pdf structures to other formats
+ * **parser**: contains low-level classes for extracting fundamental data-structures from the documents
+ * **interpreter**: a interpreter of the pdf-standard commands
+ * **converters**: contains high-level functions for conversion of the fundamental pdf structures to other formats
  * **imagewriter**: contains a simple implementation for converting PDF Image Streams to png/bmp/img formats
- * **layouts**: contains an abstraction layer for the data-structures found in the pdf
 
-## extractors
-Contains a high-level function for functional extraction of pdf-assets
+## parser
+
+WIP
+
+## interpreter
+a interpreter of the pdf-standard commands
 
 ### Example
 ```py
-from pdfmajor.extractor import extract_items_from_pdf
+from pdfmajor.interpreter import PageInterpreter
 
-for page in extract_items_from_pdf('path/to/your/file.pdf'):
-    print('page-start', page)
+for page in PDFInterpreter("/path/to/pdf.pdf"):
+    print("page start", page.page_num)
     for item in page:
-        print(' ', item)
-    print('page-end', page)
-    
+        print(" >", item)
+    print("page end", page.page_num)
 ```
 
-### extract_items_from_pdf(input_file_path,maxpages,password,caching,check_extractable,pagenos,debug_level) -> generator[LTPage]
+### interpreter.PDFInterpreter
 
 This generator-function yields individual pages which contain their respected items.
 
 #### Arguments
 
-- `input_file_path`: [str](str) 
+- `input_file_path`: [str](#)
+- `preload`: [bool](#) defaults to False
 - `maxpages`: [int](#) defaults to 0 
 - `password`: [str](#) defaults to None 
 - `caching`: [bool](#) defaults to True 
@@ -37,39 +40,57 @@ This generator-function yields individual pages which contain their respected it
 - `pagenos`: [List[int]](#) defaults to None
 - `debug_level`: [logging.levels](#https://docs.python.org/3/library/logging.html#levels) defaults logging.WARNING
 
-#### Return Value
-This function returns a generator that makes `LTPage`
+#### Yield Value
+This function returns a generator that yields [PDFInterpreter](#interpreterpageinterpreter).
 
-## interpreter
-    WIP
+### interpreter.PageInterpreter
+
+This generator-function-class yields individual [layout items](#layout-items).
+### Layout Items
+
+All layout items extend the `LTItem` class. There are two kinds of layout items:
+
+- LTComponent: extends the base `LTItem` class, this class will have additional values such as boundary boxes, height and width
+- LTContainer: extends the `LTComponent` class, this class is used to contain elements of the pdf that would have child elements. Iterating on this element will output its child elements.
+
+
+#### Layout Containers
+All of these classes extend the LTContainer class.
+
+- LTXObject: a layout item containing other additional layout items
+- LTCharBlock: a layout item containing LTChars
+
+#### Layout Components
+All of these classes extend the LTComponent class.
+
+- LTChar: an individual character
+- LTCurves: represents a collection of svg-paths (available under `self.paths`)
+- LTImage: a component containing information regarding an image
 
 ## converters
 
-Contains high-level classes for conversion of the fundamental pdf structures to other formats. This library includes 4 high-level conversion classes:
+Contains high-level functions for conversion of the fundamental pdf structures to other formats. This library includes 4 high-level conversion cases:
 
-- HTMLConverter
-- JSONConverter
-- XMLConverter
-- TextConverter
+- HTML
+- JSON
+- XML
+- Text
 
-These classes all extend the [PDFConverter](#converters.PDFConverter). To use them simply call the static method [parse_file](#converterspdfconverterparse_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos).
+These formats are all generated using the [PageInterpreter](#PDFInterpreter). To use them simply call the static method [parse_file](#converterspdfconverter).
 
 ### Example
 
 ```py
-from pdfmajor.converters import HTMLConverter
+from pdfmajor.converters import convert_file
 
-input_file = open('path/to/input/file.pdf', 'rb')
-output_file = open('path/to/output/file.html', 'wb')
-HTMLConverter.parse_file(
-    input_file,
-    output_file
+convert_file(
+    "path/to/input/file.pdf",
+    "path/to/output/file.html",
+    out_type="html"
 )
-input_file.close()
-output_file.close()
 ```
 
-### converters.convert_file(input_file, output_file, image_folder_path, codec, maxpages, password, caching, check_extractable, pagenos, out_type)
+### converters.convert_file
 
 A high-level abstraction for the conversion classes.
 
@@ -84,76 +105,6 @@ A high-level abstraction for the conversion classes.
 - `pagenos`: [List[int]](#) defaults to None
 - `out_type`: [str](#) defaults to 'html'
 
-### Example (converters.convert_file)
-
-```py
-from pdfmajor.converters import convert_file
-
-input_file = open('path/to/input/file.pdf', 'rb')
-output_file = open('path/to/output/file.html', 'wb')
-convert_file(
-    input_file,
-    output_file
-)
-input_file.close()
-output_file.close()
-```
-
-### converters.PDFConverter
-
-Extends `layouts.PDFLayoutAnalyzer`.
-
-#### converters.PDFConverter.\_\_init\_\_(rsrcmgr, outfp, imagewriter, codec, pageno)
-
-- `rsrcmgr`: [PDFResourceManager](#interpreter.PDFResourceManager)
-- `outfp`: [TextIOWrapper](https://docs.python.org/3/library/io.html#io.TextIOWrapper)
-- `imagewriter`: [ImageWriter](#imagewriter.ImageWriter)
-- `codec`: [str](#) defaults to 'utf-8'
-- `pageno`: [int](#) defaults to 1
-
-initialization function for the class
-
-#### converters.PDFConverter.parse_file(input_file, output_file, image_folder_path, codec, maxpages, password, caching, check_extractable, pagenos)
-
-returns the output file [TextIOWrapper](https://docs.python.org/3/library/io.html#io.TextIOWrapper).
-
-- `input_file`: [TextIOWrapper](https://docs.python.org/3/library/io.html#io.TextIOWrapper) 
-- `output_file`: [TextIOWrapper](https://docs.python.org/3/library/io.html#io.TextIOWrapper) 
-- `image_folder_path`: [str](#) defaults to None
-- `codec`: [str](#) defaults to 'utf-8'
-- `maxpages`: [int](#) defaults to 0 
-- `password`: [str](#) defaults to None 
-- `caching`: [bool](#) defaults to True 
-- `check_extractable`: [bool](#) defaults to True
-- `pagenos`: [List[int]](#) defaults to None
-
 ## imagewriter
 
 WIP 
-
-## layouts
-
-WIP: this documentation set is not yet complete.
-
-### Layout Items
-
-All layout items extend the `LTItem` class. There are two kinds of layout items:
-
-- LTComponent: extends the base `LTItem` class, this class will have additional values such as boundary boxes, height and width
-- LTContainer: extends the `LTComponent` class, this class is used to contain elements of the pdf that would have child elements. Iterating on this element will output its child elements.
-
-
-#### Layout Containers
-All of these classes extend the LTContainer class.
-
-- LTPage: a layout item containing all elements of the given page.
-- LTFigure: a layout item containing LTCurves and LTImages
-- LTCharBlock: a layout item containing LTChars
-
-#### Layout Components
-All of these classes extend the LTComponent class.
-
-- LTChar: an individual character
-- LTCurves: represents a collection of svg-paths (available under `self.paths`)
-- LTImage: a component containing information regarding an image
-

@@ -12,7 +12,7 @@ from tqdm import tqdm
 def rel_path(*arg: List[str]) -> str:
     return os.path.normpath(os.path.join(os.path.dirname(__file__), *arg))
 
-EXTS = ['json','xml','html']
+EXTS = ['text', 'json','xml','html']
 INPUT_FOLDER = rel_path("./samples/pdf")
 OUTPUT_FOLDER = rel_path(f"./samples/output/")
 
