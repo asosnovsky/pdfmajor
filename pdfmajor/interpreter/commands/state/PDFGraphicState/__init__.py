@@ -14,14 +14,18 @@ class PDFGraphicState(object):
         self.flatness = None
         self.scolor:PDFColor = PDFColor(None)
         self.ncolor:PDFColor = PDFColor(None)
+        self.scolspace:PDFColorSpace = None
+        self.ncolspace:PDFColorSpace = None
 
     def set_stroke_color(self, colspace: PDFColorSpace, *values):
-        if self.scolor is None:
-            self.scolor = PDFColor(colspace, *values)
+        if colspace is None:
+            colspace = self.scolspace
+        self.scolor = PDFColor(colspace, *values)
 
     def set_nostroke_color(self, colspace: PDFColorSpace, *values):
-        if self.ncolor is None:
-            self.ncolor = PDFColor(colspace, *values)
+        if colspace is None:
+            colspace = self.ncolspace
+        self.ncolor = PDFColor(colspace, *values)
 
     def copy(self):
         obj = PDFGraphicState()
@@ -32,8 +36,10 @@ class PDFGraphicState(object):
         obj.dash        = self.dash
         obj.intent      = self.intent
         obj.flatness    = self.flatness
-        obj.scolor      = self.scolor.copy() if self.scolor is not None else None
-        obj.ncolor      = self.ncolor.copy() if self.ncolor is not None else None
+        obj.scolor      = self.scolor.copy()
+        obj.ncolor      = self.ncolor.copy()
+        obj.scolspace   = self.scolspace
+        obj.ncolspace   = self.ncolspace
         return obj
 
     def __repr__(self):

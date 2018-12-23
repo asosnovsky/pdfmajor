@@ -22,7 +22,7 @@ class PDFStateStack:
         self.t_matrix = MATRIX_IDENTITY
         self.text = PDFTextState()
         self.graphics = PDFGraphicState()
-        self.graphicstack : List[PDFGraphicState] = []
+        self.gstack : list = []
         self.curvestacks: List[CurvePath] = []
         self.argstack: List[bytes] = []
         self.complete_layout_items : List[LTItem] = []

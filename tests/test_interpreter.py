@@ -9,7 +9,7 @@ from pdfmajor.interpreter.commands import LTCharBlock, LTChar
 CUR_PATH = os.path.dirname(os.path.dirname(__file__))
 FILE_NAME = os.path.join(
     "../" if CUR_PATH == "" else CUR_PATH,
-    "samples/pdf/tables.pdf"
+    "samples/pdf/long-tables.pdf"
 )
 
 for page in PDFInterpreter(FILE_NAME, debug_level=logging.INFO):

@@ -27,22 +27,26 @@ class PageInterpreter:
         self.font_cache = font_cache
         self.page = page
         self.page_num = page_num
+        self.height = y1-y0
+        self.width = x1-x0
 
         # Init State
         self.state: PDFStateStack = PDFStateStack()
         self.state.t_matrix = ctm
         self.state.resources = page.resources
         # set some global states.
-        self.state.graphics.ncolor.color_space = self.state.graphics.scolor.color_space = None 
+        self.state.graphics.ncolspace = self.state.graphics.scolspace = None 
         if self.state.colorspace_map:
             col_space = next(iter(self.state.colorspace_map.values()))
-            self.state.graphics.ncolor.color_space = self.state.graphics.scolor.color_space = col_space
+            self.state.graphics.ncolspace = self.state.graphics.scolspace = col_space
         # Init Resources
         init_resources(self.state, self.font_cache)
     
     def __iter__(self):
         parser = PDFContentParser(list_value(self.page.contents))
+        history = []
         for obj in parser:
+            history.append(obj)
             if isinstance(obj, PSKeyword):
                 name = keyword_name(obj)
                 method = name.replace('*', '_a').replace('"', '_w').replace("'", '_q')

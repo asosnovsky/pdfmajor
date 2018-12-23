@@ -28,10 +28,10 @@ class XObjectInterpreter:
         self.state.resources = resources
 
         # set some global states.
-        self.state.graphics.ncolor.color_space = self.state.graphics.scolor.color_space = None 
+        self.state.graphics.ncolspace = self.state.graphics.scolspace = None 
         if self.state.colorspace_map:
             col_space = next(iter(self.state.colorspace_map.values()))
-            self.state.graphics.ncolor.color_space = self.state.graphics.scolor.color_space = col_space
+            self.state.graphics.ncolspace = self.state.graphics.scolspace = col_space
         init_resources(self.state, self.font_cache)
         
     def __iter__(self):

@@ -32,14 +32,17 @@ def do_EMC(stack: PDFStateStack) -> PDFStateStack:
 
 @PDFCommands.add('q')
 def do_q(stack: PDFStateStack) -> PDFStateStack:
-    stack.graphicstack.append(stack.graphics)
-    stack.graphics = PDFGraphicState()
+    stack.gstack.append([
+        stack.t_matrix,
+        stack.text.copy(),
+        stack.graphics.copy()
+    ])
     return stack
 
 @PDFCommands.add('Q')
 def do_Q(stack: PDFStateStack) -> PDFStateStack:
-    if len(stack.graphicstack) > 0:
-        stack.graphicstate = stack.graphicstack.pop()
+    if len(stack.gstack) > 0:
+        stack.t_matrix, stack.text, stack.graphicstate = stack.gstack.pop()
     return stack
 
 # concat-matrix
@@ -229,9 +232,8 @@ def do_n(stack: PDFStateStack) -> PDFStateStack:
 @PDFCommands.add('CS')
 def do_CS(stack: PDFStateStack, name: str) -> PDFStateStack:
     try:
-        stack.graphics.set_stroke_color(stack.colorspace_map[literal_name(name)])
+        stack.graphics.scolspace = stack.colorspace_map[literal_name(name)]
         return stack
-        # stack.set_scolor()
     except KeyError:
         raise PDFCommands.InvalidOperation('Undefined ColorSpace: %r' % name)
 
@@ -239,9 +241,8 @@ def do_CS(stack: PDFStateStack, name: str) -> PDFStateStack:
 @PDFCommands.add('cs')
 def do_cs(stack: PDFStateStack, name: str) -> PDFStateStack:
     try:
-        stack.graphics.set_nostroke_color(stack.colorspace_map[literal_name(name)])
+        stack.graphics.ncolspace = stack.colorspace_map[literal_name(name)]
         return stack
-        # stack.set_scolor()
     except KeyError:
         raise PDFCommands.InvalidOperation('Undefined ColorSpace: %r' % name)
 
@@ -306,22 +307,22 @@ def do_k(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
 
 @PDFCommands.add('SCN','SC')
 def do_SCN(stack: PDFStateStack) -> PDFStateStack:
-    if stack.graphics.scolor.color_space is None:
+    if stack.graphics.scolspace is None:
         raise PDFCommands.InvalidOperation('No colorspace specified!')
-    components = stack.pop(stack.graphics.scolor.color_space.ncomponents)
+    components = stack.pop(stack.graphics.scolspace.ncomponents)
     stack.graphics.set_stroke_color(
-        stack.graphics.scolor.color_space,
+        stack.graphics.scolspace,
         *components
     )
     return stack
 
 @PDFCommands.add('scn','sc')
 def do_scn(stack: PDFStateStack) -> PDFStateStack:
-    if stack.graphics.ncolor.color_space is None:
+    if stack.graphics.ncolspace is None:
         raise PDFCommands.InvalidOperation('No colorspace specified!')
-    components = stack.pop(stack.graphics.ncolor.color_space.ncomponents)
+    components = stack.pop(stack.graphics.ncolspace.ncomponents)
     stack.graphics.set_nostroke_color(
-        stack.graphics.ncolor.color_space,
+        stack.graphics.ncolspace,
         *components
     )
     return stack
@@ -476,7 +477,7 @@ def do_Do(stack: PDFStateStack, xobjid) -> PDFStateStack:
         ))
     elif subtype is LITERAL_IMAGE and 'Width' in xobj and 'Height' in xobj:
         stack.complete_layout_items.append(make_image(
-            obj,  stack.ctm
+            xobj,  stack.t_matrix
         ))
     else:
         # unsupported xobject type.
