@@ -9,6 +9,5 @@ tests/*.xml
 tests/*.txt
 .idea/
 .vscode
-samples/output
-samples/pdfmajor
+tests/samples/output
 **__pycache**

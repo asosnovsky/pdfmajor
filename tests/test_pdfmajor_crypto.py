@@ -8,7 +8,7 @@ import nose
 #test of various compression/encoding modules (previously in doctests):
 from pdfmajor.utils.ascii85 import ascii85decode, asciihexdecode
 from pdfmajor.utils.lzw import LZWDecoder, lzwdecode
-from pdfmajor.interpreter.PDFStream import rldecode
+from pdfmajor.parser.PDFStream import rldecode
 
 import binascii
 def hex(b): return binascii.hexlify(b) #encode('hex')

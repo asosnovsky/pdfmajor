@@ -8,7 +8,7 @@ import nose
 
 import logging
 
-from pdfmajor.interpreter.PDFStream.ccitt import CCITTG4Parser
+from pdfmajor.parser.PDFStream.ccitt import CCITTG4Parser
 
 ##  Test cases
 ##

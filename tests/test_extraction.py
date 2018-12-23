@@ -13,8 +13,8 @@ def rel_path(*arg: List[str]) -> str:
     return os.path.normpath(os.path.join(os.path.dirname(__file__), *arg))
 
 EXTS = ['json','xml','html']
-INPUT_FOLDER = rel_path("./pdf")
-OUTPUT_FOLDER = rel_path(f"./output/")
+INPUT_FOLDER = rel_path("./samples/pdf")
+OUTPUT_FOLDER = rel_path(f"./samples/output/")
 
 if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)

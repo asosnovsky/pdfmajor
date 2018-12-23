@@ -8,7 +8,7 @@ import nose
 
 import logging
 
-from pdfmajor.interpreter.PSStackParser import KWD, LIT, PSBaseParser, PSEOF, PSStackParser
+from pdfmajor.parser.PSStackParser import KWD, LIT, PSBaseParser, PSEOF, PSStackParser
 
 ##  Simplistic Test cases
 ##
