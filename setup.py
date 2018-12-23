@@ -18,6 +18,7 @@ with open('README.md') as readme_file:
         ],
         "description": 'PDF parser',
         "long_description": readme_file.read(),
+        'long_description_content_type': 'text/markdown',
         "license": 'MIT/X',
         "author": 'Ariel Sosnovsky + Yusuke Shinyama + Philippe Guglielmetti',
         "author_email": 'ariel@sosnovsky.ca',
