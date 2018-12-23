@@ -16,9 +16,7 @@
 </tr>
 </table>
 
-PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. Additionally, this version intends to be more up to date with recent versions of python and make liberal use of the typing capabilities of python for improved future maintainability.
-
-The ultimate goal is to have a functional-programming with typing fork of the original library.
+PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. The ultimate goal of this project is to provide a simpler, faster and more functional library that both casual and low-level developers could build upon.
 
 ## Documentation
 
@@ -26,34 +24,32 @@ See documentation [here](https://asosnovsky.github.io/pdfmajor/).
 
 ## Basic Example
 ```py
-from pdfmajor.extractor import extract_items_from_pdf
+from pdfmajor.interpreter import PageInterpreter
 
-for page in extract_items_from_pdf('path/to/your/file.pdf'):
-    print('page-start', page)
+for page in PDFInterpreter("/path/to/pdf.pdf"):
+    print("page start", page.page_num)
     for item in page:
-        print(' ', item)
-    print('page-end', page)
+        print(" >", item)
+    print("page end", page.page_num)
     
 ```
 
 ## Why Another Fork?
 
-`PDFMiner` was designed to run in python 2.7>, `PDFMiner.six` was written to bring cross-version support for python 2 and 3. This versions intends to make use of the latest improvement in the python language while remaining fairly simple to develop with. 
-
+`PDFMiner` was designed to run in python 2.7>, `PDFMiner.six` was written to bring cross-version support for python 2 and 3. However, after attempting to build and extend upon `PDFMiner.six` I found it rather difficult to extend and identify additional details regarding the items encoded in the pdf. This library will attempt to expose as much information as possible to end-users, without having them solely rely on to-xml or to-json exports.
 
 ## Features
 
  * Functional extraction method based on generators
- * Written entirely in Python.
  * Parse, analyze, and convert PDF documents.
  * PDF-1.7 specification support. (well, almost)
+ * Font-Color extraction
+ * Shape fill and stroke color extraction
  * CJK languages and vertical writing scripts support.
  * Various font types (Type1, TrueType, Type3, and CID) support.
  * Basic encryption (RC4) support.
- * Font-Color extraction
- * Shape fill and stroke color extraction
 
-**Note**: We took out the layout-analysis process in this version (there is no more LTTextHorizontal or LTTextVertical). While the mathematics behind the grouping process was sound, the coupling of the layout-analysis process with the parsing and interpretation process produced unfriendly-code. This feature could be brought back by extending the `pdfmajor.layouts.PDFLayoutAnalyzer` class, but at the current time is not supported.
+**Note**: We took out the layout-analysis process in this version (there is no more LTTextHorizontal or LTTextVertical). While the mathematics behind the grouping process was sound, the coupling of the layout-analysis process with the parsing and interpretation process produced unfriendly-code. This feature could be brought back by running your own implementation of it on the `pdfmajor.interpreter.PageInterpreter` class, but at the current time is not supported.
 
 ## How to Install
 
@@ -101,7 +97,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-__version__ = (1, 2, 0)
+__version__ = (1, 3, 0)
 
 if __name__ == '__main__':
     print(
