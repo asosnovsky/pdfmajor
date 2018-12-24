@@ -97,7 +97,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-__version__ = (1, 3, 0)
+__version__ = (1, 3, 1)
 
 if __name__ == '__main__':
     print(
