@@ -10,7 +10,7 @@ from .PDFTextState import PDFTextState, PDFFont, get_font
 from .Curves import CurvePath
 
 from .layout import LTItem, LTComponent, LTContainer
-from .layout import LTCharBlock, LTChar
+from .layout import LTTextBlock, LTCharBlock, LTChar
 from .layout import LTCurve, LTLine, LTHorizontalLine, LTVerticalLine, LTRect
 from .layout import LTXObject
 from .layout import LTImage
@@ -30,6 +30,7 @@ class PDFStateStack:
         self.fontmap = {}
         self.xobjmap = {}
         self.resources = {}
+        self.current_textblock: LTTextBlock = None
 
     def pop(self, n: int) -> bytearray:
         if n == 0:

@@ -4,7 +4,7 @@ from xml.sax import saxutils
 
 from .writers.xml import XMLMaker
 from ..interpreter import PDFInterpreter, PageInterpreter, logging
-from ..interpreter import LTImage, LTCharBlock, LTChar, LTCurve, LTXObject
+from ..interpreter import LTImage, LTTextBlock, LTCharBlock, LTChar, LTCurve, LTXObject
 from ..interpreter.commands import LTItem
 from ..interpreter.commands import LTRect, LTLine
 from ..interpreter.commands.state import CurvePath, PDFColor
@@ -86,8 +86,8 @@ def render_page(xml: XMLMaker, ltpage: PageInterpreter):
                 "y0": item.y0,
                 "y1": item.y1,
             })
-        elif isinstance(item, LTCharBlock):
-            place_char_block(xml, item)
+        elif isinstance(item, LTTextBlock):
+            place_text_block(xml, item)
     with xml.elm('page', { 
         "id": ltpage.page_num,
         "width": ltpage.width,
@@ -120,6 +120,17 @@ def place_char_block(xml: XMLMaker, char_block: LTCharBlock):
     with xml.elm("char-block", attr):
         for char in char_block:
             place_char(xml, char)
+
+def place_text_block(xml: XMLMaker, text_block: LTCharBlock):
+    attr = {
+        "x0": text_block.x0,
+        "x1": text_block.x1,
+        "y0": text_block.y0,
+        "y1": text_block.y1,
+    }
+    with xml.elm("text-block", attr):
+        for char_block in text_block:
+            place_char_block(xml, char_block)
 
 def place_curve(xml: XMLMaker, item: LTCurve):
     attr = {

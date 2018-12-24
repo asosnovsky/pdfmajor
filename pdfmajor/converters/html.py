@@ -1,7 +1,7 @@
 from typing import List
 from .writers.html import HTMLMaker
 from ..interpreter import PDFInterpreter, PageInterpreter, logging
-from ..interpreter import LTImage, LTCharBlock, LTChar, LTCurve, LTXObject
+from ..interpreter import LTImage, LTTextBlock, LTCharBlock, LTChar, LTCurve, LTXObject
 from ..interpreter.commands import LTItem
 from ..interpreter.commands.state import CurvePath, PDFColor
 
@@ -76,8 +76,12 @@ def render_page(html: HTMLMaker, ltpage: PageInterpreter):
                 'max-height': item.height,
             }):
                 html.write(item.get_text())
+        elif isinstance(item, LTTextBlock):
+            for char in item:
+                render(char)
         elif isinstance(item, LTCharBlock):
-            with html.elm('span', { 'class': 'char-block' }, {
+            with html.elm('span', {'class': 'char-block'}):
+                with html.elm('p', { 'class': 'text-block' }, {
                     'position': 'absolute',
                     'left': f'{item.x0}',
                     'bottom': f'{item.y0}',
@@ -98,8 +102,8 @@ def render_page(html: HTMLMaker, ltpage: PageInterpreter):
                     'justify-content': 'space-between',
                     # 'padding-left': item.font.leading
                 }):
-                for char in item:
-                    render(char)
+                    for char in item:
+                        render(char)
     
     with html.elm('div', { "class": 'page', "id": f"page-{ltpage.page_num}" }, { 
         'width': f'{ltpage.width}px', 

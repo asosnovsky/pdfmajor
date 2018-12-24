@@ -2,7 +2,7 @@ from typing import List
 
 from .writers.json import JSONMaker, JSONMakerObject, JSONMakerArray
 from ..interpreter import PDFInterpreter, PageInterpreter, logging
-from ..interpreter import LTImage, LTCharBlock, LTChar, LTCurve, LTXObject
+from ..interpreter import LTImage, LTTextBlock, LTCharBlock, LTCurve, LTXObject
 from ..interpreter.commands import LTItem
 from ..interpreter.commands import LTRect, LTLine
 from ..interpreter.commands.state import CurvePath, PDFColor
@@ -76,11 +76,21 @@ def render(json: JSONMakerObject, item: LTItem):
             json.number("x1", item.x1)
             json.number("y0", item.y0)
             json.number("y1", item.y1)
-        elif isinstance(item, LTCharBlock):
-            place_char_block(json, item)
+        elif isinstance(item, LTTextBlock):
+            place_text_block(json, item)
+
+def place_text_block(json: JSONMakerObject, text_block: LTTextBlock):
+    json.string("type", 'text-block')
+    json.number("x0", text_block.x0)
+    json.number("x1", text_block.x1)
+    json.number("y0", text_block.y0)
+    json.number("y1", text_block.y1)
+    with json.array("char_blocks") as cb_arr:
+        for cb in text_block:
+            with cb_arr.object() as cb_obj:
+                place_char_block(cb_obj, cb)
 
 def place_char_block(json: JSONMakerObject, char_block: LTCharBlock):
-    json.string("type", 'char-block')
     json.number("size", char_block.size)
     json.number("x0", char_block.x0)
     json.number("x1", char_block.x1)

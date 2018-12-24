@@ -1,7 +1,7 @@
 from typing import List
 
 from ..interpreter import PDFInterpreter, PageInterpreter, logging
-from ..interpreter import LTCharBlock, LTXObject
+from ..interpreter import LTTextBlock, LTXObject
 
 
 def convert_to_text(
@@ -28,9 +28,10 @@ def convert_to_text(
     with open(output_file_path, 'wb') as outfp:
         def process_container(container: LTXObject):
             for item in container:
-                if isinstance(item, LTCharBlock):
-                    for char in item:
-                        outfp.write(char.get_text().encode(codec))
+                if isinstance(item, LTTextBlock):
+                    for text in item:
+                        for char in text:
+                            outfp.write(char.get_text().encode(codec))
                 elif isinstance(item, LTXObject):
                     process_container(item)
         for page in intepreter:

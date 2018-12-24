@@ -1,13 +1,8 @@
 from pdfmajor.parser.PDFPage import PDFPage
 from pdfmajor.parser.PDFStream import list_value
-from pdfmajor.parser.PDFContentParser import PDFContentParser
-from pdfmajor.parser.PSStackParser import PSKeyword
-from pdfmajor.parser.PSStackParser import keyword_name
 
-from .commands import PDFStateStack, PDFCommands
-from .commands import LTXObject
-from .utils import init_resources
-from .XObjectInterpreter import XObjectInterpreter
+from .commands import PDFStateStack
+from .commands import process_command_stream, prep_state
 
 class PageInterpreter:
     class PDFInterpreterError(Exception): pass
@@ -31,52 +26,21 @@ class PageInterpreter:
         self.width = x1-x0
 
         # Init State
-        self.state: PDFStateStack = PDFStateStack()
-        self.state.t_matrix = ctm
-        self.state.resources = page.resources
-        # set some global states.
-        self.state.graphics.ncolspace = self.state.graphics.scolspace = None 
-        if self.state.colorspace_map:
-            col_space = next(iter(self.state.colorspace_map.values()))
-            self.state.graphics.ncolspace = self.state.graphics.scolspace = col_space
-        # Init Resources
-        init_resources(self.state, self.font_cache)
+        self.state: PDFStateStack = prep_state(
+            PDFStateStack(), 
+            ctm=ctm, 
+            resources=page.resources, 
+            font_cache=self.font_cache
+        )
+
     
     def __iter__(self):
-        parser = PDFContentParser(list_value(self.page.contents))
-        history = []
-        for obj in parser:
-            history.append(obj)
-            if isinstance(obj, PSKeyword):
-                name = keyword_name(obj)
-                method = name.replace('*', '_a').replace('"', '_w').replace("'", '_q')
-                if method in PDFCommands.commands.keys():
-                    func = PDFCommands.commands.get(method)
-                    nargs = func.__code__.co_argcount-1
-                    if nargs:
-                        args = self.state.pop(nargs)
-                        if len(args) == nargs:
-                            func(self.state, *args)
-                        else:
-                            raise self.PDFInterpreterError(f"Invalid Number of Args provided {method}")
-                    else:
-                        # log.debug('exec: %s', name)
-                        func(self.state)
-                else:
-                    raise self.PDFInterpreterError('Unknown operator: %r' % name)
-            else:
-                self.state.argstack.append(obj)
-            
-            for complete_item in self.state.complete_layout_items:
-                if isinstance(complete_item, LTXObject):
-                    interpeter = XObjectInterpreter(
-                        streams=[complete_item.stream],
-                        resources=complete_item.resources,
-                        ctm=complete_item.t_matrix
-                    )
-                    for item in interpeter:
-                        complete_item.add(item)
-                yield complete_item
-            self.state.complete_layout_items = []
+        for item in process_command_stream(
+            streams=list_value(self.page.contents),
+            font_cache=self.font_cache,
+            state=self.state
+        ):
+            yield item
+
     def __repr__(self) -> str:
-        return f"<Page:{self.page_num}/>"
+        return f"<Page:{self.page_num} width={self.width} height={self.height}/>"

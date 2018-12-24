@@ -1,33 +1,41 @@
-from pdfmajor.utils import mult_matrix, MATRIX_IDENTITY, apply_matrix_pt
+from pdfmajor.utils import mult_matrix, MATRIX_IDENTITY, apply_matrix_pt, get_logger
 from pdfmajor.parser.PSStackParser import literal_name
 from pdfmajor.parser.PDFStream import PDFStream, list_value, dict_value
 from pdfmajor.parser.constants import LITERAL_FORM, LITERAL_IMAGE
 
 from .PDFCommands import PDFCommands
-from .state import PDFStateStack, PDFGraphicState
+from .state import PDFStateStack, PDFGraphicState, LTTextBlock
 from .state.Curves import CurveMethod, CurvePath, CurvePoint
 # from .state.PDFItem import PDFImage, PDFShape, PDFText, PDFXObject
 from .state import make_char_block, make_curve, make_image, make_xobject
 
+log = get_logger('commands')
+
+class CommandError(Exception): pass
+
 # No Support
-@PDFCommands.add('W','W_a', 'sh', 'ET', 'BX', 'EX' ,'BI', 'ID', 'gs')
-def do_no_support(stack: PDFStateStack) -> PDFStateStack:
-    return stack
+# @PDFCommands.add('W','W_a', 'sh', 'ET', 'BX', 'EX' ,'BI', 'ID', 'gs')
+# def do_no_support(stack: PDFStateStack) -> PDFStateStack:
+#     # log.warning("Unsupported command")
+#     return stack
 
 # marked content operators
 @PDFCommands.add('MP', 'DP')
 def do_MP(stack: PDFStateStack) -> PDFStateStack:
+    log.warning("Unsupported command - do_tag")
     # self.device.do_tag(tag)
     return stack
 
 @PDFCommands.add('BMC', 'BDC')
 def do_BMC(stack: PDFStateStack) -> PDFStateStack:
+    log.warning("Unsupported command - begin_tag")
     # self.device.begin_tag(tag)
     return stack
 
 @PDFCommands.add('EMC')
 def do_EMC(stack: PDFStateStack) -> PDFStateStack:
     # self.device.end_tag(tag)
+    log.warning("Unsupported command - end_tag")
     return stack
 
 @PDFCommands.add('q')
@@ -332,6 +340,16 @@ def do_scn(stack: PDFStateStack) -> PDFStateStack:
 def do_BT(stack: PDFStateStack) -> PDFStateStack:
     stack.text.matrix = MATRIX_IDENTITY
     stack.text.linematrix = [0, 0]
+    if stack.current_textblock is None:
+        stack.current_textblock = LTTextBlock()
+    else:
+        raise PDFCommands.InvalidOperation("Last TextBlock did not clear")
+    return stack
+
+@PDFCommands.add('ET')
+def do_ET(stack: PDFStateStack) -> PDFStateStack:
+    stack.complete_layout_items.append(stack.current_textblock)
+    stack.current_textblock = None
     return stack
 
 # setcharspace
@@ -417,12 +435,14 @@ def do_T_a(stack: PDFStateStack) -> PDFStateStack:
 def do_TJ(stack: PDFStateStack, seq: bytearray) -> PDFStateStack:
     if stack.text.font is None:
         raise PDFCommands.InvalidOperation("No Font Specified")
-    stack.complete_layout_items.append(make_char_block(
+    if stack.current_textblock is None:
+        raise PDFCommands.InvalidOperation("No TextBlock initilized")
+    stack.current_textblock.add_char_block(
         seq,
         stack.t_matrix,
         stack.text.copy(),
         stack.graphics.ncolor.copy()
-    ))
+    )
     return stack
 
 # show

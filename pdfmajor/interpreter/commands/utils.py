@@ -4,8 +4,8 @@ from pdfmajor.parser.PDFStream.PDFObjRef import PDFObjRef
 from pdfmajor.parser.PSStackParser import literal_name
 from pdfmajor.parser.constants import LITERAL_PDF, LITERAL_TEXT
 
-from .commands import PDFColorSpace, PREDEFINED_COLORSPACE
-from .commands import PDFStateStack, get_font
+from .state import PDFColorSpace, PREDEFINED_COLORSPACE
+from .state import PDFStateStack, get_font
 
 def get_colorspace(spec):
     if isinstance(spec, list):

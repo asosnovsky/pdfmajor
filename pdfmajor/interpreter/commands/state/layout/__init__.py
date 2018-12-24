@@ -6,6 +6,7 @@ from ..PDFGraphicState import PDFGraphicState, PDFColor
 from ..PDFTextState import PDFTextState
 
 from ._base import LTItem, LTComponent, LTContainer
+from .LTTextBlock import LTTextBlock
 from .LTCharBlock import LTCharBlock, LTChar
 from .LTCurves import LTCurve, LTLine, LTHorizontalLine, LTRect, LTVerticalLine
 from .LTImage import LTImage

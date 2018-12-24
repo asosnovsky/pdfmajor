@@ -6,7 +6,7 @@ from ..parser.PDFPage import PDFPage
 from ..utils import set_log_level, get_logger, logging
 from .commands.state import PDFStateStack, PDFColorSpace, PREDEFINED_COLORSPACE
 from .commands import PDFCommands
-from .commands import LTCharBlock, LTChar
+from .commands import LTTextBlock, LTCharBlock, LTChar
 from .commands import LTCurve, LTLine, LTHorizontalLine, LTVerticalLine, LTRect
 from .commands import LTImage
 from .commands import LTXObject
