@@ -62,13 +62,13 @@
     
         <ul>
         
+            <li><a class="toctree-l3" href="#parser">parser</a></li>
+        
             <li><a class="toctree-l3" href="#interpreter">interpreter</a></li>
         
             <li><a class="toctree-l3" href="#converters">converters</a></li>
         
             <li><a class="toctree-l3" href="#imagewriter">imagewriter</a></li>
-        
-            <li><a class="toctree-l3" href="#layouts">layouts</a></li>
         
         </ul>
     
@@ -111,37 +111,82 @@
                 <h1 id="api">API</h1>
 <p>The library is constructed from 4 base modules:</p>
 <ul>
-<li><strong>interpreter</strong>: contains low-level classes for extracting fundamental data-structures from the documents</li>
-<li><strong>converters</strong>: contains high-level classes for conversion of the fundamental pdf structures to other formats</li>
+<li><strong>parser</strong>: contains low-level classes for extracting fundamental data-structures from the documents</li>
+<li><strong>interpreter</strong>: a interpreter of the pdf-standard commands</li>
+<li><strong>converters</strong>: contains high-level functions for conversion of the fundamental pdf structures to other formats</li>
 <li><strong>imagewriter</strong>: contains a simple implementation for converting PDF Image Streams to png/bmp/img formats</li>
-<li><strong>layouts</strong>: contains an abstraction layer for the data-structures found in the pdf</li>
 </ul>
+<h2 id="parser">parser</h2>
+<p>WIP</p>
 <h2 id="interpreter">interpreter</h2>
-<pre><code>WIP
-</code></pre>
-<h2 id="converters">converters</h2>
-<p>Contains high-level classes for conversion of the fundamental pdf structures to other formats. This library includes 4 high-level conversion classes:</p>
-<ul>
-<li>HTMLConverter</li>
-<li>JSONConverter</li>
-<li>XMLConverter</li>
-<li>TextConverter</li>
-</ul>
-<p>These classes all extend the <a href="#converters.PDFConverter">PDFConverter</a>. To use them simply call the static method <a href="#converterspdfconverterparse_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos">parse_file</a>.</p>
+<p>a interpreter of the pdf-standard commands</p>
 <h3 id="example">Example</h3>
-<pre><code class="py">from pdfmajor.converters import HTMLConverter
+<pre><code class="py">from pdfmajor.interpreter import PageInterpreter
 
-input_file = open('path/to/input/file.pdf', 'rb')
-output_file = open('path/to/output/file.html', 'wb')
-HTMLConverter.parse_file(
-    input_file,
-    output_file
-)
-input_file.close()
-output_file.close()
+for page in PDFInterpreter(&quot;/path/to/pdf.pdf&quot;):
+    print(&quot;page start&quot;, page.page_num)
+    for item in page:
+        print(&quot; &gt;&quot;, item)
+    print(&quot;page end&quot;, page.page_num)
 </code></pre>
 
-<h3 id="convertersconvert_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos-out_type">converters.convert_file(input_file, output_file, image_folder_path, codec, maxpages, password, caching, check_extractable, pagenos, out_type)</h3>
+<h3 id="interpreterpdfinterpreter">interpreter.PDFInterpreter</h3>
+<p>This generator-function yields individual pages which contain their respected items.</p>
+<h4 id="arguments">Arguments</h4>
+<ul>
+<li><code>input_file_path</code>: <a href="#">str</a></li>
+<li><code>preload</code>: <a href="#">bool</a> defaults to False</li>
+<li><code>maxpages</code>: <a href="#">int</a> defaults to 0 </li>
+<li><code>password</code>: <a href="#">str</a> defaults to None </li>
+<li><code>caching</code>: <a href="#">bool</a> defaults to True </li>
+<li><code>check_extractable</code>: <a href="#">bool</a> defaults to True</li>
+<li><code>pagenos</code>: <a href="#">List[int]</a> defaults to None</li>
+<li><code>debug_level</code>: <a href="#https://docs.python.org/3/library/logging.html#levels">logging.levels</a> defaults logging.WARNING</li>
+</ul>
+<h4 id="yield-value">Yield Value</h4>
+<p>This function returns a generator that yields <a href="#interpreterpageinterpreter">PDFInterpreter</a>.</p>
+<h3 id="interpreterpageinterpreter">interpreter.PageInterpreter</h3>
+<p>This generator-function-class yields individual <a href="#layout-items">layout items</a>.</p>
+<h3 id="layout-items">Layout Items</h3>
+<p>All layout items extend the <code>LTItem</code> class. There are two kinds of layout items:</p>
+<ul>
+<li>LTComponent: extends the base <code>LTItem</code> class, this class will have additional values such as boundary boxes, height and width</li>
+<li>LTContainer: extends the <code>LTComponent</code> class, this class is used to contain elements of the pdf that would have child elements. Iterating on this element will output its child elements.</li>
+</ul>
+<h4 id="layout-containers">Layout Containers</h4>
+<p>All of these classes extend the LTContainer class.</p>
+<ul>
+<li>LTXObject: a layout item containing other additional layout items</li>
+<li>LTCharBlock: a layout item containing LTChars, this corresponds to whenever a <code>TJ</code> or <code>Tj</code> operators is issued within a text object.</li>
+<li>LTTextBlock: a layout item containing LTCharBlocks, note that this directly corresponds to the <code>BT</code> and <code>ET</code> operators pair in the pdf standard</li>
+</ul>
+<h4 id="layout-components">Layout Components</h4>
+<p>All of these classes extend the LTComponent class.</p>
+<ul>
+<li>LTChar: an individual character</li>
+<li>LTCurves: represents a collection of svg-paths (available under <code>self.paths</code>)</li>
+<li>LTImage: a component containing information regarding an image</li>
+</ul>
+<h2 id="converters">converters</h2>
+<p>Contains high-level functions for conversion of the fundamental pdf structures to other formats. This library includes 4 high-level conversion cases:</p>
+<ul>
+<li>HTML</li>
+<li>JSON</li>
+<li>XML</li>
+<li>Text</li>
+</ul>
+<p>These formats are all generated using the <a href="#PDFInterpreter">PageInterpreter</a>. To use them simply call the static method <a href="#converterspdfconverter">parse_file</a>.</p>
+<h3 id="example_1">Example</h3>
+<pre><code class="py">from pdfmajor.converters import convert_file
+
+convert_file(
+    &quot;path/to/input/file.pdf&quot;,
+    &quot;path/to/output/file.html&quot;,
+    out_type=&quot;html&quot;
+)
+</code></pre>
+
+<h3 id="convertersconvert_file">converters.convert_file</h3>
 <p>A high-level abstraction for the conversion classes.</p>
 <ul>
 <li><code>input_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
@@ -155,46 +200,7 @@ output_file.close()
 <li><code>pagenos</code>: <a href="#">List[int]</a> defaults to None</li>
 <li><code>out_type</code>: <a href="#">str</a> defaults to 'html'</li>
 </ul>
-<h3 id="example-convertersconvert_file">Example (converters.convert_file)</h3>
-<pre><code class="py">from pdfmajor.converters import convert_file
-
-input_file = open('path/to/input/file.pdf', 'rb')
-output_file = open('path/to/output/file.html', 'wb')
-convert_file(
-    input_file,
-    output_file
-)
-input_file.close()
-output_file.close()
-</code></pre>
-
-<h3 id="converterspdfconverter">converters.PDFConverter</h3>
-<p>Extends <code>layouts.PDFLayoutAnalyzer</code>.</p>
-<h4 id="converterspdfconverter9595init9595rsrcmgr-outfp-imagewriter-codec-pageno">converters.PDFConverter.__init__(rsrcmgr, outfp, imagewriter, codec, pageno)</h4>
-<ul>
-<li><code>rsrcmgr</code>: <a href="#interpreter.PDFResourceManager">PDFResourceManager</a></li>
-<li><code>outfp</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a></li>
-<li><code>imagewriter</code>: <a href="#imagewriter.ImageWriter">ImageWriter</a></li>
-<li><code>codec</code>: <a href="#">str</a> defaults to 'utf-8'</li>
-<li><code>pageno</code>: <a href="#">int</a> defaults to 1</li>
-</ul>
-<p>initialization function for the class</p>
-<h4 id="converterspdfconverterparse_fileinput_file-output_file-image_folder_path-codec-maxpages-password-caching-check_extractable-pagenos">converters.PDFConverter.parse_file(input_file, output_file, image_folder_path, codec, maxpages, password, caching, check_extractable, pagenos)</h4>
-<p>returns the output file <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a>.</p>
-<ul>
-<li><code>input_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
-<li><code>output_file</code>: <a href="https://docs.python.org/3/library/io.html#io.TextIOWrapper">TextIOWrapper</a> </li>
-<li><code>image_folder_path</code>: <a href="#">str</a> defaults to None</li>
-<li><code>codec</code>: <a href="#">str</a> defaults to 'utf-8'</li>
-<li><code>maxpages</code>: <a href="#">int</a> defaults to 0 </li>
-<li><code>password</code>: <a href="#">str</a> defaults to None </li>
-<li><code>caching</code>: <a href="#">bool</a> defaults to True </li>
-<li><code>check_extractable</code>: <a href="#">bool</a> defaults to True</li>
-<li><code>pagenos</code>: <a href="#">List[int]</a> defaults to None</li>
-</ul>
 <h2 id="imagewriter">imagewriter</h2>
-<p>WIP </p>
-<h2 id="layouts">layouts</h2>
 <p>WIP </p>
               
             </div>

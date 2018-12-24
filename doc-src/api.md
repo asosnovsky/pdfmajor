@@ -58,7 +58,8 @@ All layout items extend the `LTItem` class. There are two kinds of layout items:
 All of these classes extend the LTContainer class.
 
 - LTXObject: a layout item containing other additional layout items
-- LTCharBlock: a layout item containing LTChars
+- LTCharBlock: a layout item containing LTChars, this corresponds to whenever a `TJ` or `Tj` operators is issued within a text object.
+- LTTextBlock: a layout item containing LTCharBlocks, note that this directly corresponds to the `BT` and `ET` operators pair in the pdf standard
 
 #### Layout Components
 All of these classes extend the LTComponent class.

@@ -59,6 +59,8 @@
         
             <li><a class="toctree-l3" href="#documentation">Documentation</a></li>
         
+            <li><a class="toctree-l3" href="#basic-example">Basic Example</a></li>
+        
             <li><a class="toctree-l3" href="#why-another-fork">Why Another Fork?</a></li>
         
             <li><a class="toctree-l3" href="#features">Features</a></li>
@@ -122,23 +124,34 @@
 </tr>
 </table>
 
-<p>PDF-Major is a fork of <code>PDFMiner.six</code>. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. Additionally, this version intends to be more up to date with recent versions of python and make liberal use of the typing capabilities of python for improved future maintainability.</p>
+<p>PDF-Major is a fork of <code>PDFMiner.six</code>. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. The ultimate goal of this project is to provide a simpler, faster and more functional library that both casual and low-level developers could build upon.</p>
 <h2 id="documentation">Documentation</h2>
 <p>See documentation <a href="https://asosnovsky.github.io/pdfmajor/">here</a>.</p>
+<h2 id="basic-example">Basic Example</h2>
+<pre><code class="py">from pdfmajor.interpreter import PageInterpreter
+
+for page in PDFInterpreter(&quot;/path/to/pdf.pdf&quot;):
+    print(&quot;page start&quot;, page.page_num)
+    for item in page:
+        print(&quot; &gt;&quot;, item)
+    print(&quot;page end&quot;, page.page_num)
+
+</code></pre>
+
 <h2 id="why-another-fork">Why Another Fork?</h2>
-<p><code>PDFMiner</code> was designed to run in python 2.7&gt;, <code>PDFMiner.six</code> was written to bring cross-version support for python 2 and 3. This versions intends to make use of the latest improvement in the python language while remaining fairly simple to develop with. </p>
+<p><code>PDFMiner</code> was designed to run in python 2.7&gt;, <code>PDFMiner.six</code> was written to bring cross-version support for python 2 and 3. However, after attempting to build and extend upon <code>PDFMiner.six</code> I found it rather difficult to extend and identify additional details regarding the items encoded in the pdf. This library will attempt to expose as much information as possible to end-users, without having them solely rely on to-xml or to-json exports.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li>Written entirely in Python.</li>
+<li>Functional extraction method based on generators</li>
 <li>Parse, analyze, and convert PDF documents.</li>
 <li>PDF-1.7 specification support. (well, almost)</li>
+<li>Font-Color extraction</li>
+<li>Shape fill and stroke color extraction</li>
 <li>CJK languages and vertical writing scripts support.</li>
 <li>Various font types (Type1, TrueType, Type3, and CID) support.</li>
 <li>Basic encryption (RC4) support.</li>
-<li>Font-Color extraction</li>
-<li>Shape fill and stroke color extraction</li>
 </ul>
-<p><strong>Note</strong>: We took out the layout-analysis process in this version (there is no more LTTextHorizontal or LTTextVertical). While the mathematics behind the grouping process was sound, the coupling of the layout-analysis process with the parsing and interpretation process produced unfriendly-code. This feature could be brought back by extending the <code>pdfmajor.layouts.PDFLayoutAnalyzer</code> class, but at the current time is not supported.</p>
+<p><strong>Note</strong>: We took out the layout-analysis process in this version (there is no more LTTextHorizontal or LTTextVertical). While the mathematics behind the grouping process was sound, the coupling of the layout-analysis process with the parsing and interpretation process produced unfriendly-code. This feature could be brought back by running your own implementation of it on the <code>pdfmajor.interpreter.PageInterpreter</code> class, but at the current time is not supported.</p>
 <h2 id="how-to-install">How to Install</h2>
 <h3 id="source">Source</h3>
 <ul>
@@ -227,5 +240,5 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2018-11-04 21:27:38
+Build Date UTC : 2018-12-24 06:52:28
 -->
