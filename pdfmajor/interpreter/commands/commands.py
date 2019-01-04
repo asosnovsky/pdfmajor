@@ -11,8 +11,6 @@ from .state import make_char_block, make_curve, make_image, make_xobject
 
 log = get_logger('commands')
 
-class CommandError(Exception): pass
-
 # No Support
 # @PDFCommands.add('W','W_a', 'sh', 'ET', 'BX', 'EX' ,'BI', 'ID', 'gs')
 # def do_no_support(stack: PDFStateStack) -> PDFStateStack:
@@ -20,15 +18,27 @@ class CommandError(Exception): pass
 #     return stack
 
 # marked content operators
-@PDFCommands.add('MP', 'DP')
-def do_MP(stack: PDFStateStack) -> PDFStateStack:
-    log.warning("Unsupported command - do_tag")
+@PDFCommands.add('MP')
+def do_MP(stack: PDFStateStack, tag) -> PDFStateStack:
+    log.warning(f"Unsupported command - do_tag {[tag]}")
     # self.device.do_tag(tag)
     return stack
 
-@PDFCommands.add('BMC', 'BDC')
-def do_BMC(stack: PDFStateStack) -> PDFStateStack:
-    log.warning("Unsupported command - begin_tag")
+@PDFCommands.add('DP')
+def do_DP(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
+    log.warning(f"Unsupported command - do_tag {[tag.name, type(tag), props]}")
+    # self.device.do_tag(tag)
+    return stack
+
+@PDFCommands.add('BMC')
+def do_BMC(stack: PDFStateStack, tag) -> PDFStateStack:
+    log.warning(f"Unsupported command - begin_tag {[tag.name, type(tag)]}")
+    # self.device.begin_tag(tag)
+    return stack
+
+@PDFCommands.add('BDC')
+def do_BDC(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
+    log.warning(f"Unsupported command - begin_tag {[tag.name, type(tag), props]}")
     # self.device.begin_tag(tag)
     return stack
 
