@@ -10,7 +10,7 @@ import sys
 with open('README.md') as readme_file:
     SETUP = {
         "name": "pdfmajor",
-        "version": "1.3.1",
+        "version": "1.3.2",
         "packages": find_packages(include=['pdfmajor*']),
         "install_requires": [
             'pycryptodome', 
