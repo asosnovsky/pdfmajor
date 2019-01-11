@@ -16,7 +16,7 @@ a interpreter of the pdf-standard commands
 
 ### Example
 ```py
-from pdfmajor.interpreter import PageInterpreter
+from pdfmajor.interpreter import PDFInterpreter
 
 for page in PDFInterpreter("/path/to/pdf.pdf"):
     print("page start", page.page_num)
