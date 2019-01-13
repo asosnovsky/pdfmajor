@@ -48,7 +48,7 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
         for complete_item in state.complete_layout_items:
             if isinstance(complete_item, LTXObject):
                 xobj_state = prep_state(
-                    state=PDFGraphicState(),
+                    state=PDFStateStack(),
                     ctm=complete_item.t_matrix,
                     resources=complete_item.resources,
                     font_cache=font_cache

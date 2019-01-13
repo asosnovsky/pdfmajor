@@ -24,7 +24,7 @@ See documentation [here](https://asosnovsky.github.io/pdfmajor/).
 
 ## Basic Example
 ```py
-from pdfmajor.interpreter import PageInterpreter
+from pdfmajor.interpreter import PDFInterpreter
 
 for page in PDFInterpreter("/path/to/pdf.pdf"):
     print("page start", page.page_num)
@@ -97,7 +97,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-__version__ = (1, 3, 2c)
+__version__ = (1, 3, 3)
 
 if __name__ == '__main__':
     print(
