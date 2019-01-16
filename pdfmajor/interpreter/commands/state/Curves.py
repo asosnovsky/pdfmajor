@@ -1,8 +1,14 @@
 from enum import Enum
 from typing import List
+from pdfmajor.utils import apply_matrix_pt
 
 class CurvePoint:
-    def __init__(self, x: float, y: float):
+    def __init__(self, ctm: tuple, x: float, y: float):
+        # old = (x,y)
+        # (x, y) = apply_matrix_pt(ctm, (x, y))
+        # if old != (x,y):
+        # print("CurvePoint", ctm, old)
+        # print(" >", x, y)
         self.x = x
         self.y = y
     

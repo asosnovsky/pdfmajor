@@ -43,19 +43,21 @@ def convert_to_html(
                     render_page(html, page)
 
 def render_page(html: HTMLMaker, ltpage: PageInterpreter):
-    def render(item: LTItem):
+    def render(item: LTItem, block = True):
         if isinstance(item, LTCurve):
-            render_curve(html, item)
+            render_curve(html, ltpage, item)
         elif isinstance(item, LTXObject):
             with html.elm('div', { "class": 'xobject' }, {
-                'position': 'absolute', 
+                # 'position': 'absolute', 
                 'left': f'{item.x0}px', 
+                'right': f'{item.x1}px', 
                 'bottom': f'{item.y0}px', 
+                'top': f'{item.y1}px', 
                 'width': f'{item.width}px', 
                 'height': f'{item.height}px',
             }):
                 for child in item:
-                    render(child)
+                    render(child, False)
         elif isinstance(item, LTImage):
             name = item.name
             # if html.imagewriter is not None:
@@ -68,12 +70,12 @@ def render_page(html: HTMLMaker, ltpage: PageInterpreter):
             })
         elif isinstance(item, LTChar):
             with html.elm('span', { 'class': 'char' }, {
-                'width': item.width,
-                'min-width': item.width,
-                'max-width': item.width,
-                'height': item.height,
-                'min-height': item.height,
-                'max-height': item.height,
+                'width': str(item.width) + "px",
+                'min-width': str(item.width) + "px",
+                'max-width': str(item.width) + "px",
+                'height': str(item.height) + "px",
+                'min-height': str(item.height) + "px",
+                'max-height': str(item.height) + "px",
             }):
                 html.write(item.get_text())
         elif isinstance(item, LTTextBlock):
@@ -89,12 +91,12 @@ def render_page(html: HTMLMaker, ltpage: PageInterpreter):
                     'font-family': item.fontname,
                     'font-weight': item.font.font_weight,
                     'color': get_color(item.color, default="black"),
-                    'width': item.width,
-                    'min-width': item.width,
-                    'max-width': item.width,
-                    'height': item.height,
-                    'min-height': item.height,
-                    'max-height': item.height,
+                    'width': str(item.width) + "px",
+                    'min-width': str(item.width) + "px",
+                    'max-width': str(item.width) + "px",
+                    'height': str(item.height) + "px",
+                    'min-height': str(item.height) + "px",
+                    'max-height': str(item.height) + "px",
                     'transform': f'skew({item.font.italic_angle}deg, 0deg)',
                     'text-align': 'center',
                     'display': 'flex',
@@ -125,11 +127,101 @@ def get_color(col: PDFColor, default: str = ""):
     else:
         return default
 
-def render_curve(html: HTMLMaker, item: LTCurve):
+def render_curve(html: HTMLMaker, ltpage: PageInterpreter, item: LTCurve):
+    path, svg_attr = create_svg_path(item)
+    
+    stroke_col = get_color(item.stroke)
+    fill_col = get_color(item.fill)
+    path_css = {}
+    if fill_col:
+        path_css['fill'] = fill_col
+    if stroke_col:
+        path_css['stroke'] = stroke_col
+
+    with html.elm('svg', svg_attr, css={
+        'border': '1px solid black',
+        'position': 'absolute', 
+        'left': f'{item.x0}px', 
+        'bottom': f'{ltpage.height - item.y0}px', 
+        'top': f'{ltpage.height - item.y1}px', 
+        'right': f'{item.x1}px', 
+        'width': f'{item.width}px',
+        'height': f'{item.height}px',
+    }) as svg:
+        html.singleton('path', {
+            "d": path,
+            **path_css
+        }, {
+            **path_css
+        })
+
+def create_svg_path(item: LTCurve):
+    css = {
+        'position': 'absolute', 
+        'left': f'{item.x0}px', 
+        'bottom': f'{item.y0}px', 
+    }
+    path = ""
+    svg_attr = {
+        'class': 'curve',
+        'z-index': 2
+    }
+
+    if item.height > 0:
+        dy = 1.0/item.height
+        dx = (item.width/item.height)/(item.x1-item.x0)
+        svg_attr.update({
+            "viewBox": "0 0 %s %s" % ( item.width/item.height, 1 )
+        })
+    else:
+        dx = 1.0/(item.x1-item.x0)
+        dy = 1.0
+        svg_attr.update({
+            "viewBox": "0 0 1 1"
+        })
+
+    if item.height > 1:
+        svg_attr.update({
+            'height': f'{item.height}px',
+        })
+    else:
+        svg_attr.update({
+            'height': '1px',
+        })
+    
+    if item.width > 1:
+        svg_attr.update({
+            'width': f'{item.width}px',
+        })
+    else:
+        svg_attr.update({
+            'width': '1px',
+        })
+
+    def pX(val: float) -> float:
+        return ( val-item.x0 )*dx
+    def pY(val: float) -> float:
+        return ( item.height- (val-item.y0) )*dy
+
+    for p in item.paths:
+        if p.method == CurvePath.METHOD.MOVE_TO:
+            path += f'M{" ".join( f"{pX(p.x)} {pY(p.y)}" for p in p.points )} '
+        elif p.method == CurvePath.METHOD.LINE_TO:
+            path += f'L{" ".join( f"{pX(p.x)} {pY(p.y)}" for p in p.points )} '
+        elif p.method == CurvePath.METHOD.CLOSE_PATH:
+            path += 'Z'
+        elif p.method == CurvePath.METHOD.CURVE_BOTH_TO:
+            path += f'C{" ".join( f"{pX(pt.x)} {pY(pt.y)}" for pt in p.points )} '
+    
+    return path, svg_attr
+
+def __render_curve(html: HTMLMaker, ltpage: PageInterpreter, item: LTCurve):
         css = {
             'position': 'absolute', 
             'left': f'{item.x0}px', 
             'bottom': f'{item.y0}px', 
+            'top': f'{item.y1}px', 
+            'right': f'{item.x1}px', 
             'width': f'{item.width}px',
             'height': f'{item.height}px',
         }
@@ -172,10 +264,12 @@ def render_curve(html: HTMLMaker, item: LTCurve):
         for p in item.paths:
             if p.method == CurvePath.METHOD.MOVE_TO:
                 path += f'M{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
-            if p.method == CurvePath.METHOD.LINE_TO:
+            elif p.method == CurvePath.METHOD.LINE_TO:
                 path += f'L{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
-            if p.method == CurvePath.METHOD.CLOSE_PATH:
+            elif p.method == CurvePath.METHOD.CLOSE_PATH:
                 path += 'Z'
+            elif p.method == CurvePath.METHOD.CURVE_BOTH_TO:
+                path += f'C{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
         
         stroke_col = get_color(item.stroke)
         fill_col = get_color(item.fill)

@@ -20,8 +20,6 @@ log = get_logger('process_command_stream')
 class CommandProcessorError(Exception): pass
 
 def process_command_stream(streams: List[PDFStream], font_cache: dict = None, state: PDFStateStack = None):
-    if state is None:
-        state = PDFStateStack()
     if font_cache is None:
         font_cache = {}
     parser = PDFContentParser(streams)

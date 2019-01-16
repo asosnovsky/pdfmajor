@@ -13,6 +13,12 @@ class Bbox:
         self.x1 = x1
         self.y0 = y0
         self.y1 = y1
+        if (x0 is not None) and (x1 is not None):
+            self.x0 = min([x0,x1])
+            self.x1 = max([x0,x1])
+        if (y0 is not None) and (y1 is not None):
+            self.y0 = min([y0,y1])
+            self.y1 = max([y0,y1])
     
     @property
     def height(self) -> float:

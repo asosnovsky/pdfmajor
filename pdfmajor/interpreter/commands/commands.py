@@ -116,7 +116,7 @@ def do_i(stack: PDFStateStack, flatness) -> PDFStateStack:
 def do_m(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.MOVE_TO, 
-        CurvePoint(x, y)
+        CurvePoint(stack.t_matrix, x, y)
     ))
     return stack
 
@@ -125,7 +125,7 @@ def do_m(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
 def do_l(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.LINE_TO, 
-        CurvePoint(x, y)
+        CurvePoint(stack.t_matrix, x, y)
     ))
     return stack
 
@@ -137,9 +137,9 @@ def do_c(stack: PDFStateStack,
         x3: float, y3: float ) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CURVE_BOTH_TO, 
-        CurvePoint(x1, y1), 
-        CurvePoint(x2, y2), 
-        CurvePoint(x3, y3),
+        CurvePoint(stack.t_matrix, x1, y1), 
+        CurvePoint(stack.t_matrix, x2, y2), 
+        CurvePoint(stack.t_matrix, x3, y3),
     ))
     return stack
 
@@ -150,8 +150,8 @@ def do_v(stack: PDFStateStack,
         x3: float, y3: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CURVE_NEXT_TO, 
-        CurvePoint(x2, y2), 
-        CurvePoint(x3, y3),
+        CurvePoint(stack.t_matrix, x2, y2), 
+        CurvePoint(stack.t_matrix, x3, y3),
     ))
     return stack
 
@@ -162,8 +162,8 @@ def do_y(stack: PDFStateStack,
         x3: float, y3: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CURVE_FIRST_TO, 
-        CurvePoint(x1, y1), 
-        CurvePoint(x3, y3)
+        CurvePoint(stack.t_matrix, x1, y1), 
+        CurvePoint(stack.t_matrix, x3, y3)
     ))
     return stack
 
@@ -177,10 +177,10 @@ def do_h(stack: PDFStateStack) -> PDFStateStack:
 @PDFCommands.add('re')
 def do_re(stack: PDFStateStack, x, y, w, h) -> PDFStateStack:
     stack.curvestacks.extend([
-        CurvePath(CurvePath.METHOD.MOVE_TO, CurvePoint(x, y) ),
-        CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x+w, y) ),
-        CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x+w, y+h) ),
-        CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(x, y+h) ),
+        CurvePath(CurvePath.METHOD.MOVE_TO, CurvePoint(stack.t_matrix, x, y) ),
+        CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(stack.t_matrix, x+w, y) ),
+        CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(stack.t_matrix, x+w, y+h) ),
+        CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(stack.t_matrix, x, y+h) ),
         CurvePath(CurvePath.METHOD.CLOSE_PATH)
     ])
     return stack
@@ -476,7 +476,7 @@ def do__w(stack: PDFStateStack, wordspace, charspace, b) -> PDFStateStack:
 def do_EI(stack: PDFStateStack, obj) -> PDFStateStack:
     if 'W' in obj and 'H' in obj:
         stack.complete_layout_items.append(make_image(
-            obj,  stack.ctm
+            obj,  stack.t_matrix
         ))
     return stack
 

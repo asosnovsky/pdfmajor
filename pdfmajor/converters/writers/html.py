@@ -56,7 +56,6 @@ class HTMLMaker:
             self.write(f"<{tag_name} {attrs} />", lineend=lineend, deep_space=deep_space)
             yield
     
-    def singleton(self, tag_name: str, attrs: dict = None, css: dict = None):
-        with self.elm(tag_name, attrs, css, singleton=True):
+    def singleton(self, tag_name: str, attrs: dict = None, css: dict = None, singleton: bool = True):
+        with self.elm(tag_name, attrs, css, singleton=singleton):
             pass
-               
