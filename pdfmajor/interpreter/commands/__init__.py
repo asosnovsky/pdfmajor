@@ -41,7 +41,7 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
                 else:
                     func(state)
             else:
-                log.warning('Unknown operator: %r (i.e. %r)' % (name, method))
+                log.debug('Unknown operator: %r (i.e. %r)' % (name, method))
         else:
             state.argstack.append(obj)
         
