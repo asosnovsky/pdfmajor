@@ -5,6 +5,8 @@ from ..interpreter import LTImage, LTTextBlock, LTCharBlock, LTChar, LTCurve, LT
 from ..interpreter.commands import LTItem
 from ..interpreter.commands.state import CurvePath, PDFColor
 
+INF = (1<<31) - 1
+
 def convert_to_html(
     input_file_path: str, 
     output_file_path: str, 
@@ -79,33 +81,33 @@ def render_page(html: HTMLMaker, ltpage: PageInterpreter):
             }):
                 html.write(item.get_text())
         elif isinstance(item, LTTextBlock):
-            for char in item:
-                render(char)
+            with html.elm('span', {'class': 'text-block'}):
+                for char in item:
+                    render(char)
         elif isinstance(item, LTCharBlock):
-            with html.elm('span', {'class': 'char-block'}):
-                with html.elm('p', { 'class': 'text-block' }, {
-                    'position': 'absolute',
-                    'left': f'{item.x0}',
-                    'bottom': f'{item.y0}',
-                    'font-size': f'{item.size}px',
-                    'font-family': item.fontname,
-                    'font-weight': item.font.font_weight,
-                    'color': get_color(item.color, default="black"),
-                    'width': str(item.width) + "px",
-                    'min-width': str(item.width) + "px",
-                    'max-width': str(item.width) + "px",
-                    'height': str(item.height) + "px",
-                    'min-height': str(item.height) + "px",
-                    'max-height': str(item.height) + "px",
-                    'transform': f'skew({item.font.italic_angle}deg, 0deg)',
-                    'text-align': 'center',
-                    'display': 'flex',
-                    'flex-flow': 'row nowrap',
-                    'justify-content': 'space-between',
-                    # 'padding-left': item.font.leading
-                }):
-                    for char in item:
-                        render(char)
+            with html.elm('span', { 'class': 'char-block' }, {
+                'position': 'absolute',
+                'left': f'{item.x0}',
+                'bottom': f'{item.y0}',
+                'font-size': f'{item.size}px',
+                'font-family': item.fontname,
+                'font-weight': item.font.font_weight,
+                'color': get_color(item.color, default="black"),
+                'width': str(item.width) + "px",
+                'min-width': str(item.width) + "px",
+                'max-width': str(item.width) + "px",
+                'height': str(item.height) + "px",
+                'min-height': str(item.height) + "px",
+                'max-height': str(item.height) + "px",
+                'transform': f'skew({item.font.italic_angle}deg, 0deg)',
+                'text-align': 'center',
+                'display': 'flex',
+                'flex-flow': 'row nowrap',
+                'justify-content': 'space-between',
+                # 'padding-left': item.font.leading
+            }):
+                for char in item:
+                    render(char)
     
     with html.elm('div', { "class": 'page', "id": f"page-{ltpage.page_num}" }, { 
         'width': f'{ltpage.width}px', 
@@ -147,7 +149,7 @@ def render_curve(html: HTMLMaker, ltpage: PageInterpreter, item: LTCurve):
         'right': f'{item.x1}px', 
         'width': f'{item.width}px',
         'height': f'{item.height}px',
-    }) as svg:
+    }):
         html.singleton('path', {
             "d": path,
             **path_css
@@ -156,11 +158,6 @@ def render_curve(html: HTMLMaker, ltpage: PageInterpreter, item: LTCurve):
         })
 
 def create_svg_path(item: LTCurve):
-    css = {
-        'position': 'absolute', 
-        'left': f'{item.x0}px', 
-        'bottom': f'{item.y0}px', 
-    }
     path = ""
     svg_attr = {
         'class': 'curve',
@@ -215,73 +212,13 @@ def create_svg_path(item: LTCurve):
     
     return path, svg_attr
 
-def __render_curve(html: HTMLMaker, ltpage: PageInterpreter, item: LTCurve):
-        css = {
-            'position': 'absolute', 
-            'left': f'{item.x0}px', 
-            'bottom': f'{item.y0}px', 
-            'top': f'{item.y1}px', 
-            'right': f'{item.x1}px', 
-            'width': f'{item.width}px',
-            'height': f'{item.height}px',
-        }
-        path = ""
-        svg_attr = {
-            'class': 'curve',
-            'z-index': 2
-        }
-        path_css = {
+# def render_textblock(html: HTMLMaker, ltpage: PageInterpreter, item: LTTextBlock):
+#     (x0, y0, x1, y1) = (INF, INF, -INF, -INF)
 
-        }
-
-        # Compute ViewBox
-        p_vals = { "x": [], "y": []  }
-
-        for p in item.paths:
-            for pt in p.points:
-                p_vals['x'].append(pt.x)
-                p_vals['y'].append(pt.y)
-
-        mx_x = max([*p_vals['x'], 1])
-        mn_x = min([*p_vals['x'], 0])
-        mx_y = max([*p_vals['y'], 1])
-        mn_y = min([*p_vals['y'], 0])
-
-        if mx_x == mn_x:
-            mn_x -= 1
-        if mx_y == mn_y:
-            mn_y -= 1
-
-        dx = 1/( mx_x - mn_x )
-        dy = (item.height/item.width)/( mx_y - mn_y )
-        ROUND_VAL = 5
-        svg_attr.update({
-            # "viewBox": f"{min(p_vals['x'])} {min(p_vals['y'])} {max(p_vals['x'])} {max(p_vals['y'])}",
-            "viewBox": f"{round(mn_x*dx, ROUND_VAL)} {round(mn_y*dy, ROUND_VAL)} {round(mx_x*dx , ROUND_VAL)} {round(mx_y*dy, ROUND_VAL)}",
-        })
-        
-        # Compute shape
-        for p in item.paths:
-            if p.method == CurvePath.METHOD.MOVE_TO:
-                path += f'M{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
-            elif p.method == CurvePath.METHOD.LINE_TO:
-                path += f'L{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
-            elif p.method == CurvePath.METHOD.CLOSE_PATH:
-                path += 'Z'
-            elif p.method == CurvePath.METHOD.CURVE_BOTH_TO:
-                path += f'C{" ".join( f"{round(dx*pt.x, ROUND_VAL)} {round(dy*pt.y, ROUND_VAL)}" for pt in p.points )} '
-        
-        stroke_col = get_color(item.stroke)
-        fill_col = get_color(item.fill)
-        if fill_col:
-            path_css['fill'] = fill_col
-        if stroke_col:
-            path_css['stroke'] = stroke_col
-
-        with html.elm('svg', svg_attr, css):
-            html.singleton('path', {
-                "d": path,
-                **path_css
-            }, {
-                **path_css
-            })
+#     for c_block in item:
+#         x0 = min(x0, c_block.x0)
+#         y0 = min(y0, c_block.y0)
+#         x1 = max(x1, c_block.x1)
+#         y1 = max(y1, c_block.y1)
+    
+#     with html.elm('span')

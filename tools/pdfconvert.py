@@ -52,11 +52,10 @@ def main(args=None):
     if len(parsed_args.files) == 1:
         if parsed_args.output_file != "-":
             func_args['output_file'] = open(parsed_args.output_file, "wb")
-        with open(parsed_args.files[0], 'rb') as input_file:
-            convert_file(
-                input_file,
-                **func_args
-            )
+        convert_file(
+            parsed_args.files[0],
+            **func_args
+        )
     else:
         print("Multiple files not supported yet.")
         return 1

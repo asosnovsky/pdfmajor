@@ -27,9 +27,9 @@ def convert_file(
     ):
     if output_file is None:
         output_file = os.path.join(
-            os.path.dirname(input_file.name),
+            os.path.dirname(input_file),
             os.path.basename(
-                re.sub(r"\.\w+$", "."+out_type, input_file.name)
+                re.sub(r"\.\w+$", "."+out_type, input_file)
             )
         )
     if re.search(re.escape(out_type) + r'$', output_file ) is None:
