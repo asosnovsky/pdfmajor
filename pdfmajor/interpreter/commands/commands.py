@@ -14,38 +14,38 @@ log = get_logger('commands')
 # No Support
 # @PDFCommands.add('W','W_a', 'sh', 'ET', 'BX', 'EX' ,'BI', 'ID', 'gs')
 # def do_no_support(stack: PDFStateStack) -> PDFStateStack:
-#     # log.warning("Unsupported command")
+#     # log.debug("Unsupported command")
 #     return stack
 
 # marked content operators
 @PDFCommands.add('MP')
 def do_MP(stack: PDFStateStack, tag) -> PDFStateStack:
-    log.warning(f"Unsupported command - do_tag {[tag]}")
+    log.debug(f"Unsupported command - do_tag {[tag]}")
     # self.device.do_tag(tag)
     return stack
 
 @PDFCommands.add('DP')
 def do_DP(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
-    log.warning(f"Unsupported command - do_tag {[tag.name, type(tag), props]}")
+    log.debug(f"Unsupported command - do_tag {[tag.name, type(tag), props]}")
     # self.device.do_tag(tag)
     return stack
 
 @PDFCommands.add('BMC')
 def do_BMC(stack: PDFStateStack, tag) -> PDFStateStack:
-    log.warning(f"Unsupported command - begin_tag {[tag.name, type(tag)]}")
+    log.debug(f"Unsupported command - begin_tag {[tag.name, type(tag)]}")
     # self.device.begin_tag(tag)
     return stack
 
 @PDFCommands.add('BDC')
 def do_BDC(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
-    log.warning(f"Unsupported command - begin_tag {[tag.name, type(tag), props]}")
+    log.debug(f"Unsupported command - begin_tag {[tag.name, type(tag), props]}")
     # self.device.begin_tag(tag)
     return stack
 
 @PDFCommands.add('EMC')
 def do_EMC(stack: PDFStateStack) -> PDFStateStack:
     # self.device.end_tag(tag)
-    log.warning("Unsupported command - end_tag")
+    log.debug("Unsupported command - end_tag")
     return stack
 
 @PDFCommands.add('q')
