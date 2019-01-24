@@ -18,38 +18,38 @@ log = get_logger('commands')
 #     return stack
 
 # marked content operators
-@PDFCommands.add('MP')
-def do_MP(stack: PDFStateStack, tag) -> PDFStateStack:
-    log.debug(f"Unsupported command - do_tag {[tag]}")
-    # self.device.do_tag(tag)
-    return stack
+# @PDFCommands.add('MP')
+# def do_MP(stack: PDFStateStack, tag) -> PDFStateStack:
+#     log.debug(f"Unsupported command - do_tag {[tag]}")
+#     # self.device.do_tag(tag)
+#     return stack
 
-@PDFCommands.add('DP')
-def do_DP(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
-    log.debug(f"Unsupported command - do_tag {[tag.name, type(tag), props]}")
-    # self.device.do_tag(tag)
-    return stack
+# @PDFCommands.add('DP')
+# def do_DP(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
+#     log.debug(f"Unsupported command - do_tag {[tag.name, type(tag), props]}")
+#     # self.device.do_tag(tag)
+#     return stack
 
-@PDFCommands.add('BMC')
-def do_BMC(stack: PDFStateStack, tag) -> PDFStateStack:
-    log.debug(f"Unsupported command - begin_tag {[tag.name, type(tag)]}")
-    # self.device.begin_tag(tag)
-    return stack
+# @PDFCommands.add('BMC')
+# def do_BMC(stack: PDFStateStack, tag) -> PDFStateStack:
+#     log.debug(f"Unsupported command - begin_tag {[tag.name, type(tag)]}")
+#     # self.device.begin_tag(tag)
+#     return stack
 
-@PDFCommands.add('BDC')
-def do_BDC(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
-    log.debug(f"Unsupported command - begin_tag {[tag.name, type(tag), props]}")
-    # self.device.begin_tag(tag)
-    return stack
+# @PDFCommands.add('BDC')
+# def do_BDC(stack: PDFStateStack, tag, props=None) -> PDFStateStack:
+#     log.debug(f"Unsupported command - begin_tag {[tag.name, type(tag), props]}")
+#     # self.device.begin_tag(tag)
+#     return stack
 
-@PDFCommands.add('EMC')
-def do_EMC(stack: PDFStateStack) -> PDFStateStack:
-    # self.device.end_tag(tag)
-    log.debug("Unsupported command - end_tag")
-    return stack
+# @PDFCommands.add('EMC')
+# def do_EMC(stack: PDFStateStack) -> PDFStateStack:
+#     # self.device.end_tag(tag)
+#     log.debug("Unsupported command - end_tag")
+#     return stack
 
 @PDFCommands.add('q')
-def do_q(stack: PDFStateStack) -> PDFStateStack:
+def save_state(stack: PDFStateStack) -> PDFStateStack:
     stack.gstack.append([
         stack.t_matrix,
         stack.text.copy(),
@@ -58,62 +58,62 @@ def do_q(stack: PDFStateStack) -> PDFStateStack:
     return stack
 
 @PDFCommands.add('Q')
-def do_Q(stack: PDFStateStack) -> PDFStateStack:
+def restore_state(stack: PDFStateStack) -> PDFStateStack:
     if len(stack.gstack) > 0:
         stack.t_matrix, stack.text, stack.graphicstate = stack.gstack.pop()
     return stack
 
 # concat-matrix
 @PDFCommands.add('cm')
-def do_cm(stack: PDFStateStack, a1, b1, c1, d1, e1, f1) -> PDFStateStack:
+def concat_transition_matrix(stack: PDFStateStack, a1, b1, c1, d1, e1, f1) -> PDFStateStack:
     stack.t_matrix = mult_matrix((a1, b1, c1, d1, e1, f1), stack.t_matrix)
     return stack
 
 # setlinewidth
 @PDFCommands.add('w')
-def do_w(stack: PDFStateStack, linewidth) -> PDFStateStack:
+def set_line_width(stack: PDFStateStack, linewidth) -> PDFStateStack:
     stack.graphics.linewidth = linewidth
     return stack
 
 # setlinecap
 @PDFCommands.add('J')
-def do_J(stack: PDFStateStack, linecap) -> PDFStateStack:
+def set_linecap(stack: PDFStateStack, linecap) -> PDFStateStack:
     stack.graphics.linecap = linecap
     return stack
 
 # setlinejoin
 @PDFCommands.add('j')
-def do_j(stack: PDFStateStack, linejoin) -> PDFStateStack:
+def set_linejoin(stack: PDFStateStack, linejoin) -> PDFStateStack:
     stack.graphics.linejoin = linejoin
     return stack
 
 # setmiterlimit
 @PDFCommands.add('M')
-def do_M(stack: PDFStateStack, miterlimit) -> PDFStateStack:
+def set_miterlimit(stack: PDFStateStack, miterlimit) -> PDFStateStack:
     stack.graphics.miterlimit = miterlimit
     return stack
 
 # setdash
 @PDFCommands.add('d')
-def do_d(stack: PDFStateStack, dash, phase) -> PDFStateStack:
+def set_dash(stack: PDFStateStack, dash, phase) -> PDFStateStack:
     stack.graphics.dash = (dash, phase)
     return stack
 
 # setintent
 @PDFCommands.add('ri')
-def do_ri(stack: PDFStateStack, intent) -> PDFStateStack:
+def set_intent(stack: PDFStateStack, intent) -> PDFStateStack:
     stack.graphics.intent = intent
     return stack
 
 # setflatness
 @PDFCommands.add('i')
-def do_i(stack: PDFStateStack, flatness) -> PDFStateStack:
+def set_flatness(stack: PDFStateStack, flatness) -> PDFStateStack:
     stack.graphics.flatness = flatness
     return stack
 
 # moveto
 @PDFCommands.add('m')
-def do_m(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
+def curve_moveto(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.MOVE_TO, 
         CurvePoint(stack.t_matrix, x, y)
@@ -122,7 +122,7 @@ def do_m(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
 
 # lineto
 @PDFCommands.add('l')
-def do_l(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
+def curve_lineto(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.LINE_TO, 
         CurvePoint(stack.t_matrix, x, y)
@@ -131,7 +131,7 @@ def do_l(stack: PDFStateStack, x: float, y: float) -> PDFStateStack:
 
 # curveto
 @PDFCommands.add('c')
-def do_c(stack: PDFStateStack, 
+def curve_curveto(stack: PDFStateStack, 
         x1: float, y1: float, 
         x2: float, y2: float, 
         x3: float, y3: float ) -> PDFStateStack:
@@ -145,7 +145,7 @@ def do_c(stack: PDFStateStack,
 
 # urveto
 @PDFCommands.add('v')
-def do_v(stack: PDFStateStack, 
+def curve_urveto(stack: PDFStateStack, 
         x2: float, y2: float, 
         x3: float, y3: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
@@ -157,7 +157,7 @@ def do_v(stack: PDFStateStack,
 
 # rveto
 @PDFCommands.add('y')
-def do_y(stack: PDFStateStack, 
+def curve_rveto(stack: PDFStateStack, 
         x1: float, y1: float, 
         x3: float, y3: float) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
@@ -169,13 +169,13 @@ def do_y(stack: PDFStateStack,
 
 # closepath
 @PDFCommands.add('h')
-def do_h(stack: PDFStateStack) -> PDFStateStack:
+def curve_close(stack: PDFStateStack) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(CurvePath.METHOD.CLOSE_PATH))
     return stack
 
 # rectangle
 @PDFCommands.add('re')
-def do_re(stack: PDFStateStack, x, y, w, h) -> PDFStateStack:
+def curve_rect(stack: PDFStateStack, x, y, w, h) -> PDFStateStack:
     stack.curvestacks.extend([
         CurvePath(CurvePath.METHOD.MOVE_TO, CurvePoint(stack.t_matrix, x, y) ),
         CurvePath(CurvePath.METHOD.LINE_TO, CurvePoint(stack.t_matrix, x+w, y) ),
@@ -187,7 +187,7 @@ def do_re(stack: PDFStateStack, x, y, w, h) -> PDFStateStack:
 
 # stroke, fill
 @PDFCommands.add('S', 'f', 'F', 'B')
-def do_complete_path(stack: PDFStateStack) -> PDFStateStack:
+def curve_complete_path(stack: PDFStateStack) -> PDFStateStack:
     stack.complete_layout_items.append(make_curve(
         stack.t_matrix,
         stack.graphics.copy(),
@@ -199,7 +199,7 @@ def do_complete_path(stack: PDFStateStack) -> PDFStateStack:
 
 # sroke, fill-even-odd
 @PDFCommands.add('f_a', 'B_a')
-def do_complete_path_evenodd(stack: PDFStateStack) -> PDFStateStack:
+def curve_complete_path_evenodd(stack: PDFStateStack) -> PDFStateStack:
     stack.complete_layout_items.append(make_curve(
         stack.t_matrix,
         stack.graphics.copy(),
@@ -211,7 +211,7 @@ def do_complete_path_evenodd(stack: PDFStateStack) -> PDFStateStack:
 
 # close-and-stroke (do_h, do_S)
 @PDFCommands.add('s', 'b')
-def do_close_complete(stack: PDFStateStack) -> PDFStateStack:
+def curve_close_complete(stack: PDFStateStack) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CLOSE_PATH
     ))
@@ -226,7 +226,7 @@ def do_close_complete(stack: PDFStateStack) -> PDFStateStack:
 
 # close-fill-and-stroke-even-odd
 @PDFCommands.add('b_a')
-def do_close_complete_evenodd(stack: PDFStateStack) -> PDFStateStack:
+def curve_close_complete_evenodd(stack: PDFStateStack) -> PDFStateStack:
     stack.curvestacks.append(CurvePath(
         CurvePath.METHOD.CLOSE_PATH
     ))
@@ -241,14 +241,14 @@ def do_close_complete_evenodd(stack: PDFStateStack) -> PDFStateStack:
 
 # close-only (empty path)
 @PDFCommands.add('n')
-def do_n(stack: PDFStateStack) -> PDFStateStack:
+def curve_close_only(stack: PDFStateStack) -> PDFStateStack:
     stack.curvestacks = []
     return stack
 
 
 # setcolorspace-stroking
 @PDFCommands.add('CS')
-def do_CS(stack: PDFStateStack, name: str) -> PDFStateStack:
+def set_stroke_colorspace(stack: PDFStateStack, name: str) -> PDFStateStack:
     try:
         stack.graphics.scolspace = stack.colorspace_map[literal_name(name)]
         return stack
@@ -257,7 +257,7 @@ def do_CS(stack: PDFStateStack, name: str) -> PDFStateStack:
 
 # setcolorspace-non-strokine
 @PDFCommands.add('cs')
-def do_cs(stack: PDFStateStack, name: str) -> PDFStateStack:
+def set_nonstroke_colorspace(stack: PDFStateStack, name: str) -> PDFStateStack:
     try:
         stack.graphics.ncolspace = stack.colorspace_map[literal_name(name)]
         return stack
@@ -266,7 +266,7 @@ def do_cs(stack: PDFStateStack, name: str) -> PDFStateStack:
 
 # setgray-stroking
 @PDFCommands.add('G')
-def do_G(stack: PDFStateStack, gray: float) -> PDFStateStack:
+def set_stroke_gray(stack: PDFStateStack, gray: float) -> PDFStateStack:
     stack.graphics.set_stroke_color(
         stack.colorspace_map['DeviceGray'], 
         gray
@@ -275,7 +275,7 @@ def do_G(stack: PDFStateStack, gray: float) -> PDFStateStack:
 
 # setgray-non-stroking
 @PDFCommands.add('g')
-def do_g(stack: PDFStateStack, gray: float) -> PDFStateStack:
+def set_nonstroke_gray(stack: PDFStateStack, gray: float) -> PDFStateStack:
     stack.graphics.set_nostroke_color(
         stack.colorspace_map['DeviceGray'], 
         gray
@@ -285,7 +285,7 @@ def do_g(stack: PDFStateStack, gray: float) -> PDFStateStack:
 
 # setrgb-stroking
 @PDFCommands.add('RG')
-def do_RG(stack: PDFStateStack, r, g, b) -> PDFStateStack:
+def set_stroke_rgb(stack: PDFStateStack, r, g, b) -> PDFStateStack:
     stack.graphics.set_stroke_color(
         stack.colorspace_map['DeviceRGB'], 
         round(r*255), 
@@ -296,7 +296,7 @@ def do_RG(stack: PDFStateStack, r, g, b) -> PDFStateStack:
 
 # setrgb-non-stroking
 @PDFCommands.add('rg')
-def do_rg(stack: PDFStateStack, r, g, b) -> PDFStateStack:
+def set_nonstroke_rgb(stack: PDFStateStack, r, g, b) -> PDFStateStack:
     stack.graphics.set_nostroke_color(
         stack.colorspace_map['DeviceRGB'], 
         round(r*255), 
@@ -307,7 +307,7 @@ def do_rg(stack: PDFStateStack, r, g, b) -> PDFStateStack:
 
 # setcmyk-stroking
 @PDFCommands.add('K')
-def do_K(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
+def set_stroke_cmyk(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
     stack.graphics.set_stroke_color(
         stack.colorspace_map['DeviceCMYK'], 
         c, m, y, k
@@ -316,7 +316,7 @@ def do_K(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
 
 # setcmyk-non-stroking
 @PDFCommands.add('k')
-def do_k(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
+def set_nonstroke_cmyk(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
     stack.graphics.set_stroke_color(
         stack.colorspace_map['DeviceCMYK'], 
         c, m, y, k
@@ -324,7 +324,7 @@ def do_k(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
     return stack
 
 @PDFCommands.add('SCN','SC')
-def do_SCN(stack: PDFStateStack) -> PDFStateStack:
+def set_stroke_colorspace_custom(stack: PDFStateStack) -> PDFStateStack:
     if stack.graphics.scolspace is None:
         raise PDFCommands.InvalidOperation('No colorspace specified!')
     components = stack.pop(stack.graphics.scolspace.ncomponents)
@@ -335,7 +335,7 @@ def do_SCN(stack: PDFStateStack) -> PDFStateStack:
     return stack
 
 @PDFCommands.add('scn','sc')
-def do_scn(stack: PDFStateStack) -> PDFStateStack:
+def set_nonstroke_colorspace_custom(stack: PDFStateStack) -> PDFStateStack:
     if stack.graphics.ncolspace is None:
         raise PDFCommands.InvalidOperation('No colorspace specified!')
     components = stack.pop(stack.graphics.ncolspace.ncomponents)
@@ -347,7 +347,7 @@ def do_scn(stack: PDFStateStack) -> PDFStateStack:
 
 # begin-text
 @PDFCommands.add('BT')
-def do_BT(stack: PDFStateStack) -> PDFStateStack:
+def begin_text(stack: PDFStateStack) -> PDFStateStack:
     stack.text.matrix = MATRIX_IDENTITY
     stack.text.linematrix = [0, 0]
     if stack.current_textblock is None:
@@ -357,38 +357,38 @@ def do_BT(stack: PDFStateStack) -> PDFStateStack:
     return stack
 
 @PDFCommands.add('ET')
-def do_ET(stack: PDFStateStack) -> PDFStateStack:
+def end_text(stack: PDFStateStack) -> PDFStateStack:
     stack.complete_layout_items.append(stack.current_textblock)
     stack.current_textblock = None
     return stack
 
 # setcharspace
 @PDFCommands.add('Tc')
-def do_Tc(stack: PDFStateStack, charspace) -> PDFStateStack:
+def set_charspace(stack: PDFStateStack, charspace) -> PDFStateStack:
     stack.text.charspace = charspace
     return stack
 
 # setwordspace
 @PDFCommands.add('Tw')
-def do_Tw(stack: PDFStateStack, wordspace) -> PDFStateStack:
+def set_wordspace(stack: PDFStateStack, wordspace) -> PDFStateStack:
     stack.text.wordspace = wordspace
     return stack
 
 # textscale
 @PDFCommands.add('Tz')
-def do_Tz(stack: PDFStateStack, scaling) -> PDFStateStack:
+def set_textscale(stack: PDFStateStack, scaling) -> PDFStateStack:
     stack.text.scaling = scaling
     return stack
 
 # setleading
 @PDFCommands.add('TL')
-def do_TL(stack: PDFStateStack, leading) -> PDFStateStack:
+def set_text_leading(stack: PDFStateStack, leading) -> PDFStateStack:
     stack.text.leading = -leading
     return stack
 
 # selectfont
 @PDFCommands.add('Tf')
-def do_Tf(stack: PDFStateStack, fontid, fontsize) -> PDFStateStack:
+def set_font(stack: PDFStateStack, fontid, fontsize) -> PDFStateStack:
     stack.text.fontsize = fontsize
     try:
         stack.text.font = stack.fontmap[literal_name(fontid)]
@@ -398,19 +398,19 @@ def do_Tf(stack: PDFStateStack, fontid, fontsize) -> PDFStateStack:
 
 # setrendering
 @PDFCommands.add('Tr')
-def do_Tr(stack: PDFStateStack, render) -> PDFStateStack:
+def set_text_rendering(stack: PDFStateStack, render) -> PDFStateStack:
     stack.text.render = render
     return stack
 
 # settextrise
 @PDFCommands.add('Ts')
-def do_Ts(stack: PDFStateStack, rise) -> PDFStateStack:
+def set_textrise(stack: PDFStateStack, rise) -> PDFStateStack:
     stack.text.rise = rise
     return stack
 
 # text-move
 @PDFCommands.add('Td')
-def do_Td(stack: PDFStateStack, tx, ty) -> PDFStateStack:
+def move_text_x(stack: PDFStateStack, tx, ty) -> PDFStateStack:
     (a, b, c, d, e, f) = stack.text.matrix
     stack.text.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
     stack.text.linematrix = [0, 0]
@@ -418,7 +418,7 @@ def do_Td(stack: PDFStateStack, tx, ty) -> PDFStateStack:
 
 # text-move
 @PDFCommands.add('TD')
-def do_TD(stack: PDFStateStack, tx, ty) -> PDFStateStack:
+def move_text_y(stack: PDFStateStack, tx, ty) -> PDFStateStack:
     (a, b, c, d, e, f) = stack.text.matrix
     stack.text.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
     stack.text.leading = ty
@@ -427,14 +427,14 @@ def do_TD(stack: PDFStateStack, tx, ty) -> PDFStateStack:
 
 # textmatrix
 @PDFCommands.add('Tm')
-def do_Tm(stack: PDFStateStack, a, b, c, d, e, f) -> PDFStateStack:
+def set_text_matrix(stack: PDFStateStack, a, b, c, d, e, f) -> PDFStateStack:
     stack.text.matrix = (a, b, c, d, e, f)
     stack.text.linematrix = [0, 0]
     return stack
 
 # nextline
 @PDFCommands.add('T_a')
-def do_T_a(stack: PDFStateStack) -> PDFStateStack:
+def nextline(stack: PDFStateStack) -> PDFStateStack:
     (a, b, c, d, e, f) = stack.text.matrix
     stack.text.matrix = (a, b, c, d, stack.text.leading*c+e, stack.text.leading*d+f)
     stack.text.linematrix = [0, 0]
@@ -442,7 +442,7 @@ def do_T_a(stack: PDFStateStack) -> PDFStateStack:
 
 # show-pos
 @PDFCommands.add('TJ')
-def do_TJ(stack: PDFStateStack, seq: bytearray) -> PDFStateStack:
+def add_char_blocks(stack: PDFStateStack, seq: bytearray) -> PDFStateStack:
     if stack.text.font is None:
         raise PDFCommands.InvalidOperation("No Font Specified")
     if stack.current_textblock is None:
@@ -457,23 +457,23 @@ def do_TJ(stack: PDFStateStack, seq: bytearray) -> PDFStateStack:
 
 # show
 @PDFCommands.add('Tj')
-def do_Tj(stack: PDFStateStack, b: bytes) -> PDFStateStack:
-    return do_TJ(stack, [b])
+def add_char_block(stack: PDFStateStack, b: bytes) -> PDFStateStack:
+    return add_char_blocks(stack, [b])
 
 # quote
 @PDFCommands.add('_q')
-def do__q(stack: PDFStateStack, b: bytes) -> PDFStateStack:
-    return do_TJ(do_T_a(stack), [b])
+def add_quoted_char_blocks(stack: PDFStateStack, b: bytes) -> PDFStateStack:
+    return add_char_blocks(nextline(stack), [b])
 
 # doublequote
 @PDFCommands.add('_w')
-def do__w(stack: PDFStateStack, wordspace, charspace, b) -> PDFStateStack:
+def add_dbquoted_char_blocks(stack: PDFStateStack, wordspace, charspace, b) -> PDFStateStack:
     stack.text.wordspace = wordspace
     stack.text.charspace = charspace
-    return do_TJ(stack, [b])
+    return add_char_blocks(stack, [b])
 
 @PDFCommands.add('EI')
-def do_EI(stack: PDFStateStack, obj) -> PDFStateStack:
+def insert_image(stack: PDFStateStack, obj) -> PDFStateStack:
     if 'W' in obj and 'H' in obj:
         stack.complete_layout_items.append(make_image(
             obj,  stack.t_matrix
@@ -482,7 +482,7 @@ def do_EI(stack: PDFStateStack, obj) -> PDFStateStack:
 
 # invoke an XObject
 @PDFCommands.add('Do')
-def do_Do(stack: PDFStateStack, xobjid) -> PDFStateStack:
+def insert_xobject(stack: PDFStateStack, xobjid) -> PDFStateStack:
     xobjid = literal_name(xobjid)
     try:
         xobj = PDFStream.validated_stream(stack.xobjmap[xobjid])
