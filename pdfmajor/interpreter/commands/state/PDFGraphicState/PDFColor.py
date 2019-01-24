@@ -13,4 +13,6 @@ class PDFColor:
         )
     
     def __repr__(self):
-        return f"<PDFColor space={self.color_space} values={self.values}/>"
+        return f"""<PDFColor space="{
+            None if self.color_space is None else self.color_space.name
+        }" values={self.values}/>"""

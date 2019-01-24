@@ -24,6 +24,14 @@ class LTCurve(LTComponent):
         self.stroke = stroke
         self.fill = fill
 
+    def __repr__(self):
+        return ('<%s [%s] fill=%s stroke=%s>' % (
+            self.__class__.__name__, 
+            str(self.bbox),
+            self.fill,
+            self.stroke
+        ))
+
 ##  LTLine
 ##
 class LTLine(LTCurve):
