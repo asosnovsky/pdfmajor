@@ -80,7 +80,6 @@ with JSONMaker(FILE_NAME) as obj:
                     item.number("x1", 4.2)
                     item.number("y0", 231.12)
                     item.number("y1", 331.12)
-print(open(FILE_NAME, 'r').read())
 assert(open(FILE_NAME, 'r').read() == """{
   "pages": [
     {

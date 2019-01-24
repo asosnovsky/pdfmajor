@@ -20,7 +20,6 @@ with YAMLMaker(FILE_NAME) as yml:
                 toys.write("bear")
     with yml.object("computer") as computer:
         computer.write("type", "awesome")
-print(open(FILE_NAME, 'r').read())
 assert(open(FILE_NAME, 'r').read() == """name: bob
 age: 20
 wife:
@@ -48,7 +47,6 @@ with YAMLMaker(FILE_NAME) as yml:
                 "lion", "bear"
             ])
     yml.place_object("computer", {"type": "awesome"})
-print(open(FILE_NAME, 'r').read())
 assert(open(FILE_NAME, 'r').read() == """name: bob
 age: 20
 wife:
@@ -81,8 +79,21 @@ with YAMLMaker(FILE_NAME) as yml:
                     curve.write("y0", 0)
                     curve.write("y1", 1)
 
-print(open(FILE_NAME, 'r').read())
-assert(open(FILE_NAME, 'r').read() == """""")
+assert(open(FILE_NAME, 'r').read() == """pages:
+  - id: 0
+    width: 100
+    height: 200
+    children:
+      - stroke:
+          type: DeviceRGB
+          value: ['1', '2', '3']
+        x0: 0
+        x1: 1
+        fill:
+          type: DeviceRGB
+          value: ['1', '2', '3']
+        y0: 0
+        y1: 1""")
 
 
 

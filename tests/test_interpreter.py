@@ -1,21 +1,22 @@
 import os
-
-# from pdfmajor.extractor import extract_items_from_pdf
+from tqdm import tqdm
 from pdfmajor.interpreter import LTCharBlock, PDFInterpreter, logging
 from pdfmajor.interpreter import PageInterpreter
 from pdfmajor.interpreter.commands import LTItem
 from pdfmajor.interpreter.commands import LTCharBlock, LTChar
 
 CUR_PATH = os.path.dirname(os.path.dirname(__file__))
-FILE_NAME = os.path.join(
-    CUR_PATH,
-    "samples/pdf/tables.pdf"
+INPUT_FOLDER = os.path.join(
+    CUR_PATH, "tests/samples/pdf"
 )
+FILES = os.listdir(INPUT_FOLDER)
 
-for page in PDFInterpreter(FILE_NAME, debug_level=logging.INFO):
-    assert isinstance(page, PageInterpreter)
-    for item in page:
-        assert isinstance(item, LTItem)
-        if isinstance(item, LTCharBlock):
-            for char in item:
-                assert(char, LTChar)
+for file_name in tqdm(FILES, desc="Interpreter Test"):
+    file_path = os.path.join(INPUT_FOLDER, file_name)
+    for page in PDFInterpreter(file_path, debug_level=logging.ERROR):
+        assert isinstance(page, PageInterpreter)
+        for item in page:
+            assert isinstance(item, LTItem)
+            if isinstance(item, LTCharBlock):
+                for char in item:
+                    assert isinstance(char, LTChar)

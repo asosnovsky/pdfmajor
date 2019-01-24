@@ -50,7 +50,8 @@ class JSONMakerObject:
         self.write_prop(key, val)
     
     def string(self, key: str, val: str):
-        self.write_prop(key, f'"{val}"')
+        val_sant = str(val).replace('"', '\\"')
+        self.write_prop(key, f'"{val_sant}"')
     
     @contextmanager
     def object(self, key: str):
@@ -109,7 +110,8 @@ class JSONMakerArray:
         self.write_prop(val)
     
     def string(self, val: str):
-        self.write_prop(f'"{val}"')
+        val_sant = str(val).replace('"', '\\"')
+        self.write_prop(f'"{val_sant}"')
     
     @contextmanager
     def object(self):

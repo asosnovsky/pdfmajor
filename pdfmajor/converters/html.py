@@ -166,7 +166,7 @@ def create_svg_path(item: LTCurve):
 
     if item.height > 0:
         dy = 1.0/item.height
-        dx = (item.width/item.height)/(item.x1-item.x0)
+        dx = (item.width/item.height)/max([(item.x1-item.x0),0.01])
         svg_attr.update({
             "viewBox": "0 0 %s %s" % ( item.width/item.height, 1 )
         })
