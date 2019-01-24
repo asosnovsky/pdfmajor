@@ -6,13 +6,18 @@ cd ..
 
 ./bin/clean.sh
 
-python setup.py sdist bdist_wheel
 
-git add .
-git commit
-git push
+if ./bin/run_tests.sh; then
+    python setup.py sdist bdist_wheel
 
-git tag $(cat .version)
-git push -u origin $(cat .version)
+    git add .
+    git commit
+    git push
 
-twine upload dist/*
+    git tag $(cat .version)
+    git push -u origin $(cat .version)
+
+    twine upload dist/*
+else
+    echo ">>> Stopped due to test failure!"
+fi

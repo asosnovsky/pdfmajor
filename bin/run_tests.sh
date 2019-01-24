@@ -5,5 +5,9 @@ cd $WK_DIR
 cd ..
 
 for filename in ./tests/test*.py; do
-    python $filename
+    if python $filename ; then
+        echo woohoo
+    else
+        exit 1
+    fi
 done
