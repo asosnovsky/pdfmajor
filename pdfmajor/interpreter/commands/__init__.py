@@ -23,10 +23,16 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
     if font_cache is None:
         font_cache = {}
     parser = PDFContentParser(streams)
+    # from .cmd_record import CmdRecord
+    # history = CmdRecord()
     for obj in parser:
         if isinstance(obj, PSKeyword):
             name = keyword_name(obj)
             method = name.replace('*', '_a').replace('"', '_w').replace("'", '_q')
+            func = None
+            args = []
+            if method == "Do":
+                pass
             if method in PDFCommands.commands.keys():
                 func = PDFCommands.commands.get(method)
                 nargs = func.__code__.co_argcount-1
@@ -40,8 +46,12 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
                     func(state)
             else:
                 log.debug('Unknown operator: %r (i.e. %r)' % (name, method))
+            # history.write(name, 
+            #     None if func is None else func.__name__
+            # , args)
         else:
             state.argstack.append(obj)
+            # history.write('arg', None, obj)
         
         for complete_item in state.complete_layout_items:
             if isinstance(complete_item, LTXObject):
@@ -51,6 +61,7 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
                     resources=complete_item.resources,
                     font_cache=font_cache
                 )
+                xobj_state.graphics = state.graphics.copy()
                 for item in process_command_stream(
                     [complete_item.stream], 
                     font_cache=font_cache, 
