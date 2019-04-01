@@ -11,11 +11,11 @@
 </tr>
 </table>
 
-PDF-Major is a <u>completed re-write</u> of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. The ultimate goal of this project is to provide a simpler, faster and more functional library that both casual and low-level developers could build upon.
+PDF-Major is a **complete re-write** of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. The ultimate goal of this project is to provide a simpler, faster and more functional library that both casual and low-level developers could build upon.
 
 ## Documentation
 
-See [<u>full API documentation here</u>](https://asosnovsky.github.io/pdfmajor/api/).
+See [full API documentation here](https://asosnovsky.github.io/pdfmajor/api/).
 
 ## Basic Example
 ```py
