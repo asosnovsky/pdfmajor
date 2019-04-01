@@ -15,7 +15,7 @@ PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight imp
 
 ## Documentation
 
-See documentation [here](https://asosnovsky.github.io/pdfmajor/).
+See [<u>full API documentation here</u>](https://asosnovsky.github.io/pdfmajor/api/).
 
 ## Basic Example
 ```py
