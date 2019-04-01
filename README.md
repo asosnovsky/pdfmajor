@@ -11,7 +11,7 @@
 </tr>
 </table>
 
-PDF-Major is a fork of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. The ultimate goal of this project is to provide a simpler, faster and more functional library that both casual and low-level developers could build upon.
+PDF-Major is a <u>completed re-write</u> of `PDFMiner.six`. It is meant to be a more light-weight implementation that makes fewer assumptions on the data. The ultimate goal of this project is to provide a simpler, faster and more functional library that both casual and low-level developers could build upon.
 
 ## Documentation
 
@@ -29,9 +29,9 @@ for page in PDFInterpreter("/path/to/pdf.pdf"):
     
 ```
 
-## Why Another Fork?
+## Why a re-write?
 
-`PDFMiner` was designed to run in python 2.7>, `PDFMiner.six` was written to bring cross-version support for python 2 and 3. However, after attempting to build and extend upon `PDFMiner.six` I found it rather difficult to extend and identify additional details regarding the items encoded in the pdf. This library will attempt to expose as much information as possible to end-users, without having them solely rely on to-xml or to-json exports.
+`PDFMiner` was designed to run in python 2.7, `PDFMiner.six` was written to bring cross-version support for python 2 and 3. However, after attempting to build and extend upon `PDFMiner.six` I found it rather difficult to extend and identify additional details regarding the items encoded in the pdf. This library will attempt to expose as much information as possible to end-users, without having them solely rely on to-xml or to-json exports.
 
 ## Features
 
