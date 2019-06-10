@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .writers.html import HTMLMaker
 from ..interpreter import PDFInterpreter, PageInterpreter, logging
 from ..interpreter import LTImage, LTTextBlock, LTCharBlock, LTChar, LTCurve, LTXObject
@@ -10,11 +10,11 @@ INF = (1<<31) - 1
 def convert_to_html(
     input_file_path: str, 
     output_file_path: str, 
-    image_folder_path: str = None,
+    image_folder_path: Optional[str] = None,
     dont_export_images: bool = False,
     codec: str = 'utf-8',
     maxpages: int = 0, 
-    password: str = None, 
+    password: Optional[str] = None, 
     caching: bool = True, 
     check_extractable: bool = True,
     pagenos: List[int] = None,

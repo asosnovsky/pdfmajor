@@ -11,4 +11,6 @@ tests/*.txt
 .vscode
 tests/samples/output
 samples
-**__pycache**
+**__pycache**\
+.mypy_cache
+.ipynb_checkpoints

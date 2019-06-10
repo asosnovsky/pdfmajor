@@ -2,7 +2,7 @@ import io
 import os
 import re
 
-from typing import List
+from typing import List, Optional
 
 from .html import convert_to_html
 from .xml import convert_to_xml
@@ -13,14 +13,14 @@ from ..utils import logging
 
 def convert_file(
         input_file: str, 
-        output_file: str = None, 
-        image_folder_path: str = None,
+        output_file: Optional[str] = None, 
+        image_folder_path: Optional[str] = None,
         codec: str = 'utf-8',
         maxpages: int = 0, 
-        password: str = None, 
+        password: Optional[str] = None, 
         caching: bool = True, 
         check_extractable: bool = True,
-        pagenos: List[int] = None,
+        pagenos: Optional[List[int]] = None,
         dont_export_images: bool = False,
         debug_level: int = logging.WARNING,
         out_type: str = 'html',

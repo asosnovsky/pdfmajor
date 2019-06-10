@@ -1,3 +1,4 @@
+from typing import Dict
 from collections import OrderedDict
 
 class PDFColorSpace(object):
@@ -5,13 +6,12 @@ class PDFColorSpace(object):
     def __init__(self, name: str, ncomponents: int):
         self.name: str = name
         self.ncomponents: int = ncomponents
-        return
 
     def __repr__(self):
         return '<PDFColorSpace: %s, ncomponents=%d>' % (self.name, self.ncomponents)
 
 
-PREDEFINED_COLORSPACE = OrderedDict()
+PREDEFINED_COLORSPACE: Dict[str, PDFColorSpace] = OrderedDict()
 
 for (name, n) in [
     ('DeviceGray', 1),  # default value first

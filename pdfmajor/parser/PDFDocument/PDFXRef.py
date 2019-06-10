@@ -1,5 +1,6 @@
 import re
 from logging import getLogger
+from typing import Tuple, Optional, Dict
 
 from ...utils import settings, choplist, nunpack
 from ..PSStackParser import PSEOF
@@ -13,6 +14,7 @@ from .exceptions import PDFNoValidXRef, PDFSyntaxError
 
 
 log = getLogger(__name__)
+Pos = Tuple[Optional[int], int, int]
 
 ##  XRefs
 ##
@@ -27,7 +29,7 @@ class PDFBaseXRef(object):
     # Must return
     #     (strmid, index, genno)
     #  or (None, pos, genno)
-    def get_pos(self, objid):
+    def get_pos(self, objid) -> Pos:
         raise KeyError(objid)
 
 
@@ -36,7 +38,7 @@ class PDFBaseXRef(object):
 class PDFXRef(PDFBaseXRef):
 
     def __init__(self):
-        self.offsets = {}
+        self.offsets: Dict[int, Pos] = {}
         self.trailer = {}
         return
 

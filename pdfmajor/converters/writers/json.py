@@ -1,3 +1,4 @@
+from typing import Set
 from json import dumps as json_dump
 from io import TextIOWrapper
 from contextlib import contextmanager     
@@ -8,14 +9,13 @@ def JSONMaker(file_path: str, codec: str = 'utf-8'):
         with JSONMakerObject(outf, codec=codec) as obj:
             yield obj
 
-
 class JSONMakerObject:
     class AccessError(Exception): pass
     def __init__(self, outfile: TextIOWrapper, codec: str = 'utf-8', levels_deep: int = 0):
         self.outfile: TextIOWrapper = outfile
         self.codec = codec
         self.levels_deep = levels_deep
-        self.keys = set()
+        self.keys: Set[str] = set()
 
     def __enter__(self):
         self.write_raw('{')

@@ -1,6 +1,5 @@
 import os
-from tqdm import tqdm
-
+from unittest import TestCase, main
 # from pdfmajor.extractor import extract_items_from_pdf
 from pdfmajor.interpreter import LTCharBlock, PDFInterpreter, logging
 from pdfmajor.interpreter import PageInterpreter
@@ -23,13 +22,17 @@ def count_elms(file_path: str):
                 count += 1
     return count
 
-with tqdm(desc='Cache Test', total=len(FILES)*NUM_LOOPS) as waiter:
-    for file_name in FILES:
-        waiter.set_description(f"Cache Test - [{file_name}]")
-        file_path = os.path.join(INPUT_FOLDER, file_name)
-        last_count = count_elms(file_path)
-        for _ in range(NUM_LOOPS):
-            new_count = count_elms(file_path)
-            assert new_count == last_count
-            last_count = new_count
-            waiter.update()
+class CachingTester(TestCase):
+    def test_cache(self):
+        for file_name in FILES:
+            self.subTest(name = file_name)
+            file_path = os.path.join(INPUT_FOLDER, file_name)
+            last_count = count_elms(file_path)
+            for _ in range(NUM_LOOPS):
+                new_count = count_elms(file_path)
+                self.assertEqual( new_count , last_count )
+                last_count = new_count
+
+if __name__ == '__main__':
+    # Run Tests
+    main()

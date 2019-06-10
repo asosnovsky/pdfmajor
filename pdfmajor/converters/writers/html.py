@@ -1,3 +1,4 @@
+from typing import Optional
 from io import TextIOWrapper
 from contextlib import contextmanager
 
@@ -6,7 +7,7 @@ class HTMLMaker:
     def __init__(self, file_path: str, codec: str = 'utf-8'):
         self.file_path = file_path
         self.codec = codec
-        self.outfile: TextIOWrapper = None
+        self.outfile: Optional[TextIOWrapper] = None
     
     def __enter__(self):
         self.outfile = open(self.file_path, 'wb')
@@ -42,18 +43,18 @@ class HTMLMaker:
                 f'{name}: {value}'
                 for name, value in css.items()
             ])
-        attrs = " ".join([
+        attrs_str = " ".join([
             f'{name}="{value}"'
             for name, value in attrs.items()
         ])
         if not singleton:
-            self.write(f"<{tag_name} {attrs}>", lineend=lineend)
+            self.write(f"<{tag_name} {attrs_str}>", lineend=lineend)
             self.__levels_deep += 1
             yield
             self.__levels_deep -= 1
             self.write(f"</{tag_name}>", deep_space=deep_space, lineend='\n' if not nolineend else '')
         else:
-            self.write(f"<{tag_name} {attrs} />", lineend=lineend, deep_space=deep_space)
+            self.write(f"<{tag_name} {attrs_str} />", lineend=lineend, deep_space=deep_space)
             yield
     
     def singleton(self, tag_name: str, attrs: dict = None, css: dict = None, singleton: bool = True):

@@ -10,12 +10,19 @@ import sys
 with open('README.md') as readme_file:
     SETUP = {
         "name": "pdfmajor",
-        "version": "1.3.7",
+        "version": "1.3.8",
         "packages": find_packages(include=['pdfmajor*']),
         "install_requires": [
-            'pycryptodome', 
-            'chardet'
+            'pycryptodome==3.8.2', 
+            'chardet==3.0.4',
+            'Pillow==6.0.0'
         ],
+        'extras_require': {
+            'dev': [
+                'tqdm==4.32.1',
+                'nose==1.3.7'
+            ]
+        },
         "description": 'PDF parser',
         "long_description": readme_file.read(),
         'long_description_content_type': 'text/markdown',

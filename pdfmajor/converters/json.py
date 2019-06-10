@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from .writers.json import JSONMaker, JSONMakerObject, JSONMakerArray
 from ..interpreter import PDFInterpreter, PageInterpreter, logging
@@ -21,14 +21,14 @@ def normalize_color_values(values: list):
 def convert_to_json(
     input_file_path: str, 
     output_file_path: str, 
-    image_folder_path: str = None,
+    image_folder_path: Optional[str] = None,
     dont_export_images: bool = False,
     codec: str = 'utf-8',
     maxpages: int = 0, 
-    password: str = None, 
+    password: str = Optional[None], 
     caching: bool = True, 
     check_extractable: bool = True,
-    pagenos: List[int] = None,
+    pagenos: Optional[List[int]] = None,
     debug_level: int = logging.WARNING,
 ):
     intepreter = PDFInterpreter(input_file_path, 
