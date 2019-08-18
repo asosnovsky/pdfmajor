@@ -1,7 +1,5 @@
 from typing import List
 
-from tqdm import tqdm
-
 from ..parser.PDFPage import PDFPage
 from ..utils import set_log_level, get_logger, logging
 from .commands.state import PDFStateStack, PDFColorSpace, PREDEFINED_COLORSPACE
@@ -53,7 +51,7 @@ class PDFInterpreter:
                 caching=self.caching, 
                 check_extractable=self.check_extractable
             )
-            for page_num, page in tqdm(enumerate(pages), desc="Reading pages...", disable=self.debug_level > logging.INFO):
+            for page_num, page in enumerate(pages):
                 self.__pages.append(PageInterpreter(page, page_num, font_cache))
                 yield self.__pages[-1]
             log.info(f"Done Reading {len(self.__pages)} pages.")
@@ -64,7 +62,7 @@ class PDFInterpreter:
     def __iter__(self):
         if len(self.__pages) > 0:
             set_log_level(self.debug_level)
-            for page in tqdm(self.__pages, desc="Reading pages from store...", disable=self.debug_level > logging.INFO):
+            for page in self.__pages:
                 yield page
             set_log_level(logging.WARNING)
         else:
