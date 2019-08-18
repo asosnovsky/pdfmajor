@@ -10,7 +10,7 @@ tests/*.txt
 .idea/
 .vscode
 tests/samples/output
-samples
+./samples
 **__pycache**\
 .mypy_cache
 .ipynb_checkpoints
