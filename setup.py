@@ -15,12 +15,11 @@ with open('README.md') as readme_file:
         "install_requires": [
             'pycryptodome==3.8.2', 
             'chardet==3.0.4',
-            'Pillow==6.0.0'
+            'Pillow>=6.2.0'
         ],
         'extras_require': {
             'dev': [
-                'tqdm==4.32.1',
-                'nose==1.3.7'
+                'tqdm==4.32.1'
             ]
         },
         "description": 'PDF parser',
