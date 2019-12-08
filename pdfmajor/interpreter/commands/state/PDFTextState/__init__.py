@@ -1,5 +1,6 @@
-from .PDFFont import PDFFont, get_font
 from pdfmajor.utils import MATRIX_IDENTITY
+from .PDFFont import PDFFont, get_font
+from .PDFFont.execptions import PDFUnicodeNotDefined, PDFFontError
 
 ##  PDFTextState
 ##
@@ -16,14 +17,27 @@ class PDFTextState(object):
         self.rise: int = 0
         self.matrix = MATRIX_IDENTITY
         self.linematrix = [0, 0]
+        self.ignore_bad_chars = False
 
     def __repr__(self):
         return ('<PDFTextState: font=%r, fontsize=%r, charspace=%r, wordspace=%r, '
                 ' scaling=%r, leading=%r, render=%r, rise=%r, '
-                ' matrix=%r, linematrix=%r>' %
+                ' matrix=%r, linematrix=%r ignore_bad_chars=%r>' %
                 (self.font, self.fontsize, self.charspace, self.wordspace,
                  self.scaling, self.leading, self.render, self.rise,
-                 self.matrix, self.linematrix))
+                 self.matrix, self.linematrix, self.ignore_bad_chars))
+    
+    def to_unichr(self, cid: int) -> str:
+        if self.font is None:
+            raise PDFFontError("Missing font")
+        try:
+            return self.font.to_unichr(cid)
+        except PDFUnicodeNotDefined as e:
+            if self.ignore_bad_chars:
+                return ""
+            else:
+                raise e
+
 
     def copy(self):
         obj = self.__class__()
@@ -37,6 +51,7 @@ class PDFTextState(object):
         obj.rise = self.rise
         obj.matrix = self.matrix
         obj.linematrix = self.linematrix
+        obj.ignore_bad_chars = self.ignore_bad_chars
         return obj
 
     def reset_matrices(self):

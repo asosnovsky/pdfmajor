@@ -71,9 +71,10 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
             yield complete_item
         state.complete_layout_items = []
 
-def prep_state(state: PDFStateStack, ctm: tuple, resources: dict, font_cache: dict) -> PDFStateStack:
+def prep_state(state: PDFStateStack, ctm: tuple, resources: dict, font_cache: dict, ignore_bad_chars: bool = False) -> PDFStateStack:
     state.t_matrix = ctm
     state.resources = resources
+    state.text.ignore_bad_chars = ignore_bad_chars
 
     # set some global states.
     state.graphics.ncolspace = state.graphics.scolspace = None 

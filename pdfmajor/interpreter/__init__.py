@@ -23,6 +23,7 @@ class PDFInterpreter:
         password: str = None, 
         pagenos: List[int] = None,
         preload: bool = False,
+        ignore_bad_chars: bool = False,
         debug_level: int = logging.WARNING, 
     ):
         self.input_file_path = input_file_path
@@ -31,6 +32,7 @@ class PDFInterpreter:
         self.check_extractable = check_extractable
         self.password = password
         self.pagenos = pagenos
+        self.ignore_bad_chars = ignore_bad_chars
         self.debug_level = debug_level
         self.__pages = []
         if preload:
@@ -52,7 +54,7 @@ class PDFInterpreter:
                 check_extractable=self.check_extractable
             )
             for page_num, page in enumerate(pages):
-                self.__pages.append(PageInterpreter(page, page_num, font_cache))
+                self.__pages.append(PageInterpreter(page, page_num, font_cache, ignore_bad_chars=self.ignore_bad_chars))
                 yield self.__pages[-1]
             log.info(f"Done Reading {len(self.__pages)} pages.")
         set_log_level(logging.WARNING)

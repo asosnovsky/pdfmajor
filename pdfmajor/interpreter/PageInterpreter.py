@@ -6,7 +6,7 @@ from .commands import process_command_stream, prep_state
 
 class PageInterpreter:
 
-    def __init__(self, page: PDFPage, page_num: int, font_cache: dict = {}):
+    def __init__(self, page: PDFPage, page_num: int, font_cache: dict = None, ignore_bad_chars = False):
         (x0, y0, x1, y1) = page.mediabox
         if page.rotate == 90:
             ctm = [0, -1, 1, 0, -y0, x1]
@@ -18,7 +18,7 @@ class PageInterpreter:
             ctm = [1, 0, 0, 1, -x0, -y0]
 
         # Locals
-        self.font_cache = font_cache
+        self.font_cache = font_cache if font_cache is not None else {}
         self.page = page
         self.page_num = page_num
         self.height = y1-y0
@@ -29,7 +29,8 @@ class PageInterpreter:
             PDFStateStack(), 
             ctm=ctm, 
             resources=page.resources, 
-            font_cache=self.font_cache
+            font_cache=self.font_cache,
+            ignore_bad_chars=ignore_bad_chars
         )
 
     

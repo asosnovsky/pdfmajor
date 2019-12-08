@@ -58,7 +58,7 @@ class PDFText(PDFItem):
                     if needcharspace:
                         textstate.linematrix[idx] += textstate.charspace
                     
-                    text = textstate.font.to_unichr(cid)
+                    text = textstate.to_unichr(cid)
                     assert isinstance(text, str), str(type(text))
 
                     matrix = translate_matrix(textstate.matrix, textstate.linematrix)
