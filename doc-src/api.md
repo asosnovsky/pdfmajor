@@ -37,6 +37,7 @@ This generator-function yields individual pages which contain their respected it
 - `password`: [str](#) defaults to None 
 - `caching`: [bool](#) defaults to True 
 - `check_extractable`: [bool](#) defaults to True
+- `ignore_bad_chars`: [bool](#) defaults to False
 - `pagenos`: [List[int]](#) defaults to None
 - `debug_level`: [logging.levels](#https://docs.python.org/3/library/logging.html#levels) defaults logging.WARNING
 

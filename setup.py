@@ -19,7 +19,8 @@ with open('README.md') as readme_file:
         ],
         'extras_require': {
             'dev': [
-                'tqdm==4.32.1'
+                'tqdm==4.32.1',
+                'mkdocs==1.0.4'
             ]
         },
         "description": 'PDF parser',
