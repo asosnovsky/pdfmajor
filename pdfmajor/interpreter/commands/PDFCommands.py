@@ -7,17 +7,18 @@ from pdfmajor.parser.constants import LITERAL_FORM, LITERAL_IMAGE
 from .state import PDFStateStack, PDFColorSpace
 from .state.Curves import CurveMethod, CurvePath, CurvePoint
 
+class PDFCommandsInvalidOperation(Exception): pass
+class PDFCommandsRepeatedCommand(Exception): pass
+
 class PDFCommands:
     commands = {}
-    class InvalidOperation(Exception): pass
-    class RepeatedCommand(Exception): pass
 
     @classmethod
     def __add(cls, cmd_name: str, cmd: callable):
         if not (cmd_name in cls.commands.keys()):
             cls.commands[cmd_name] = cmd
             return cmd
-        raise cls.RepeatedCommand(cmd_name)
+        raise PDFCommandsRepeatedCommand(cmd_name)
 
     @classmethod
     def add(cls, *cmd_names: List[str]):

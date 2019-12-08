@@ -4,6 +4,7 @@ from pdfmajor.parser.PDFStream import list_value
 from pdfmajor.parser.PDFStream import dict_value
 from pdfmajor.parser.PDFStream import resolve1
 from pdfmajor.parser.constants import LITERAL_FONT
+from .execptions import PDFFontError
 
 from .fonts import PDFType1Font, PDFTrueTypeFont, PDFType3Font, PDFCIDFont, PDFFont
 
@@ -16,13 +17,13 @@ def get_font(objid: int, spec: dict, cached_fonts: dict = {}):
         log.debug('get_font: create: objid=%r, spec=%r', objid, spec)
         if settings.STRICT:
             if spec['Type'] is not LITERAL_FONT:
-                raise PDFFont.PDFFontError('Type is not /Font')
+                raise PDFFontError('Type is not /Font')
         # Create a Font object.
         if 'Subtype' in spec:
             subtype = literal_name(spec['Subtype'])
         else:
             if settings.STRICT:
-                raise PDFFont.PDFFontError('Font Subtype is not specified.')
+                raise PDFFontError('Font Subtype is not specified.')
             subtype = 'Type1'
         if subtype in ('Type1', 'MMType1'):
             # Type1 Font
@@ -47,7 +48,7 @@ def get_font(objid: int, spec: dict, cached_fonts: dict = {}):
             font = get_font(None, subspec, cached_fonts)
         else:
             if settings.STRICT:
-                raise PDFFont.PDFFontError('Invalid Font spec: %r' % spec)
+                raise PDFFontError('Invalid Font spec: %r' % spec)
             font = PDFType1Font(spec)  # this is so wrong!
         if objid:
             cached_fonts[objid] = font

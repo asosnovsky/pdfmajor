@@ -5,7 +5,6 @@ from .commands import PDFStateStack
 from .commands import process_command_stream, prep_state
 
 class PageInterpreter:
-    class PDFInterpreterError(Exception): pass
 
     def __init__(self, page: PDFPage, page_num: int, font_cache: dict = {}):
         (x0, y0, x1, y1) = page.mediabox

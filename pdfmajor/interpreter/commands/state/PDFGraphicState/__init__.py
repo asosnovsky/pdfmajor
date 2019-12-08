@@ -2,7 +2,6 @@ from .PDFColor import PDFColor, PDFColorSpace
 from .PDFColorSpace import PREDEFINED_COLORSPACE
 
 class PDFGraphicState(object):
-    class InvalidOperation(Exception): pass
 
     def __init__(self):
         self.linewidth = 0

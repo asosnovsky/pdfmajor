@@ -10,10 +10,10 @@ from pdfmajor.parser.PDFStream import resolve1
 from pdfmajor.parser.PDFStream import int_value
 from pdfmajor.parser.PDFStream import num_value
 from pdfmajor.parser.PDFStream import list_value
-from pdfmajor.parser.PDFStream import PDFException
 from pdfmajor.parser.PDFStream import PDFStream
 from pdfmajor.parser.cmapdb import FileUnicodeMap
 from pdfmajor.parser.cmapdb import CMapParser
+from .execptions import PDFFontError, PDFUnicodeNotDefined
 
 ##  Literals
 ##
@@ -22,8 +22,6 @@ LITERAL_TYPE1C = LIT('Type1C')
 
 
 class PDFFont(object):
-    class PDFFontError(PDFException): pass
-    class PDFUnicodeNotDefined(PDFFontError): pass
 
     def __init__(self, descriptor, widths, default_width=None):
         self.descriptor = descriptor
@@ -77,7 +75,7 @@ class PDFFont(object):
         except KeyError:
             try:
                 return self.widths[self.to_unichr(cid)] * self.hscale
-            except (KeyError, self.PDFUnicodeNotDefined):
+            except (KeyError, PDFUnicodeNotDefined):
                 return self.default_width * self.hscale
 
     def char_disp(self, cid):
@@ -137,4 +135,4 @@ class PDFSimpleFont(PDFFont):
         try:
             return self.cid2unicode[cid]
         except KeyError:
-            raise self.PDFUnicodeNotDefined(None, cid)
+            raise PDFUnicodeNotDefined(None, cid)
