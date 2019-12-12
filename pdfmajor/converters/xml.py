@@ -45,6 +45,7 @@ def convert_to_xml(
     maxpages: int = 0, 
     password: str = None, 
     caching: bool = True, 
+    ignore_bad_chars: bool = False,
     check_extractable: bool = True,
     pagenos: List[int] = None,
     debug_level: int = logging.WARNING,
@@ -54,6 +55,7 @@ def convert_to_xml(
         password=password, 
         caching=caching,
         check_extractable=check_extractable,
+        ignore_bad_chars=ignore_bad_chars,
         pagenos=pagenos,
         debug_level=debug_level
     )

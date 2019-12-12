@@ -16,7 +16,7 @@ class TestInterpreter(TestCase):
         for file_name in FILES:
             self.subTest(file_name=file_name)
             file_path = os.path.join(INPUT_FOLDER, file_name)
-            for page in PDFInterpreter(file_path, debug_level=logging.ERROR):
+            for page in PDFInterpreter(file_path, debug_level=logging.ERROR, ignore_bad_chars=True):
                 self.assertTrue( isinstance(page, PageInterpreter) )
                 for item in page:
                     self.assertTrue( isinstance(item, LTItem) )

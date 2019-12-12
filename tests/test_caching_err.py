@@ -14,7 +14,7 @@ NUM_LOOPS = 10
 
 def count_elms(file_path: str):
     count = 0
-    for page in PDFInterpreter(file_path):
+    for page in PDFInterpreter(file_path, ignore_bad_chars=True):
         for item in page:
             if isinstance(item, LTContainer):
                 count += len([*item])

@@ -28,6 +28,7 @@ def convert_to_json(
     password: str = Optional[None], 
     caching: bool = True, 
     check_extractable: bool = True,
+    ignore_bad_chars: bool = False,
     pagenos: Optional[List[int]] = None,
     debug_level: int = logging.WARNING,
 ):
@@ -36,6 +37,7 @@ def convert_to_json(
         password=password, 
         caching=caching,
         check_extractable=check_extractable,
+        ignore_bad_chars=ignore_bad_chars,
         pagenos=pagenos,
         debug_level=debug_level
     )

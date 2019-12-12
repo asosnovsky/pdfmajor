@@ -22,6 +22,7 @@ def convert_file(
         check_extractable: bool = True,
         pagenos: Optional[List[int]] = None,
         dont_export_images: bool = False,
+        ignore_bad_chars: bool = False,
         debug_level: int = logging.WARNING,
         out_type: str = 'html',
     ):
@@ -45,6 +46,7 @@ def convert_file(
             password=password, 
             caching=caching, 
             check_extractable=check_extractable,
+            ignore_bad_chars=ignore_bad_chars,
             pagenos=pagenos,
             debug_level=debug_level,
         )
@@ -59,6 +61,7 @@ def convert_file(
             caching=caching, 
             check_extractable=check_extractable,
             pagenos=pagenos,
+            ignore_bad_chars=ignore_bad_chars,
             dont_export_images=dont_export_images,
             debug_level=debug_level,
         )
@@ -73,6 +76,7 @@ def convert_file(
             caching=caching, 
             check_extractable=check_extractable,
             pagenos=pagenos,
+            ignore_bad_chars=ignore_bad_chars,
             dont_export_images=dont_export_images,
             debug_level=debug_level,
         )
@@ -87,6 +91,7 @@ def convert_file(
             caching=caching, 
             check_extractable=check_extractable,
             pagenos=pagenos,
+            ignore_bad_chars=ignore_bad_chars,
             dont_export_images=dont_export_images,
             debug_level=debug_level,
         )
@@ -101,6 +106,7 @@ def convert_file(
             caching=caching, 
             check_extractable=check_extractable,
             pagenos=pagenos,
+            ignore_bad_chars=ignore_bad_chars,
             dont_export_images=dont_export_images,
             debug_level=debug_level,
         )

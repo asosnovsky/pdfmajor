@@ -16,6 +16,7 @@ def convert_to_html(
     maxpages: int = 0, 
     password: Optional[str] = None, 
     caching: bool = True, 
+    ignore_bad_chars: bool = False,
     check_extractable: bool = True,
     pagenos: List[int] = None,
     debug_level: int = logging.WARNING,
@@ -25,6 +26,7 @@ def convert_to_html(
         password=password, 
         caching=caching,
         check_extractable=check_extractable,
+        ignore_bad_chars=ignore_bad_chars,
         pagenos=pagenos,
         debug_level=debug_level
     )

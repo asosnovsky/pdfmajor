@@ -42,6 +42,7 @@ class ConversionTest(TestCase):
                         input_file=input_file_path,
                         output_file=output_file_path,
                         out_type=ext,
+                        ignore_bad_chars=True,
                         debug_level=logging.WARN,
                     )
                     if ext == 'xml':
