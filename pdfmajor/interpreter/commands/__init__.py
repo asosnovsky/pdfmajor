@@ -23,8 +23,6 @@ def process_command_stream(streams: List[PDFStream], font_cache: dict = None, st
     if font_cache is None:
         font_cache = {}
     parser = PDFContentParser(streams)
-    # from .cmd_record import CmdRecord
-    # history = CmdRecord()
     for obj in parser:
         if isinstance(obj, PSKeyword):
             name = keyword_name(obj)
