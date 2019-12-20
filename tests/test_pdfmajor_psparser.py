@@ -5,7 +5,8 @@
 import logging
 from  unittest import TestCase, main
 from io import BytesIO
-from pdfmajor.parser.PSStackParser import KWD, LIT, PSBaseParser, PSEOF, PSStackParser
+from pdfmajor.parser.PSStackParser import KWD, LIT, PSBaseParser, PSStackParser
+from pdfmajor.execptions import PSEOF
 
 ##  Simplistic Test cases
 ##

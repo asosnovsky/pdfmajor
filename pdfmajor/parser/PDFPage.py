@@ -1,13 +1,12 @@
 
 import logging
 
-from ..execptions import PDFTextExtractionNotAllowed
+from pdfmajor.execptions import PDFTextExtractionNotAllowed, PDFObjectNotFound
 from ..utils import settings
 from .constants import LIT
-from .PDFStream import PDFObjectNotFound
 from .PDFStream import resolve1, int_value, list_value, dict_value
 from .PDFParser import PDFParser
-from .PDFDocument import PDFDocument, PDFTextExtractionNotAllowed
+from .PDFDocument import PDFDocument
 
 from ..utils import get_logger
 

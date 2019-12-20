@@ -1,6 +1,6 @@
 import zlib
 
-from ..PSStackParser import PSException
+from pdfmajor.execptions import PDFValueError, PDFObjectNotFound
 from ..PSStackParser import PSObject
 from ...utils import lzwdecode, settings
 

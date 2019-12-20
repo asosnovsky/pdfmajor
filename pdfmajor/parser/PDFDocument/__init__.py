@@ -8,16 +8,18 @@ from pdfmajor.execptions import (
     ParserError, 
     PDFNoOutlines, 
     PDFDestinationNotFound, 
-    PDFNoValidXRef
+    PDFNoValidXRef,
+    PSEOF,
+    PDFObjectNotFound, 
+    PDFTypeError,
+    PDFSyntaxError
 )
 
 from ...utils import settings, choplist, decode_text
 from ..PSStackParser import KWD
 from ..PSStackParser import literal_name
-from ..PSStackParser import PSEOF
 from ..PDFStream import int_value, str_value, dict_value, list_value, decipher_all
-from ..PDFStream import PDFObjectNotFound, PDFTypeError
-from ..PDFParser import PDFStreamParser, PDFStream, PDFSyntaxError
+from ..PDFParser import PDFStreamParser, PDFStream
 
 from .PDFSecurityHandler import PDFStandardSecurityHandler
 from .PDFSecurityHandler import PDFStandardSecurityHandlerV4

@@ -1,5 +1,6 @@
+from pdfmajor.execptions import PSEOF
 from pdfmajor.parser.PSStackParser import PSStackParser
-from pdfmajor.parser.PSStackParser import PSEOF, KWD
+from pdfmajor.parser.PSStackParser import KWD
 from pdfmajor.parser.PSStackParser import PSLiteral
 from pdfmajor.parser.PSStackParser import literal_name
 from pdfmajor.parser.EncodingDB import name2unicode

@@ -1,7 +1,7 @@
 import logging
 from io import TextIOWrapper
 
-from pdfmajor.execptions import PSSyntaxError, PSTypeError
+from pdfmajor.execptions import PSSyntaxError, PSTypeError, PSEOF
 
 from ...utils import choplist, settings
 

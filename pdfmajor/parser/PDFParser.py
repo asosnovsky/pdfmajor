@@ -5,10 +5,10 @@ from ..utils import settings
 from pdfmajor.execptions import (
     PSSyntaxError, 
     PSEOF,
+    PDFSyntaxError
 )
 from .PSStackParser import PSStackParser
 from .PSStackParser import KWD
-from .PDFStream import PDFException
 from .PDFStream import PDFStream
 from .PDFStream.PDFObjRef import PDFObjRef
 from .PDFStream import int_value
@@ -16,11 +16,6 @@ from .PDFStream import dict_value
 
 log = logging.getLogger(__name__)
 
-
-##  Exceptions
-##
-class PDFSyntaxError(PDFException):
-    pass
 
 
 ##  PDFParser

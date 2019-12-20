@@ -48,6 +48,23 @@ class CMapNotFound(ParserError):
 class PSException(ParserError):
     pass
 
+class PDFValueError(ParserError):
+    pass
+
+class PDFObjectNotFound(ParserError):
+    pass
+
+class PDFException(ParserError):
+    pass
+
+class PDFTypeError(PDFException):
+    pass
+
+class PDFSyntaxError(PDFException):
+    pass
+
+class PDFTextExtractionNotAllowed(PDFException):
+    pass
 
 class PSEOF(PSException):
     pass
