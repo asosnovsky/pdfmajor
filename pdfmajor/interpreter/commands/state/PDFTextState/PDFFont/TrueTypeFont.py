@@ -1,12 +1,9 @@
 ##  TrueTypeFont
 ##
 import struct
+from pdfmajor.execptions import CMapNotFound
 from pdfmajor.parser.cmapdb import FileUnicodeMap
-
 class TrueTypeFont(object):
-
-    class CMapNotFound(Exception):
-        pass
 
     def __init__(self, name, fp):
         self.name = name
@@ -27,7 +24,7 @@ class TrueTypeFont(object):
 
     def create_unicode_map(self):
         if 'cmap' not in self.tables:
-            raise TrueTypeFont.CMapNotFound
+            raise CMapNotFound
         (base_offset, _) = self.tables['cmap']
         fp = self.fp
         fp.seek(base_offset)

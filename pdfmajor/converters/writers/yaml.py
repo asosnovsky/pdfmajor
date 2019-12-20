@@ -1,6 +1,7 @@
 from json import dumps as json_dump
 from io import TextIOWrapper
 from contextlib import contextmanager     
+from pdfmajor.execptions import FileAccessException
 
 @contextmanager
 def YAMLMaker(file_path: str, codec: str = 'utf-8'):
@@ -9,7 +10,6 @@ def YAMLMaker(file_path: str, codec: str = 'utf-8'):
             yield obj
 
 class YAMLMakerWriter:
-    class AccessError(Exception): pass
     def __init__(self, outfile: TextIOWrapper, codec: str = 'utf-8', levels_deep: int = -1):
         self.outfile: TextIOWrapper = outfile
         self.codec = codec
@@ -30,7 +30,7 @@ class YAMLMakerWriter:
                 text = text.encode(self.codec)
             self.outfile.write(text)
         else:
-            raise self.AccessError("Attempting to write to file without an open connection")
+            raise FileAccessException("Attempting to write to file without an open connection")
     
     def _write(self, text: str, append_deep: bool = True, deep_space: str = '  ', prefix:str = ''):
         if not append_deep:

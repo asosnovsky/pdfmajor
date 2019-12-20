@@ -1,5 +1,7 @@
 from typing import List
 
+from pdfmajor.execptions import EmptyDocumentError
+
 from ..parser.PDFPage import PDFPage
 from ..utils import set_log_level, get_logger, logging
 from .commands.state import PDFStateStack, PDFColorSpace, PREDEFINED_COLORSPACE
@@ -13,7 +15,6 @@ from .PageInterpreter import PageInterpreter
 log = get_logger(__name__)
 
 class PDFInterpreter:
-    class AccessError(Exception): pass
 
     def __init__(self,
         input_file_path: str, 
@@ -58,8 +59,9 @@ class PDFInterpreter:
                 yield self.__pages[-1]
             log.info(f"Done Reading {len(self.__pages)} pages.")
         set_log_level(logging.WARNING)
+        
         if len(self.__pages) == 0:
-            raise self.AccessError("No pages found in pdf-file")
+            raise EmptyDocumentError("No pages found in pdf-file")
     
     def __iter__(self):
         if len(self.__pages) > 0:

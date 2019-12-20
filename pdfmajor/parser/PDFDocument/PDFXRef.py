@@ -2,8 +2,9 @@ import re
 from logging import getLogger
 from typing import Tuple, Optional, Dict
 
+from pdfmajor.execptions import PSEOF
+
 from ...utils import settings, choplist, nunpack
-from ..PSStackParser import PSEOF
 from ..PSStackParser import KWD
 from ..PDFParser import PDFStreamParser
 from ..PDFStream import PDFStream
@@ -105,7 +106,7 @@ class PDFXRef(PDFBaseXRef):
         try:
             return self.offsets[objid]
         except KeyError:
-            raise
+            raise PDFSyntaxError
 
 
 ##  PDFXRefFallback

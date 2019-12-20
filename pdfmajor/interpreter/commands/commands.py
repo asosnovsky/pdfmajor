@@ -1,9 +1,10 @@
+from pdfmajor.execptions import InvalidOperation
 from pdfmajor.utils import mult_matrix, MATRIX_IDENTITY, apply_matrix_pt, get_logger
 from pdfmajor.parser.PSStackParser import literal_name
 from pdfmajor.parser.PDFStream import PDFStream, list_value, dict_value
 from pdfmajor.parser.constants import LITERAL_FORM, LITERAL_IMAGE
 
-from .PDFCommands import PDFCommands, PDFCommandsInvalidOperation, PDFCommandsRepeatedCommand
+from .PDFCommands import PDFCommands
 from .state import PDFStateStack, PDFGraphicState, LTTextBlock
 from .state.Curves import CurveMethod, CurvePath, CurvePoint
 # from .state.PDFItem import PDFImage, PDFShape, PDFText, PDFXObject
@@ -253,7 +254,7 @@ def set_stroke_colorspace(stack: PDFStateStack, name: str) -> PDFStateStack:
         stack.graphics.scolspace = stack.colorspace_map[literal_name(name)]
         return stack
     except KeyError:
-        raise PDFCommandsInvalidOperation('Undefined ColorSpace: %r' % name)
+        raise InvalidOperation('Undefined ColorSpace: %r' % name)
 
 # setcolorspace-non-strokine
 @PDFCommands.add('cs')
@@ -262,7 +263,7 @@ def set_nonstroke_colorspace(stack: PDFStateStack, name: str) -> PDFStateStack:
         stack.graphics.ncolspace = stack.colorspace_map[literal_name(name)]
         return stack
     except KeyError:
-        raise PDFCommandsInvalidOperation('Undefined ColorSpace: %r' % name)
+        raise InvalidOperation('Undefined ColorSpace: %r' % name)
 
 # setgray-stroking
 @PDFCommands.add('G')
@@ -326,7 +327,7 @@ def set_nonstroke_cmyk(stack: PDFStateStack, c, m, y, k) -> PDFStateStack:
 @PDFCommands.add('SCN','SC')
 def set_stroke_colorspace_custom(stack: PDFStateStack) -> PDFStateStack:
     if stack.graphics.scolspace is None:
-        raise PDFCommandsInvalidOperation('No colorspace specified!')
+        raise InvalidOperation('No colorspace specified!')
     components = stack.pop(stack.graphics.scolspace.ncomponents)
     stack.graphics.set_stroke_color(
         stack.graphics.scolspace,
@@ -337,7 +338,7 @@ def set_stroke_colorspace_custom(stack: PDFStateStack) -> PDFStateStack:
 @PDFCommands.add('scn','sc')
 def set_nonstroke_colorspace_custom(stack: PDFStateStack) -> PDFStateStack:
     if stack.graphics.ncolspace is None:
-        raise PDFCommandsInvalidOperation('No colorspace specified!')
+        raise InvalidOperation('No colorspace specified!')
     components = stack.pop(stack.graphics.ncolspace.ncomponents)
     stack.graphics.set_nostroke_color(
         stack.graphics.ncolspace,
@@ -353,7 +354,7 @@ def begin_text(stack: PDFStateStack) -> PDFStateStack:
     if stack.current_textblock is None:
         stack.current_textblock = LTTextBlock()
     else:
-        raise PDFCommandsInvalidOperation("Last TextBlock did not clear")
+        raise InvalidOperation("Last TextBlock did not clear")
     return stack
 
 @PDFCommands.add('ET')
@@ -394,7 +395,7 @@ def set_font(stack: PDFStateStack, fontid, fontsize) -> PDFStateStack:
         stack.text.font = stack.fontmap[literal_name(fontid)]
         return stack
     except KeyError:
-        raise PDFCommandsInvalidOperation('Undefined Font id: %r' % fontid)
+        raise InvalidOperation('Undefined Font id: %r' % fontid)
 
 # setrendering
 @PDFCommands.add('Tr')
@@ -444,9 +445,9 @@ def nextline(stack: PDFStateStack) -> PDFStateStack:
 @PDFCommands.add('TJ')
 def add_char_blocks(stack: PDFStateStack, seq: bytearray) -> PDFStateStack:
     if stack.text.font is None:
-        raise PDFCommandsInvalidOperation("No Font Specified")
+        raise InvalidOperation("No Font Specified")
     if stack.current_textblock is None:
-        raise PDFCommandsInvalidOperation("No TextBlock initilized")
+        raise InvalidOperation("No TextBlock initilized")
     stack.current_textblock.add_char_block(
         seq,
         stack.t_matrix,
@@ -487,7 +488,7 @@ def insert_xobject(stack: PDFStateStack, xobjid) -> PDFStateStack:
     try:
         xobj = PDFStream.validated_stream(stack.xobjmap[xobjid])
     except KeyError:
-        raise PDFCommandsInvalidOperation('Undefined xobject id: %r' % xobjid)
+        raise InvalidOperation('Undefined xobject id: %r' % xobjid)
     # log.info('Processing xobj: %r', xobj)
     subtype = xobj.get('Subtype')
     if subtype is LITERAL_FORM and 'BBox' in xobj:

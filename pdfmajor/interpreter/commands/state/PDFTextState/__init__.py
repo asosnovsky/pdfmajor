@@ -1,6 +1,6 @@
+from pdfmajor.execptions import MissingFont, UnicodeNotDefined
 from pdfmajor.utils import MATRIX_IDENTITY
 from .PDFFont import PDFFont, get_font
-from .PDFFont.execptions import PDFUnicodeNotDefined, PDFFontError
 
 ##  PDFTextState
 ##
@@ -29,10 +29,10 @@ class PDFTextState(object):
     
     def to_unichr(self, cid: int) -> str:
         if self.font is None:
-            raise PDFFontError("Missing font")
+            raise MissingFont
         try:
             return self.font.to_unichr(cid)
-        except PDFUnicodeNotDefined as e:
+        except UnicodeNotDefined as e:
             if self.ignore_bad_chars:
                 return ""
             else:

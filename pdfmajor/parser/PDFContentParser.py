@@ -4,11 +4,11 @@ import operator
 from typing import List
 from io import BytesIO
 
+from pdfmajor.execptions import PSEOF, PSTypeError
 from ..utils import int2byte, choplist, settings
 
 from .PSStackParser import literal_name
 from .PSStackParser import PSStackParser
-from .PSStackParser import PSEOF, PSTypeError
 from .PSStackParser import KWD
 
 from .PDFStream import PDFStream
@@ -101,9 +101,9 @@ class PDFContentParser(PSStackParser):
                 obj = PDFStream(d, data)
                 self.push((pos, obj))
                 self.push((pos, self.KEYWORD_EI))
-            except PSTypeError:
+            except PSTypeError as e:
                 if settings.STRICT:
-                    raise
+                    raise e
         else:
             self.push((pos, token))
         return

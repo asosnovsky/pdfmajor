@@ -1,5 +1,7 @@
 
 import logging
+
+from ..execptions import PDFTextExtractionNotAllowed
 from ..utils import settings
 from .constants import LIT
 from .PDFStream import PDFObjectNotFound

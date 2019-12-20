@@ -4,6 +4,13 @@ from Crypto.Cipher import ARC4, AES
 from Crypto.Hash import SHA256
 from logging import getLogger
 
+from pdfmajor.execptions import (
+    ParserError, 
+    PDFNoOutlines, 
+    PDFDestinationNotFound, 
+    PDFNoValidXRef
+)
+
 from ...utils import settings, choplist, decode_text
 from ..PSStackParser import KWD
 from ..PSStackParser import literal_name
@@ -12,7 +19,6 @@ from ..PDFStream import int_value, str_value, dict_value, list_value, decipher_a
 from ..PDFStream import PDFObjectNotFound, PDFTypeError
 from ..PDFParser import PDFStreamParser, PDFStream, PDFSyntaxError
 
-from .exceptions import *
 from .PDFSecurityHandler import PDFStandardSecurityHandler
 from .PDFSecurityHandler import PDFStandardSecurityHandlerV4
 from .PDFSecurityHandler import PDFStandardSecurityHandlerV5
@@ -181,7 +187,7 @@ class PDFDocument(object):
     def getobj(self, objid):
         assert objid != 0
         if not self.xrefs:
-            raise PDFException('PDFDocument is not initialized')
+            raise ParserError('PDFDocument is not initialized')
         log.debug('getobj: objid=%r', objid)
         if objid in self._cached_objs:
             (obj, genno) = self._cached_objs[objid]

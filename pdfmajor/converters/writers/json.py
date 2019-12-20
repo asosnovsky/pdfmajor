@@ -2,6 +2,7 @@ from typing import Set
 from json import dumps as json_dump
 from io import TextIOWrapper
 from contextlib import contextmanager     
+from pdfmajor.execptions import FileAccessException
 
 @contextmanager
 def JSONMaker(file_path: str, codec: str = 'utf-8'):
@@ -10,7 +11,6 @@ def JSONMaker(file_path: str, codec: str = 'utf-8'):
             yield obj
 
 class JSONMakerObject:
-    class AccessError(Exception): pass
     def __init__(self, outfile: TextIOWrapper, codec: str = 'utf-8', levels_deep: int = 0):
         self.outfile: TextIOWrapper = outfile
         self.codec = codec
@@ -32,7 +32,7 @@ class JSONMakerObject:
                 text = text.encode(self.codec)
             self.outfile.write(text)
         else:
-            raise self.AccessError("Attempting to write to file without an open connection")
+            raise FileAccessException("Attempting to write to file without an open connection")
     
     def write(self, text: str, deep_space: str = '  ', prefix:str = ''):
         text = prefix + (deep_space*self.levels_deep) + text
@@ -71,7 +71,6 @@ class JSONMakerObject:
     
 
 class JSONMakerArray:
-    class AccessError(Exception): pass
     def __init__(self, outfile: TextIOWrapper, codec: str = 'utf-8', levels_deep: int = 0):
         self.outfile: TextIOWrapper = outfile
         self.codec = codec
@@ -93,7 +92,7 @@ class JSONMakerArray:
                 text = text.encode(self.codec)
             self.outfile.write(text)
         else:
-            raise self.AccessError("Attempting to write to file without an open connection")
+            raise FileAccessException("Attempting to write to file without an open connection")
     
     def write(self, text: str, deep_space: str = '  ', prefix:str = ''):
         text = prefix + (deep_space*self.levels_deep) + text

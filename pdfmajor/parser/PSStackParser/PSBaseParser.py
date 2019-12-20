@@ -4,9 +4,10 @@ log = logging.getLogger(__name__)
 
 from io import TextIOWrapper
 from typing import List, Tuple, Union
+
+from pdfmajor.execptions import PSEOF
 from ...utils import int2byte
 
-from .exceptions import PSEOF
 from .constants import EOL, NONSPC, KWD, END_LITERAL, LIT, HEX
 from .constants import SPC, HEX_PAIR
 from .constants import END_NUMBER, END_STRING, END_KEYWORD, END_HEX_STRING

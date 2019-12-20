@@ -1,8 +1,8 @@
 from io import TextIOWrapper
 from contextlib import contextmanager
+from pdfmajor.execptions import FileAccessException
 
 class XMLMaker:
-    class AccessError(Exception): pass
     def __init__(self, file_path: str, codec: str = 'utf-8'):
         self.file_path = file_path
         self.codec = codec
@@ -25,7 +25,7 @@ class XMLMaker:
                 text = text.encode(self.codec)
             self.outfile.write(text)
         else:
-            raise self.AccessError("Attempting to write to file without an open connection")
+            raise FileAccessException("Attempting to write to file without an open connection")
     
     def write(self, text: str, lineend: str = '\n', deep_space: str = ' '):
         text = deep_space*self.__levels_deep + text + lineend

@@ -1,5 +1,6 @@
 from typing import List
 
+from pdfmajor.execptions import CommandProcessorError
 from pdfmajor.parser.PDFContentParser import PDFContentParser, PDFStream
 from pdfmajor.parser.PSStackParser import PSKeyword, keyword_name
 from pdfmajor.utils import get_logger
@@ -16,8 +17,6 @@ from .state import LTItem, LTComponent, LTContainer
 from .utils import init_resources
 
 log = get_logger('process_command_stream')
-
-class CommandProcessorError(Exception): pass
 
 def process_command_stream(streams: List[PDFStream], font_cache: dict = None, state: PDFStateStack = None):
     if font_cache is None:

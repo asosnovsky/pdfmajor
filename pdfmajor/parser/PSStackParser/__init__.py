@@ -1,6 +1,8 @@
 import logging
 from io import TextIOWrapper
 
+from pdfmajor.execptions import PSSyntaxError, PSTypeError
+
 from ...utils import choplist, settings
 
 from .PSBaseParser import PSBaseParser
@@ -121,9 +123,9 @@ class PSStackParser(PSBaseParser):
                 # end array
                 try:
                     self.push(self.end_type('a'))
-                except PSTypeError:
+                except PSTypeError as e:
                     if settings.STRICT:
-                        raise
+                        raise e
             elif token == KEYWORD_DICT_BEGIN:
                 # begin dictionary
                 self.start_type(pos, 'd')
@@ -136,9 +138,9 @@ class PSStackParser(PSBaseParser):
                     # construct a Python dictionary.
                     d = dict((literal_name(k), v) for (k, v) in choplist(2, objs) if v is not None)
                     self.push((pos, d))
-                except PSTypeError:
+                except PSTypeError as e:
                     if settings.STRICT:
-                        raise
+                        raise e
             elif token == KEYWORD_PROC_BEGIN:
                 # begin proc
                 self.start_type(pos, 'p')
@@ -146,16 +148,16 @@ class PSStackParser(PSBaseParser):
                 # end proc
                 try:
                     self.push(self.end_type('p'))
-                except PSTypeError:
+                except PSTypeError as e:
                     if settings.STRICT:
-                        raise
+                        raise e
             elif isinstance(token,PSKeyword):
                 log.debug('do_keyword: pos=%r, token=%r, stack=%r', pos, token, self.curstack)
                 self.do_keyword(pos, token)
             else:
                 log.error('unknown token: pos=%r, token=%r, stack=%r', pos, token, self.curstack)
                 self.do_keyword(pos, token)
-                raise Exception("unknown tokens")
+                raise PSSyntaxError("unknown tokens")
             if self.context:
                 continue
             else:

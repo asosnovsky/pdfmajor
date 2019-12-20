@@ -10,6 +10,7 @@ from .json import convert_to_json
 from .text import convert_to_text
 from .yaml import convert_to_yaml
 from ..utils import logging
+from ..execptions import ConverterException
 
 def convert_file(
         input_file: str, 
@@ -34,7 +35,7 @@ def convert_file(
             )
         )
     if re.search(re.escape(out_type) + r'$', output_file ) is None:
-        raise Exception("Please make sure that the file name and output type match!")
+        raise ConverterException("Please make sure that the file name and output type match!")
     if out_type == 'html':
         return convert_to_html(
             input_file_path=input_file, 
@@ -110,4 +111,4 @@ def convert_file(
             dont_export_images=dont_export_images,
             debug_level=debug_level,
         )
-    else: raise Exception("Please specify out_type as 'html' or 'xml' or 'json' or 'text' or 'yaml'")
+    else: raise ConverterException("Please specify out_type as 'html' or 'xml' or 'json' or 'text' or 'yaml'")

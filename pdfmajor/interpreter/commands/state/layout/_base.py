@@ -13,7 +13,7 @@ class LTComponent(LTItem):
         if isinstance(bbox, Bbox):
             self.bbox = bbox
         else:
-            raise Exception("Invalid BBox")
+            raise AssertionError("Expected a BBox")
     
     def __repr__(self):
         return ('<%s %s>' %

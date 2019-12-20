@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from pdfmajor.execptions import FontError, UnicodeNotDefined, CMapNotFound
 from pdfmajor.parser.PSStackParser import literal_name
 from pdfmajor.parser.PDFStream import int_value
 from pdfmajor.parser.PDFStream import num_value
@@ -15,7 +16,6 @@ from .PDFFont import PDFFont, PDFSimpleFont
 from .util import FontMetricsDB, get_widths, get_widths2
 from .Type1FontHeaderParser import Type1FontHeaderParser
 from .TrueTypeFont import TrueTypeFont
-from .execptions import PDFFontError, PDFUnicodeNotDefined
 
 # PDFType1Font
 class PDFType1Font(PDFSimpleFont):
@@ -25,7 +25,7 @@ class PDFType1Font(PDFSimpleFont):
             self.basefont = literal_name(spec['BaseFont'])
         except KeyError:
             if settings.STRICT:
-                raise PDFFontError('BaseFont is missing')
+                raise FontError('BaseFont is missing')
             self.basefont = 'unknown'
         try:
             (descriptor, widths) = FontMetricsDB.get_metrics(self.basefont)
@@ -87,7 +87,7 @@ class PDFCIDFont(PDFFont):
             self.basefont = literal_name(spec['BaseFont'])
         except KeyError:
             if strict:
-                raise PDFFontError('BaseFont is missing')
+                raise FontError('BaseFont is missing')
             self.basefont = 'unknown'
         self.cidsysteminfo = dict_value(spec.get('CIDSystemInfo', {}))
         self.cidcoding = '%s-%s' % (resolve1(self.cidsysteminfo.get('Registry', b'unknown')).decode("latin1"),
@@ -96,19 +96,19 @@ class PDFCIDFont(PDFFont):
             name = literal_name(spec['Encoding'])
         except KeyError:
             if strict:
-                raise PDFFontError('Encoding is unspecified')
+                raise FontError('Encoding is unspecified')
             name = 'unknown'
         try:
             self.cmap = CMapDB.get_cmap(name)
-        except CMapDB.CMapNotFound as e:
+        except CMapNotFound as e:
             if strict:
-                raise PDFFontError(e)
+                raise FontError(e)
             self.cmap = CMap()
         try:
             descriptor = dict_value(spec['FontDescriptor'])
         except KeyError:
             if strict:
-                raise PDFFontError('FontDescriptor is missing')
+                raise FontError('FontDescriptor is missing')
             descriptor = {}
         ttf = None
         if 'FontFile2' in descriptor:
@@ -124,12 +124,12 @@ class PDFCIDFont(PDFFont):
             if ttf:
                 try:
                     self.unicode_map = ttf.create_unicode_map()
-                except TrueTypeFont.CMapNotFound:
+                except CMapNotFound:
                     pass
         else:
             try:
                 self.unicode_map = CMapDB.get_unicode_map(self.cidcoding, self.cmap.is_vertical())
-            except CMapDB.CMapNotFound as e:
+            except CMapNotFound as e:
                 pass
 
         self.vertical = self.cmap.is_vertical()
@@ -172,4 +172,4 @@ class PDFCIDFont(PDFFont):
                 raise KeyError(cid)
             return self.unicode_map.get_unichr(cid)
         except KeyError:
-            raise PDFUnicodeNotDefined(self.cidcoding, cid)
+            raise UnicodeNotDefined(self.cidcoding, cid)

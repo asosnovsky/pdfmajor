@@ -19,19 +19,19 @@ import pickle as pickle
 import struct
 import logging
 
+from pdfmajor.execptions import (
+    CMapNotFound, 
+    PSEOF, 
+    PSSyntaxError,
+)
 from ...utils import choplist, nunpack, name2unicode
 from ..PSStackParser import PSStackParser
-from ..PSStackParser import PSSyntaxError
-from ..PSStackParser import PSEOF
 from ..PSStackParser import PSLiteral
 from ..PSStackParser import KWD
 from ..PSStackParser import literal_name
 
 log = logging.getLogger(__name__)
 
-
-class CMapError(Exception):
-    pass
 
 
 ##  CMapBase
@@ -219,9 +219,6 @@ class CMapDB(object):
     _cmap_cache = {}
     _umap_cache = {}
 
-    class CMapNotFound(CMapError):
-        pass
-
     @classmethod
     def _load_data(klass, name):
         name = name.replace("\0", "")
@@ -238,7 +235,7 @@ class CMapDB(object):
                 finally:
                     gzfile.close()
         else:
-            raise CMapDB.CMapNotFound(name)
+            raise CMapNotFound(name)
 
     @classmethod
     def get_cmap(klass, name):
@@ -325,7 +322,7 @@ class CMapParser(PSStackParser):
                 self.cmap.use_cmap(CMapDB.get_cmap(literal_name(cmapname)))
             except PSSyntaxError:
                 pass
-            except CMapDB.CMapNotFound:
+            except CMapNotFound:
                 pass
             return
 

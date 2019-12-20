@@ -2,10 +2,11 @@
 import logging
 from io import BytesIO, TextIOWrapper
 from ..utils import settings
-
+from pdfmajor.execptions import (
+    PSSyntaxError, 
+    PSEOF,
+)
 from .PSStackParser import PSStackParser
-from .PSStackParser import PSSyntaxError
-from .PSStackParser import PSEOF
 from .PSStackParser import KWD
 from .PDFStream import PDFException
 from .PDFStream import PDFStream

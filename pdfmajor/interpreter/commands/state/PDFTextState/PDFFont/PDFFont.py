@@ -2,6 +2,7 @@
 from abc import abstractmethod
 from io import BytesIO
 
+from pdfmajor.execptions import UnicodeNotDefined
 from pdfmajor.parser.EncodingDB import EncodingDB
 from pdfmajor.parser.PSStackParser import LIT
 from pdfmajor.parser.PSStackParser import PSLiteral
@@ -13,7 +14,7 @@ from pdfmajor.parser.PDFStream import list_value
 from pdfmajor.parser.PDFStream import PDFStream
 from pdfmajor.parser.cmapdb import FileUnicodeMap
 from pdfmajor.parser.cmapdb import CMapParser
-from .execptions import PDFFontError, PDFUnicodeNotDefined
+
 
 ##  Literals
 ##
@@ -75,7 +76,7 @@ class PDFFont(object):
         except KeyError:
             try:
                 return self.widths[self.to_unichr(cid)] * self.hscale
-            except (KeyError, PDFUnicodeNotDefined):
+            except (KeyError, UnicodeNotDefined):
                 return self.default_width * self.hscale
 
     def char_disp(self, cid):
@@ -135,4 +136,4 @@ class PDFSimpleFont(PDFFont):
         try:
             return self.cid2unicode[cid]
         except KeyError:
-            raise PDFUnicodeNotDefined(None, cid)
+            raise UnicodeNotDefined(None, cid)

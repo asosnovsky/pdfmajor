@@ -1,5 +1,6 @@
 from typing import List
 
+from pdfmajor.execptions import RepeatedCommand
 from pdfmajor.utils import MATRIX_IDENTITY, mult_matrix
 from pdfmajor.parser.PSStackParser import literal_name
 from pdfmajor.parser.PDFStream import PDFStream, list_value, dict_value
@@ -7,8 +8,6 @@ from pdfmajor.parser.constants import LITERAL_FORM, LITERAL_IMAGE
 from .state import PDFStateStack, PDFColorSpace
 from .state.Curves import CurveMethod, CurvePath, CurvePoint
 
-class PDFCommandsInvalidOperation(Exception): pass
-class PDFCommandsRepeatedCommand(Exception): pass
 
 class PDFCommands:
     commands = {}
@@ -18,7 +17,7 @@ class PDFCommands:
         if not (cmd_name in cls.commands.keys()):
             cls.commands[cmd_name] = cmd
             return cmd
-        raise PDFCommandsRepeatedCommand(cmd_name)
+        raise RepeatedCommand(cmd_name)
 
     @classmethod
     def add(cls, *cmd_names: List[str]):
