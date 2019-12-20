@@ -1,6 +1,5 @@
 from .PDFObjRef import PDFObjRef
 from ...utils import settings, isnumber, int2byte
-from .exceptions import PDFTypeError
 
 from logging import getLogger
 

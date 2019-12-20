@@ -7,7 +7,6 @@ from ...utils import choplist, settings
 
 from .PSBaseParser import PSBaseParser
 from .types import *
-from .exceptions import *
 from .constants import *
 
 log = logging.getLogger(__name__)

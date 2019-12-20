@@ -11,7 +11,6 @@ from ..PDFStream import PDFStream
 from ..PDFStream import dict_value
 
 from .constants import LITERAL_OBJSTM, LITERAL_XREF
-from .exceptions import PDFNoValidXRef, PDFSyntaxError
 
 
 log = getLogger(__name__)

@@ -73,7 +73,7 @@ class EOFB(CCITTExeception):
 class InvalidData(CCITTExeception):
     pass
 
-class ByteSkip(ExceptCCITTExeceptionion):
+class ByteSkip(CCITTExeception):
     pass
 
 class PDFTextExtractionNotAllowed(ParserError):

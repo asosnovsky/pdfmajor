@@ -6,7 +6,6 @@ from ...utils import lzwdecode, settings
 
 from .constants import * # pylint: disable=W0614
 from .types import * # pylint: disable=W0614
-from .exceptions import * # pylint: disable=W0614
 
 ##  PDFObjRef
 ##

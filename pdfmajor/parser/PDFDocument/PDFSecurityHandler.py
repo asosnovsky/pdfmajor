@@ -3,7 +3,6 @@ import hashlib as md5
 from Crypto.Cipher import ARC4, AES
 from Crypto.Hash import SHA256
 
-from .exceptions import * # pylint: disable=W0614
 from ..PDFStream import int_value, str_value, dict_value
 from ..PSStackParser import literal_name
 from ...utils import int2byte, struct

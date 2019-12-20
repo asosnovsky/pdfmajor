@@ -5,7 +5,6 @@ from ...utils import ascii85decode, asciihexdecode, apply_png_predictor
 
 from .constants import * 
 from .types import * 
-from .exceptions import * 
 from .util import *
 from .ccitt import ccittfaxdecode
 
