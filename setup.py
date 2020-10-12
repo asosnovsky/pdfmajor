@@ -13,7 +13,7 @@ with open('README.md') as readme_file:
         "version": "1.3.13",
         "packages": find_packages(include=['pdfmajor*']),
         "install_requires": [
-            'pycryptodome==3.8.2', 
+            'pycryptodome==3.8.2',
             'chardet==3.0.4',
             'Pillow>=6.2.0'
         ],
