@@ -1,4 +1,3 @@
-
 from .PSStackParser import LIT
 
 ##  Constants
@@ -15,16 +14,16 @@ COMMON_FONT_ATTRIBUTES = [
     "FontFamily",
     "FontStretch",
     "FontWeight",
-    "Flags", 
-    "FontBBox", 
-    "ItalicAngle", 
-    "Ascent", 
-    "Descent", 
+    "Flags",
+    "FontBBox",
+    "ItalicAngle",
+    "Ascent",
+    "Descent",
     "Leading",
-    "CapHeight", 
+    "CapHeight",
     "XHeight",
-    "StemV", 
-    "StemH", 
+    "StemV",
+    "StemH",
     "AvgWidth",
     "MaxWidth",
     "MissingWidth",

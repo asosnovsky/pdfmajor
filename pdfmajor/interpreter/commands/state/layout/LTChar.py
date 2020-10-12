@@ -6,13 +6,7 @@ from ..PDFTextState import PDFTextState, PDFFont
 ##  LTChar
 ##
 class LTChar(LTComponent):
-
-    def __init__(self, 
-        bbox: Bbox, 
-        char: str, 
-        textstate: PDFTextState, 
-        color: PDFColor
-    ):
+    def __init__(self, bbox: Bbox, char: str, textstate: PDFTextState, color: PDFColor):
         self._text = char
         self.textstate = textstate
         self.color = color
@@ -24,14 +18,11 @@ class LTChar(LTComponent):
         return
 
     def __repr__(self):
-        return (
-            '<%s %s font=%r text=%r>' %
-            (
-                self.__class__.__name__, 
-                str(self.bbox),
-                self.fontname, 
-                self.get_text()
-            )
+        return "<%s %s font=%r text=%r>" % (
+            self.__class__.__name__,
+            str(self.bbox),
+            self.fontname,
+            self.get_text(),
         )
 
     def get_text(self):

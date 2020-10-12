@@ -30,8 +30,8 @@ class PSLiteral(PSObject):
         self.name = name
 
     def __repr__(self):
-        name=self.name
-        return '/%r' % name
+        name = self.name
+        return "/%r" % name
 
 
 ##  PSKeyword
@@ -53,8 +53,8 @@ class PSKeyword(PSObject):
         return
 
     def __repr__(self):
-        name=self.name
-        return '/%r' % name
+        name = self.name
+        return "/%r" % name
 
 
 ##  PSSymbolTable

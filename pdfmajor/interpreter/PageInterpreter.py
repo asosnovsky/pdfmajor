@@ -4,9 +4,15 @@ from pdfmajor.parser.PDFStream import list_value
 from .commands import PDFStateStack
 from .commands import process_command_stream, prep_state
 
-class PageInterpreter:
 
-    def __init__(self, page: PDFPage, page_num: int, font_cache: dict = None, ignore_bad_chars = False):
+class PageInterpreter:
+    def __init__(
+        self,
+        page: PDFPage,
+        page_num: int,
+        font_cache: dict = None,
+        ignore_bad_chars=False,
+    ):
         (x0, y0, x1, y1) = page.mediabox
         if page.rotate == 90:
             ctm = [0, -1, 1, 0, -y0, x1]
@@ -21,24 +27,23 @@ class PageInterpreter:
         self.font_cache = font_cache if font_cache is not None else {}
         self.page = page
         self.page_num = page_num
-        self.height = y1-y0
-        self.width = x1-x0
+        self.height = y1 - y0
+        self.width = x1 - x0
 
         # Init State
         self.state: PDFStateStack = prep_state(
-            PDFStateStack(), 
-            ctm=ctm, 
-            resources=page.resources, 
+            PDFStateStack(),
+            ctm=ctm,
+            resources=page.resources,
             font_cache=self.font_cache,
-            ignore_bad_chars=ignore_bad_chars
+            ignore_bad_chars=ignore_bad_chars,
         )
 
-    
     def __iter__(self):
         for item in process_command_stream(
             streams=list_value(self.page.contents),
             font_cache=self.font_cache,
-            state=self.state
+            state=self.state,
         ):
             yield item
 

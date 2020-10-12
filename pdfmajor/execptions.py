@@ -1,31 +1,37 @@
-
-
 class PDFMajorException(Exception):
     pass
+
 
 # Interpreter Errors
 class InterpreterError(PDFMajorException):
     pass
 
+
 class EmptyDocumentError(InterpreterError):
     pass
+
 
 class CommandProcessorError(InterpreterError):
     pass
 
-class InvalidOperation(CommandProcessorError): 
+
+class InvalidOperation(CommandProcessorError):
     pass
 
-class RepeatedCommand(CommandProcessorError): 
+
+class RepeatedCommand(CommandProcessorError):
     pass
+
 
 class FontError(InterpreterError):
     pass
 
-class UnicodeNotDefined(FontError): 
+
+class UnicodeNotDefined(FontError):
     pass
 
-class MissingFont(FontError): 
+
+class MissingFont(FontError):
     pass
 
 
@@ -33,38 +39,50 @@ class MissingFont(FontError):
 class ParserError(PDFMajorException):
     pass
 
-class PDFNoOutlines(ParserError): 
+
+class PDFNoOutlines(ParserError):
     pass
+
 
 class PDFDestinationNotFound(ParserError):
     pass
 
+
 class PDFNoValidXRef(ParserError):
     pass
+
 
 class CMapNotFound(ParserError):
     pass
 
+
 class PSException(ParserError):
     pass
+
 
 class PDFValueError(ParserError):
     pass
 
+
 class PDFObjectNotFound(ParserError):
     pass
+
 
 class PDFException(ParserError):
     pass
 
+
 class PDFTypeError(PDFException):
     pass
+
 
 class PDFSyntaxError(PDFException):
     pass
 
+
 class PDFTextExtractionNotAllowed(PDFException):
     pass
+
 
 class PSEOF(PSException):
     pass
@@ -81,25 +99,33 @@ class PSTypeError(PSException):
 class PSValueError(PSException):
     pass
 
+
 class CCITTExeception(ParserError):
     pass
+
 
 class EOFB(CCITTExeception):
     pass
 
+
 class InvalidData(CCITTExeception):
     pass
+
 
 class ByteSkip(CCITTExeception):
     pass
 
+
 class PDFTextExtractionNotAllowed(ParserError):
     pass
 
+
 # converter error
 
+
 class ConverterException(PDFMajorException):
-    pass 
+    pass
+
 
 class FileAccessException(ConverterException):
     pass

@@ -2,7 +2,7 @@ import re
 from .glyphlist import glyphname2unicode
 from .latin_enc import LATIN_ENCODING
 
-STRIP_NAME = re.compile(r'[0-9]+')
+STRIP_NAME = re.compile(r"[0-9]+")
 
 ##  name2unicode
 ##
@@ -14,4 +14,3 @@ def name2unicode(name):
     if not m:
         raise KeyError(name)
     return chr(int(m.group(0)))
-

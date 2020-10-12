@@ -3,20 +3,20 @@ import zlib
 from ...utils import lzwdecode
 from ...utils import ascii85decode, asciihexdecode, apply_png_predictor
 
-from .constants import * 
-from .types import * 
+from .constants import *
+from .types import *
 from .util import *
 from .ccitt import ccittfaxdecode
 
-class PDFStream(PDFObject):
 
+class PDFStream(PDFObject):
     @classmethod
     def validated_stream(cls, x):
         x = resolve1(x)
         if not isinstance(x, cls):
             if settings.STRICT:
-                raise PDFTypeError('PDFStream required: %r' % x)
-            return PDFStream({}, b'')
+                raise PDFTypeError("PDFStream required: %r" % x)
+            return PDFStream({}, b"")
         return x
 
     def __init__(self, attrs, rawdata, decipher=None):
@@ -37,10 +37,18 @@ class PDFStream(PDFObject):
     def __repr__(self):
         if self.data is None:
             assert self.rawdata is not None
-            return '<PDFStream(%r): raw=%d, %r>' % (self.objid, len(self.rawdata), self.attrs)
+            return "<PDFStream(%r): raw=%d, %r>" % (
+                self.objid,
+                len(self.rawdata),
+                self.attrs,
+            )
         else:
             assert self.data is not None
-            return '<PDFStream(%r): len=%d, %r>' % (self.objid, len(self.data), self.attrs)
+            return "<PDFStream(%r): len=%d, %r>" % (
+                self.objid,
+                len(self.data),
+                self.attrs,
+            )
 
     def __contains__(self, name):
         return name in self.attrs
@@ -58,8 +66,8 @@ class PDFStream(PDFObject):
         return default
 
     def get_filters(self):
-        filters = self.get_any(('F', 'Filter'))
-        params = self.get_any(('DP', 'DecodeParms', 'FDecodeParms'), {})
+        filters = self.get_any(("F", "Filter"))
+        params = self.get_any(("DP", "DecodeParms", "FDecodeParms"), {})
         if not filters:
             return []
         if not isinstance(filters, list):
@@ -72,13 +80,17 @@ class PDFStream(PDFObject):
         # resolve filter if possible
         _filters = []
         for fltr in filters:
-            if hasattr(fltr, 'resolve'):
+            if hasattr(fltr, "resolve"):
                 fltr = fltr.resolve()[0]
             _filters.append(fltr)
-        return list(zip(_filters, params)) #solves https://github.com/pdfminer/pdfminer.six/issues/15
+        return list(
+            zip(_filters, params)
+        )  # solves https://github.com/pdfminer/pdfminer.six/issues/15
 
     def decode(self):
-        assert self.data is None and self.rawdata is not None, str((self.data, self.rawdata))
+        assert self.data is None and self.rawdata is not None, str(
+            (self.data, self.rawdata)
+        )
         data = self.rawdata
         if self.decipher:
             # Handle encryption
@@ -88,15 +100,15 @@ class PDFStream(PDFObject):
             self.data = data
             self.rawdata = None
             return
-        for (f,params) in filters:
+        for (f, params) in filters:
             if f in LITERALS_FLATE_DECODE:
                 # will get errors if the document is encrypted.
                 try:
                     data = zlib.decompress(data)
                 except zlib.error as e:
                     if settings.STRICT:
-                        raise PDFException('Invalid zlib bytes: %r, %r' % (e, data))
-                    data = b''
+                        raise PDFException("Invalid zlib bytes: %r, %r" % (e, data))
+                    data = b""
             elif f in LITERALS_LZW_DECODE:
                 data = lzwdecode(data)
             elif f in LITERALS_ASCII85_DECODE:
@@ -113,23 +125,25 @@ class PDFStream(PDFObject):
                 pass
             elif f == LITERAL_CRYPT:
                 # not yet..
-                raise PDFNotImplementedError('/Crypt filter is unsupported')
+                raise PDFNotImplementedError("/Crypt filter is unsupported")
             else:
-                raise PDFNotImplementedError('Unsupported filter: %r' % f)
+                raise PDFNotImplementedError("Unsupported filter: %r" % f)
             # apply predictors
-            if params and 'Predictor' in params:
-                pred = int_value(params['Predictor'])
+            if params and "Predictor" in params:
+                pred = int_value(params["Predictor"])
                 if pred == 1:
                     # no predictor
                     pass
                 elif 10 <= pred:
                     # PNG predictor
-                    colors = int_value(params.get('Colors', 1))
-                    columns = int_value(params.get('Columns', 1))
-                    bitspercomponent = int_value(params.get('BitsPerComponent', 8))
-                    data = apply_png_predictor(pred, colors, columns, bitspercomponent, data)
+                    colors = int_value(params.get("Colors", 1))
+                    columns = int_value(params.get("Columns", 1))
+                    bitspercomponent = int_value(params.get("BitsPerComponent", 8))
+                    data = apply_png_predictor(
+                        pred, colors, columns, bitspercomponent, data
+                    )
                 else:
-                    raise PDFNotImplementedError('Unsupported predictor: %r' % pred)
+                    raise PDFNotImplementedError("Unsupported predictor: %r" % pred)
         self.data = data
         self.rawdata = None
         return

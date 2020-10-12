@@ -20,7 +20,10 @@ with open('README.md') as readme_file:
         'extras_require': {
             'dev': [
                 'tqdm==4.32.1',
-                'mkdocs==1.0.4'
+                'mkdocs==1.0.4',
+                'flake8==3.8.4',
+                'mypy==0.790',
+                'black==20.8b1'
             ]
         },
         "description": 'PDF parser',

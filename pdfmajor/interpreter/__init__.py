@@ -14,18 +14,19 @@ from .PageInterpreter import PageInterpreter
 
 log = get_logger(__name__)
 
-class PDFInterpreter:
 
-    def __init__(self,
-        input_file_path: str, 
-        maxpages: int = 0, 
-        caching: bool = True, 
+class PDFInterpreter:
+    def __init__(
+        self,
+        input_file_path: str,
+        maxpages: int = 0,
+        caching: bool = True,
         check_extractable: bool = True,
-        password: str = None, 
+        password: str = None,
         pagenos: List[int] = None,
         preload: bool = False,
         ignore_bad_chars: bool = False,
-        debug_level: int = logging.WARNING, 
+        debug_level: int = logging.WARNING,
     ):
         self.input_file_path = input_file_path
         self.maxpages = maxpages
@@ -39,30 +40,37 @@ class PDFInterpreter:
         if preload:
             for _ in self.__load_pages():
                 pass
-        
+
     def __load_pages(self):
         set_log_level(self.debug_level)
         log.info("Opening file...")
-        with open(self.input_file_path, 'rb') as input_file:
+        with open(self.input_file_path, "rb") as input_file:
             font_cache = {}
             log.info("Parsing file...")
             pages = PDFPage.get_pages(
-                input_file, 
-                pagenos=self.pagenos, 
-                maxpages=self.maxpages, 
-                password=self.password, 
-                caching=self.caching, 
-                check_extractable=self.check_extractable
+                input_file,
+                pagenos=self.pagenos,
+                maxpages=self.maxpages,
+                password=self.password,
+                caching=self.caching,
+                check_extractable=self.check_extractable,
             )
             for page_num, page in enumerate(pages):
-                self.__pages.append(PageInterpreter(page, page_num, font_cache, ignore_bad_chars=self.ignore_bad_chars))
+                self.__pages.append(
+                    PageInterpreter(
+                        page,
+                        page_num,
+                        font_cache,
+                        ignore_bad_chars=self.ignore_bad_chars,
+                    )
+                )
                 yield self.__pages[-1]
             log.info(f"Done Reading {len(self.__pages)} pages.")
         set_log_level(logging.WARNING)
-        
+
         if len(self.__pages) == 0:
             raise EmptyDocumentError("No pages found in pdf-file")
-    
+
     def __iter__(self):
         if len(self.__pages) > 0:
             set_log_level(self.debug_level)

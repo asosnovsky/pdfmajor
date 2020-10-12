@@ -1,5 +1,6 @@
 from ._base import PDFItem
 
+
 class PDFXObject(PDFItem):
     def __init__(self, xobj_strem, bbox, resources, ctm):
         self.stream = xobj_strem

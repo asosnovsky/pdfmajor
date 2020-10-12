@@ -5,7 +5,6 @@ from .PDFFont import PDFFont, get_font
 ##  PDFTextState
 ##
 class PDFTextState(object):
-        
     def __init__(self):
         self.font: PDFFont = None
         self.fontsize: int = 0
@@ -20,13 +19,25 @@ class PDFTextState(object):
         self.ignore_bad_chars = False
 
     def __repr__(self):
-        return ('<PDFTextState: font=%r, fontsize=%r, charspace=%r, wordspace=%r, '
-                ' scaling=%r, leading=%r, render=%r, rise=%r, '
-                ' matrix=%r, linematrix=%r ignore_bad_chars=%r>' %
-                (self.font, self.fontsize, self.charspace, self.wordspace,
-                 self.scaling, self.leading, self.render, self.rise,
-                 self.matrix, self.linematrix, self.ignore_bad_chars))
-    
+        return (
+            "<PDFTextState: font=%r, fontsize=%r, charspace=%r, wordspace=%r, "
+            " scaling=%r, leading=%r, render=%r, rise=%r, "
+            " matrix=%r, linematrix=%r ignore_bad_chars=%r>"
+            % (
+                self.font,
+                self.fontsize,
+                self.charspace,
+                self.wordspace,
+                self.scaling,
+                self.leading,
+                self.render,
+                self.rise,
+                self.matrix,
+                self.linematrix,
+                self.ignore_bad_chars,
+            )
+        )
+
     def to_unichr(self, cid: int) -> str:
         if self.font is None:
             raise MissingFont
@@ -37,7 +48,6 @@ class PDFTextState(object):
                 return ""
             else:
                 raise e
-
 
     def copy(self):
         obj = self.__class__()
@@ -60,4 +70,7 @@ class PDFTextState(object):
 
     @property
     def is_upright(self):
-        return (0 < self.matrix[:,0].prod()*self.scaling and self.matrix[0,1:].prod() <= 0)
+        return (
+            0 < self.matrix[:, 0].prod() * self.scaling
+            and self.matrix[0, 1:].prod() <= 0
+        )

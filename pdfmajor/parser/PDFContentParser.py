@@ -13,8 +13,8 @@ from .PSStackParser import KWD
 
 from .PDFStream import PDFStream
 
-class PDFContentParser(PSStackParser):
 
+class PDFContentParser(PSStackParser):
     def __init__(self, streams: List[PDFStream]):
         self.streams = streams
         self.istream = 0
@@ -27,7 +27,7 @@ class PDFContentParser(PSStackParser):
                 strm = PDFStream.validated_stream(self.streams[self.istream])
                 self.istream += 1
             else:
-                raise PSEOF('Unexpected EOF, file truncated?')
+                raise PSEOF("Unexpected EOF, file truncated?")
             self.fp = BytesIO(strm.get_data())
         return
 
@@ -49,14 +49,14 @@ class PDFContentParser(PSStackParser):
         self.charpos = 0
         return
 
-    def get_inline_data(self, pos, target=b'EI'):
+    def get_inline_data(self, pos, target=b"EI"):
         self.seek(pos)
         i = 0
-        data = b''
+        data = b""
         while i <= len(target):
             self.fillbuf()
             if i:
-                c = operator.getitem(self.buf,self.charpos)
+                c = operator.getitem(self.buf, self.charpos)
                 c = int2byte(c)
                 data += c
                 self.charpos += 1
@@ -69,35 +69,35 @@ class PDFContentParser(PSStackParser):
             else:
                 try:
                     j = self.buf.index(target[0], self.charpos)
-                    data += self.buf[self.charpos:j+1]
-                    self.charpos = j+1
+                    data += self.buf[self.charpos : j + 1]
+                    self.charpos = j + 1
                     i = 1
                 except ValueError:
-                    data += self.buf[self.charpos:]
+                    data += self.buf[self.charpos :]
                     self.charpos = len(self.buf)
-        data = data[:-(len(target)+1)]  # strip the last part
-        data = re.sub(br'(\x0d\x0a|[\x0d\x0a])$', b'', data)
+        data = data[: -(len(target) + 1)]  # strip the last part
+        data = re.sub(br"(\x0d\x0a|[\x0d\x0a])$", b"", data)
         return (pos, data)
 
     def flush(self):
         self.add_results(*self.popall())
         return
 
-    KEYWORD_BI = KWD(b'BI')
-    KEYWORD_ID = KWD(b'ID')
-    KEYWORD_EI = KWD(b'EI')
+    KEYWORD_BI = KWD(b"BI")
+    KEYWORD_ID = KWD(b"ID")
+    KEYWORD_EI = KWD(b"EI")
 
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_BI:
             # inline image within a content stream
-            self.start_type(pos, 'inline')
+            self.start_type(pos, "inline")
         elif token is self.KEYWORD_ID:
             try:
-                (_, objs) = self.end_type('inline')
+                (_, objs) = self.end_type("inline")
                 if len(objs) % 2 != 0:
-                    raise PSTypeError('Invalid dictionary construct: %r' % objs)
+                    raise PSTypeError("Invalid dictionary construct: %r" % objs)
                 d = dict((literal_name(k), v) for (k, v) in choplist(2, objs))
-                (pos, data) = self.get_inline_data(pos+len(b'ID '))
+                (pos, data) = self.get_inline_data(pos + len(b"ID "))
                 obj = PDFStream(d, data)
                 self.push((pos, obj))
                 self.push((pos, self.KEYWORD_EI))

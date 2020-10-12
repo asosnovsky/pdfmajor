@@ -1,12 +1,12 @@
 from typing import List, Tuple
 
-INF = (1<<31) - 1
+INF = (1 << 31) - 1
 Point = Tuple[float]
 unicode = str
 
+
 class Bbox:
-    """A generic boundary box
-    """
+    """A generic boundary box"""
 
     def __init__(self, x0: float, y0: float, x1: float, y1: float):
         self.x0 = x0
@@ -14,23 +14,23 @@ class Bbox:
         self.y0 = y0
         self.y1 = y1
         if (x0 is not None) and (x1 is not None):
-            self.x0 = min([x0,x1])
-            self.x1 = max([x0,x1])
+            self.x0 = min([x0, x1])
+            self.x1 = max([x0, x1])
         if (y0 is not None) and (y1 is not None):
-            self.y0 = min([y0,y1])
-            self.y1 = max([y0,y1])
-    
+            self.y0 = min([y0, y1])
+            self.y1 = max([y0, y1])
+
     @property
     def height(self) -> float:
         return self.y1 - self.y0
-    
+
     @property
     def width(self) -> float:
         return self.x1 - self.x0
 
     def __str__(self):
-        return '%.3f,%.3f,%.3f,%.3f' % (self.x0, self.y0, self.x1, self.y1)
-    
+        return "%.3f,%.3f,%.3f,%.3f" % (self.x0, self.y0, self.x1, self.y1)
+
     def __repr__(self):
         return f"<Bbox {str(self)}/>"
 

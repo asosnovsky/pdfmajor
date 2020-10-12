@@ -15,17 +15,16 @@ from .utils.textdecoder import decode_text_seq
 ##
 class LTTextBlock(LTContainer):
     def __init__(self, x0=None, y0=None, x1=None, y1=None):
-        LTContainer.__init__(self, 
-            Bbox(x0, y0, x1, y1),
-            []
+        LTContainer.__init__(self, Bbox(x0, y0, x1, y1), [])
+
+    def add_char_block(
+        self, seq: bytearray, ctm: tuple, textstate: PDFTextState, color: PDFColor
+    ):
+        (char_meta_datas, textstate, color) = decode_text_seq(
+            seq, ctm, textstate, color
         )
-    
-    def add_char_block(self, seq: bytearray, ctm: tuple, textstate: PDFTextState, color: PDFColor):
-        (char_meta_datas, textstate, color) = decode_text_seq(seq, ctm, textstate, color)
         char_block = LTCharBlock(
-            chars=char_meta_datas,
-            color=color,
-            textstate=textstate
+            chars=char_meta_datas, color=color, textstate=textstate
         )
         if None in [self.bbox.x0, self.bbox.x1, self.bbox.y0, self.bbox.y1]:
             self.bbox.x0 = char_block.x0

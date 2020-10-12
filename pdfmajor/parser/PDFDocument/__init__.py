@@ -5,14 +5,14 @@ from Crypto.Hash import SHA256
 from logging import getLogger
 
 from pdfmajor.execptions import (
-    ParserError, 
-    PDFNoOutlines, 
-    PDFDestinationNotFound, 
+    ParserError,
+    PDFNoOutlines,
+    PDFDestinationNotFound,
     PDFNoValidXRef,
     PSEOF,
-    PDFObjectNotFound, 
+    PDFObjectNotFound,
     PDFTypeError,
-    PDFSyntaxError
+    PDFSyntaxError,
 )
 
 from ...utils import settings, choplist, decode_text
@@ -55,7 +55,7 @@ class PDFDocument(object):
         if SHA256 is not None:
             security_handler_registry[5] = PDFStandardSecurityHandlerV5
 
-    def __init__(self, parser, password='', caching=True, fallback=True):
+    def __init__(self, parser, password="", caching=True, fallback=True):
         "Set the document to use a given PDFParser object."
         self.caching = caching
         self.xrefs = []
@@ -75,7 +75,7 @@ class PDFDocument(object):
             pos = self.find_xref(parser)
             self.read_xref_from(parser, pos, self.xrefs)
         except PDFNoValidXRef:
-            pass # fallback = True
+            pass  # fallback = True
         if fallback:
             parser.fallback = True
             xref = PDFXRefFallback()
@@ -86,42 +86,44 @@ class PDFDocument(object):
             if not trailer:
                 continue
             # If there's an encryption info, remember it.
-            if 'Encrypt' in trailer:
-                #assert not self.encryption, str(self.encryption)
-                self.encryption = (list_value(trailer['ID']),
-                                   dict_value(trailer['Encrypt']))
+            if "Encrypt" in trailer:
+                # assert not self.encryption, str(self.encryption)
+                self.encryption = (
+                    list_value(trailer["ID"]),
+                    dict_value(trailer["Encrypt"]),
+                )
                 self._initialize_password(password)
-            if 'Info' in trailer:
-                self.info.append(dict_value(trailer['Info']))
-            if 'Root' in trailer:
+            if "Info" in trailer:
+                self.info.append(dict_value(trailer["Info"]))
+            if "Root" in trailer:
                 # Every PDF file must have exactly one /Root dictionary.
-                self.catalog = dict_value(trailer['Root'])
+                self.catalog = dict_value(trailer["Root"])
                 break
         else:
-            raise PDFSyntaxError('No /Root object! - Is this really a PDF?')
-        if self.catalog.get('Type') is not LITERAL_CATALOG:
+            raise PDFSyntaxError("No /Root object! - Is this really a PDF?")
+        if self.catalog.get("Type") is not LITERAL_CATALOG:
             if settings.STRICT:
-                raise PDFSyntaxError('Catalog not found!')
+                raise PDFSyntaxError("Catalog not found!")
         return
-    
-    KEYWORD_OBJ = KWD(b'obj')
+
+    KEYWORD_OBJ = KWD(b"obj")
 
     # _initialize_password(password=b'')
     #   Perform the initialization with a given password.
-    def _initialize_password(self, password=''):
+    def _initialize_password(self, password=""):
         (docid, param) = self.encryption
-        if literal_name(param.get('Filter')) != 'Standard':
-            raise PDFEncryptionError('Unknown filter: param=%r' % param)
-        v = int_value(param.get('V', 0))
+        if literal_name(param.get("Filter")) != "Standard":
+            raise PDFEncryptionError("Unknown filter: param=%r" % param)
+        v = int_value(param.get("V", 0))
         factory = self.security_handler_registry.get(v)
         if factory is None:
-            raise PDFEncryptionError('Unknown algorithm: param=%r' % param)
+            raise PDFEncryptionError("Unknown algorithm: param=%r" % param)
         handler = factory(docid, param, password)
         self.decipher = handler.decrypt
         self.is_printable = handler.is_printable()
         self.is_modifiable = handler.is_modifiable()
         self.is_extractable = handler.is_extractable()
-        self._parser.fallback = False # need to read streams with exact length
+        self._parser.fallback = False  # need to read streams with exact length
         return
 
     def _getobj_objstm(self, stream, index, objid):
@@ -131,22 +133,22 @@ class PDFDocument(object):
             (objs, n) = self._get_objects(stream)
             if self.caching:
                 self._parsed_objs[stream.objid] = (objs, n)
-        i = n*2+index
+        i = n * 2 + index
         try:
             obj = objs[i]
         except IndexError:
-            raise PDFSyntaxError('index too big: %r' % index)
+            raise PDFSyntaxError("index too big: %r" % index)
         return obj
 
     def _get_objects(self, stream):
-        if stream.get('Type') is not LITERAL_OBJSTM:
+        if stream.get("Type") is not LITERAL_OBJSTM:
             if settings.STRICT:
-                raise PDFSyntaxError('Not a stream object: %r' % stream)
+                raise PDFSyntaxError("Not a stream object: %r" % stream)
         try:
-            n = stream['N']
+            n = stream["N"]
         except KeyError:
             if settings.STRICT:
-                raise PDFSyntaxError('N is not defined: %r' % stream)
+                raise PDFSyntaxError("N is not defined: %r" % stream)
             n = 0
         parser = PDFStreamParser(stream.get_data())
         parser.set_document(self)
@@ -166,22 +168,22 @@ class PDFDocument(object):
         (_, kwd) = self._parser.nexttoken()
         # #### hack around malformed pdf files
         # copied from https://github.com/jaepil/pdfminer3k/blob/master/pdfminer/pdfparser.py#L399
-        #to solve https://github.com/pdfminer/pdfminer.six/issues/56
-        #assert objid1 == objid, str((objid1, objid))
+        # to solve https://github.com/pdfminer/pdfminer.six/issues/56
+        # assert objid1 == objid, str((objid1, objid))
         if objid1 != objid:
             x = []
             while kwd is not self.KEYWORD_OBJ:
-                (_,kwd) = self._parser.nexttoken()
+                (_, kwd) = self._parser.nexttoken()
                 x.append(kwd)
             if x:
                 objid1 = x[-2]
                 genno = x[-1]
         # #### end hack around malformed pdf files
         if objid1 != objid:
-            raise PDFSyntaxError('objid mismatch: %r=%r' % (objid1, objid))
+            raise PDFSyntaxError("objid mismatch: %r=%r" % (objid1, objid))
 
-        if kwd != KWD(b'obj'):
-            raise PDFSyntaxError('Invalid object spec: offset=%r' % pos)
+        if kwd != KWD(b"obj"):
+            raise PDFSyntaxError("Invalid object spec: offset=%r" % pos)
         (_, obj) = self._parser.nextobject()
         return obj
 
@@ -189,8 +191,8 @@ class PDFDocument(object):
     def getobj(self, objid):
         assert objid != 0
         if not self.xrefs:
-            raise ParserError('PDFDocument is not initialized')
-        log.debug('getobj: objid=%r', objid)
+            raise ParserError("PDFDocument is not initialized")
+        log.debug("getobj: objid=%r", objid)
         if objid in self._cached_objs:
             (obj, genno) = self._cached_objs[objid]
         else:
@@ -215,67 +217,69 @@ class PDFDocument(object):
                     continue
             else:
                 raise PDFObjectNotFound(objid)
-            log.debug('register: objid=%r: %r', objid, obj)
+            log.debug("register: objid=%r: %r", objid, obj)
             if self.caching:
                 self._cached_objs[objid] = (obj, genno)
         return obj
 
     def get_outlines(self):
-        if 'Outlines' not in self.catalog:
+        if "Outlines" not in self.catalog:
             raise PDFNoOutlines
 
         def search(entry, level):
             entry = dict_value(entry)
-            if 'Title' in entry:
-                if 'A' in entry or 'Dest' in entry:
-                    title = decode_text(str_value(entry['Title']))
-                    dest = entry.get('Dest')
-                    action = entry.get('A')
-                    se = entry.get('SE')
+            if "Title" in entry:
+                if "A" in entry or "Dest" in entry:
+                    title = decode_text(str_value(entry["Title"]))
+                    dest = entry.get("Dest")
+                    action = entry.get("A")
+                    se = entry.get("SE")
                     yield (level, title, dest, action, se)
-            if 'First' in entry and 'Last' in entry:
-                for x in search(entry['First'], level+1):
+            if "First" in entry and "Last" in entry:
+                for x in search(entry["First"], level + 1):
                     yield x
-            if 'Next' in entry:
-                for x in search(entry['Next'], level):
+            if "Next" in entry:
+                for x in search(entry["Next"], level):
                     yield x
             return
-        return search(self.catalog['Outlines'], 0)
+
+        return search(self.catalog["Outlines"], 0)
 
     def lookup_name(self, cat, key):
         try:
-            names = dict_value(self.catalog['Names'])
+            names = dict_value(self.catalog["Names"])
         except (PDFTypeError, KeyError):
             raise KeyError((cat, key))
         # may raise KeyError
         d0 = dict_value(names[cat])
 
         def lookup(d):
-            if 'Limits' in d:
-                (k1, k2) = list_value(d['Limits'])
+            if "Limits" in d:
+                (k1, k2) = list_value(d["Limits"])
                 if key < k1 or k2 < key:
                     return None
-            if 'Names' in d:
-                objs = list_value(d['Names'])
+            if "Names" in d:
+                objs = list_value(d["Names"])
                 names = dict(choplist(2, objs))
                 return names[key]
-            if 'Kids' in d:
-                for c in list_value(d['Kids']):
+            if "Kids" in d:
+                for c in list_value(d["Kids"]):
                     v = lookup(dict_value(c))
                     if v:
                         return v
             raise KeyError((cat, key))
+
         return lookup(d0)
 
     def get_dest(self, name):
         try:
             # PDF-1.2 or later
-            obj = self.lookup_name('Dests', name)
+            obj = self.lookup_name("Dests", name)
         except KeyError:
             # PDF-1.1 or prior
-            if 'Dests' not in self.catalog:
+            if "Dests" not in self.catalog:
                 raise PDFDestinationNotFound(name)
-            d0 = dict_value(self.catalog['Dests'])
+            d0 = dict_value(self.catalog["Dests"])
             if name not in d0:
                 raise PDFDestinationNotFound(name)
             obj = d0[name]
@@ -288,14 +292,14 @@ class PDFDocument(object):
         prev = None
         for line in parser.revreadlines():
             line = line.strip()
-            log.debug('find_xref: %r', line)
-            if line == b'startxref':
+            log.debug("find_xref: %r", line)
+            if line == b"startxref":
                 break
             if line:
                 prev = line
         else:
-            raise PDFNoValidXRef('Unexpected EOF')
-        log.info('xref found: pos=%r', prev)
+            raise PDFNoValidXRef("Unexpected EOF")
+        log.info("xref found: pos=%r", prev)
         return int(prev)
 
     # read xref table
@@ -306,8 +310,8 @@ class PDFDocument(object):
         try:
             (pos, token) = parser.nexttoken()
         except PSEOF:
-            raise PDFNoValidXRef('Unexpected EOF')
-        log.info('read_xref_from: start=%d, token=%r', start, token)
+            raise PDFNoValidXRef("Unexpected EOF")
+        log.info("read_xref_from: start=%d, token=%r", start, token)
         if isinstance(token, int):
             # XRefStream: PDF-1.5
             parser.seek(pos)
@@ -321,12 +325,12 @@ class PDFDocument(object):
             xref.load(parser)
         xrefs.append(xref)
         trailer = xref.get_trailer()
-        log.info('trailer: %r', trailer)
-        if 'XRefStm' in trailer:
-            pos = int_value(trailer['XRefStm'])
+        log.info("trailer: %r", trailer)
+        if "XRefStm" in trailer:
+            pos = int_value(trailer["XRefStm"])
             self.read_xref_from(parser, pos, xrefs)
-        if 'Prev' in trailer:
+        if "Prev" in trailer:
             # find previous xref
-            pos = int_value(trailer['Prev'])
+            pos = int_value(trailer["Prev"])
             self.read_xref_from(parser, pos, xrefs)
         return

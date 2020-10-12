@@ -9,15 +9,15 @@ from pdfmajor.parser.EncodingDB import name2unicode
 ##
 class Type1FontHeaderParser(PSStackParser):
 
-    KEYWORD_BEGIN = KWD(b'begin')
-    KEYWORD_END = KWD(b'end')
-    KEYWORD_DEF = KWD(b'def')
-    KEYWORD_PUT = KWD(b'put')
-    KEYWORD_DICT = KWD(b'dict')
-    KEYWORD_ARRAY = KWD(b'array')
-    KEYWORD_READONLY = KWD(b'readonly')
-    KEYWORD_FOR = KWD(b'for')
-    KEYWORD_FOR = KWD(b'for')
+    KEYWORD_BEGIN = KWD(b"begin")
+    KEYWORD_END = KWD(b"end")
+    KEYWORD_DEF = KWD(b"def")
+    KEYWORD_PUT = KWD(b"put")
+    KEYWORD_DICT = KWD(b"dict")
+    KEYWORD_ARRAY = KWD(b"array")
+    KEYWORD_READONLY = KWD(b"readonly")
+    KEYWORD_FOR = KWD(b"for")
+    KEYWORD_FOR = KWD(b"for")
 
     def __init__(self, data):
         PSStackParser.__init__(self, data)
@@ -38,9 +38,7 @@ class Type1FontHeaderParser(PSStackParser):
 
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_PUT:
-            ((_, key), (_, value)) = self.pop(2) # pylint: disable=E0632
-            if (isinstance(key, int) and
-                isinstance(value, PSLiteral)):
+            ((_, key), (_, value)) = self.pop(2)  # pylint: disable=E0632
+            if isinstance(key, int) and isinstance(value, PSLiteral):
                 self.add_results((key, literal_name(value)))
         return
-

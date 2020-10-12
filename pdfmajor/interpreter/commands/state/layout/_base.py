@@ -6,6 +6,7 @@ from pdfmajor.utils import Bbox
 class LTItem(object):
     pass
 
+
 ##  LTComponent
 ##
 class LTComponent(LTItem):
@@ -14,38 +15,46 @@ class LTComponent(LTItem):
             self.bbox = bbox
         else:
             raise AssertionError("Expected a BBox")
-    
+
     def __repr__(self):
-        return ('<%s %s>' %
-                (self.__class__.__name__, str(self.bbox)))
+        return "<%s %s>" % (self.__class__.__name__, str(self.bbox))
 
     # Disable comparison.
     def __lt__(self, _):
         raise ValueError
+
     def __le__(self, _):
         raise ValueError
+
     def __gt__(self, _):
         raise ValueError
+
     def __ge__(self, _):
         raise ValueError
 
     @property
-    def width(self): return self.bbox.width
+    def width(self):
+        return self.bbox.width
 
     @property
-    def height(self): return self.bbox.height
+    def height(self):
+        return self.bbox.height
 
     @property
-    def x0(self): return self.bbox.x0
+    def x0(self):
+        return self.bbox.x0
 
     @property
-    def x1(self): return self.bbox.x1
+    def x1(self):
+        return self.bbox.x1
 
     @property
-    def y0(self): return self.bbox.y0
+    def y0(self):
+        return self.bbox.y0
 
     @property
-    def y1(self): return self.bbox.y1
+    def y1(self):
+        return self.bbox.y1
 
     def is_empty(self):
         return self.width <= 0 or self.height <= 0
@@ -59,12 +68,12 @@ class LTComponent(LTItem):
         if self.is_hoverlap(obj):
             return 0
         else:
-            return min(abs(self.x0-obj.x1), abs(self.x1-obj.x0))
+            return min(abs(self.x0 - obj.x1), abs(self.x1 - obj.x0))
 
     def hoverlap(self, obj):
         assert isinstance(obj, LTComponent), str(type(obj))
         if self.is_hoverlap(obj):
-            return min(abs(self.x0-obj.x1), abs(self.x1-obj.x0))
+            return min(abs(self.x0 - obj.x1), abs(self.x1 - obj.x0))
         else:
             return 0
 
@@ -77,19 +86,19 @@ class LTComponent(LTItem):
         if self.is_voverlap(obj):
             return 0
         else:
-            return min(abs(self.y0-obj.y1), abs(self.y1-obj.y0))
+            return min(abs(self.y0 - obj.y1), abs(self.y1 - obj.y0))
 
     def voverlap(self, obj):
         assert isinstance(obj, LTComponent), str(type(obj))
         if self.is_voverlap(obj):
-            return min(abs(self.y0-obj.y1), abs(self.y1-obj.y0))
+            return min(abs(self.y0 - obj.y1), abs(self.y1 - obj.y0))
         else:
             return 0
+
 
 ##  LTContainer
 ##
 class LTContainer(LTComponent):
-
     def __init__(self, bbox: Bbox, objs: List[LTItem] = None):
         LTComponent.__init__(self, bbox)
         self._objs: List[LTItem] = [] if objs is None else objs
@@ -109,7 +118,3 @@ class LTContainer(LTComponent):
         for obj in objs:
             self.add(obj)
         return
-
-
-
-

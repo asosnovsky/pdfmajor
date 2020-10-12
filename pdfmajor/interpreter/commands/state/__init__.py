@@ -3,7 +3,11 @@ from pdfmajor.utils import MATRIX_IDENTITY
 
 from .PDFGraphicState import PDFGraphicState
 from .PDFGraphicState.PDFColor import PDFColor
-from .PDFGraphicState.PDFColorSpace import PREDEFINED_COLORSPACE, OrderedDict, PDFColorSpace
+from .PDFGraphicState.PDFColorSpace import (
+    PREDEFINED_COLORSPACE,
+    OrderedDict,
+    PDFColorSpace,
+)
 
 from .PDFTextState import PDFTextState, PDFFont, get_font
 
@@ -17,15 +21,16 @@ from .layout import LTImage
 
 from .layout import make_char_block, make_curve, make_image, make_xobject
 
+
 class PDFStateStack:
     def __init__(self):
         self.t_matrix = MATRIX_IDENTITY
         self.text = PDFTextState()
         self.graphics = PDFGraphicState()
-        self.gstack : list = []
+        self.gstack: list = []
         self.curvestacks: List[CurvePath] = []
         self.argstack: List[bytes] = []
-        self.complete_layout_items : List[LTItem] = []
+        self.complete_layout_items: List[LTItem] = []
         self.colorspace_map: OrderedDict = PREDEFINED_COLORSPACE.copy()
         self.fontmap = {}
         self.xobjmap = {}

@@ -25,6 +25,5 @@ class PDFCommands:
             for cmd_name in cmd_names:
                 cls.__add(cmd_name, cmd)
             return cmd
+
         return wrap
-
-

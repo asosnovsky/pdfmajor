@@ -1,44 +1,48 @@
 import struct
-import chardet  
+import chardet
 
 # from sys import maxint as INF #doesn't work anymore under Python3,
 # but PDF still uses 32 bits ints
 int2byte = struct.Struct(">B").pack
+
 
 def make_compat_bytes(in_str):
     "In Py2, does nothing. In Py3, converts to bytes, encoding to unicode."
     assert isinstance(in_str, str), str(type(in_str))
     return in_str.encode()
 
+
 def make_compat_str(in_str):
     "In Py2, does nothing. In Py3, converts to string, guessing encoding."
     assert isinstance(in_str, (bytes, str, unicode)), str(type(in_str))
     if isinstance(in_str, bytes):
         enc = chardet.detect(in_str)
-        in_str = in_str.decode(enc['encoding'])
+        in_str = in_str.decode(enc["encoding"])
     return in_str
 
-def compatible_encode_method(bytesorstring, encoding='utf-8', erraction='ignore'):
-    if isinstance(bytesorstring, str): return bytesorstring
+
+def compatible_encode_method(bytesorstring, encoding="utf-8", erraction="ignore"):
+    if isinstance(bytesorstring, str):
+        return bytesorstring
     assert isinstance(bytesorstring, bytes), str(type(bytesorstring))
     return bytesorstring.decode(encoding, erraction)
+
 
 ##  PNG Predictor
 ##
 def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     if bitspercomponent != 8:
         # unsupported
-        raise ValueError("Unsupported `bitspercomponent': %d" %
-                         bitspercomponent)
+        raise ValueError("Unsupported `bitspercomponent': %d" % bitspercomponent)
     nbytes = colors * columns * bitspercomponent // 8
     i = 0
-    buf = b''
-    line0 = b'\x00' * columns
-    for i in range(0, len(data), nbytes+1):
+    buf = b""
+    line0 = b"\x00" * columns
+    for i in range(0, len(data), nbytes + 1):
         ft = data[i]
         i += 1
-        line1 = data[i:i+nbytes]
-        line2 = b''
+        line1 = data[i : i + nbytes]
+        line2 = b""
         if ft == 0:
             # PNG none
             line2 += line1
@@ -46,18 +50,18 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
             # PNG sub (UNTESTED)
             c = 0
             for b in line1:
-                c = (c+b) & 255
+                c = (c + b) & 255
                 line2 += int2byte(c)
         elif ft == 2:
             # PNG up
             for (a, b) in zip(line0, line1):
-                c = (a+b) & 255
+                c = (a + b) & 255
                 line2 += int2byte(c)
         elif ft == 3:
             # PNG average (UNTESTED)
             c = 0
             for (a, b) in zip(line0, line1):
-                c = ((c+a+b)//2) & 255
+                c = ((c + a + b) // 2) & 255
                 line2 += int2byte(c)
         else:
             # unsupported
@@ -67,14 +71,13 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     return buf
 
 
-
-
 ##  Utility functions
 ##
 
 # isnumber
 def isnumber(x):
     return isinstance(x, (int, float))
+
 
 # uniq
 def uniq(objs):
@@ -99,7 +102,8 @@ def csort(objs, key):
 def drange(v0, v1, d):
     """Returns a discrete range."""
     assert v0 < v1, str((v0, v1, d))
-    return range(int(v0)//d, int(v1+d)//d)
+    return range(int(v0) // d, int(v1 + d) // d)
+
 
 # pick
 def pick(seq, func, maxobj=None):
@@ -133,15 +137,16 @@ def nunpack(s, default=0):
     elif l == 1:
         return ord(s)
     elif l == 2:
-        return struct.unpack('>H', s)[0]
+        return struct.unpack(">H", s)[0]
     elif l == 3:
-        return struct.unpack('>L', b'\x00'+s)[0]
+        return struct.unpack(">L", b"\x00" + s)[0]
     elif l == 4:
-        return struct.unpack('>L', s)[0]
+        return struct.unpack(">L", s)[0]
     elif l == 8:
-        return struct.unpack('>Q', s)[0]
+        return struct.unpack(">Q", s)[0]
     else:
-        raise TypeError('invalid length: %d' % l)
+        raise TypeError("invalid length: %d" % l)
+
 
 ##  Plane
 ##
@@ -151,9 +156,8 @@ def nunpack(s, default=0):
 ##  which is sorted by its x or y coordinate.
 ##
 class Plane(object):
-
     def __init__(self, bbox, gridsize=50):
-        self._seq = []          # preserve the object order.
+        self._seq = []  # preserve the object order.
         self._objs = set()
         self._grid = {}
         self.gridsize = gridsize
@@ -161,10 +165,10 @@ class Plane(object):
         return
 
     def __repr__(self):
-        return ('<Plane objs=%r>' % list(self))
+        return "<Plane objs=%r>" % list(self)
 
     def __iter__(self):
-        return ( obj for obj in self._seq if obj in self._objs )
+        return (obj for obj in self._seq if obj in self._objs)
 
     def __len__(self):
         return len(self._objs)
@@ -174,8 +178,8 @@ class Plane(object):
 
     def _getrange(self, bbox):
         (x0, y0, x1, y1) = bbox
-        if (x1 <= self.x0 or self.x1 <= x0 or
-            y1 <= self.y0 or self.y1 <= y0): return
+        if x1 <= self.x0 or self.x1 <= x0 or y1 <= self.y0 or self.y1 <= y0:
+            return
         x0 = max(self.x0, x0)
         y0 = max(self.y0, y0)
         x1 = min(self.x1, x1)
@@ -225,12 +229,7 @@ class Plane(object):
                 if obj in done:
                     continue
                 done.add(obj)
-                if (obj.x1 <= x0 or x1 <= obj.x0 or
-                    obj.y1 <= y0 or y1 <= obj.y0):
+                if obj.x1 <= x0 or x1 <= obj.x0 or obj.y1 <= y0 or y1 <= obj.y0:
                     continue
                 yield obj
         return
-
-
-
-

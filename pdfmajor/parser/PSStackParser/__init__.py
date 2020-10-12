@@ -11,35 +11,35 @@ from .constants import *
 
 log = logging.getLogger(__name__)
 
+
 def literal_name(x):
     if not isinstance(x, PSLiteral):
         if settings.STRICT:
-            raise PSTypeError('Literal required: %r' % (x,))
+            raise PSTypeError("Literal required: %r" % (x,))
         else:
-            name=x
+            name = x
     else:
-        name=x.name
+        name = x.name
         try:
-            name = str(name,'utf-8')
+            name = str(name, "utf-8")
         except:
             pass
     return name
 
+
 def keyword_name(x):
     if not isinstance(x, PSKeyword):
         if settings.STRICT:
-            raise PSTypeError('Keyword required: %r' % x)
+            raise PSTypeError("Keyword required: %r" % x)
         else:
-            name=x
+            name = x
     else:
-        name=x.name
-        name = str(name,'utf-8','ignore')
+        name = x.name
+        name = str(name, "utf-8", "ignore")
     return name
 
 
-
 class PSStackParser(PSBaseParser):
-
     def __init__(self, fp: TextIOWrapper):
         PSBaseParser.__init__(self, fp)
         self.reset()
@@ -73,24 +73,24 @@ class PSStackParser(PSBaseParser):
 
     def add_results(self, *objs):
         try:
-            log.debug('add_results: %r', objs)
+            log.debug("add_results: %r", objs)
         except:
-            log.debug('add_results: (unprintable object)')
+            log.debug("add_results: (unprintable object)")
         self.results.extend(objs)
         return
 
     def start_type(self, pos, type):
         self.context.append((pos, self.curtype, self.curstack))
         (self.curtype, self.curstack) = (type, [])
-        log.debug('start_type: pos=%r, type=%r', pos, type)
+        log.debug("start_type: pos=%r, type=%r", pos, type)
         return
 
     def end_type(self, type):
         if self.curtype != type:
-            raise PSTypeError('Type mismatch: %r != %r' % (self.curtype, type))
+            raise PSTypeError("Type mismatch: %r != %r" % (self.curtype, type))
         objs = [obj for (_, obj) in self.curstack]
         (pos, self.curtype, self.curstack) = self.context.pop()
-        log.debug('end_type: pos=%r, type=%r, objs=%r', pos, type, objs)
+        log.debug("end_type: pos=%r, type=%r, objs=%r", pos, type, objs)
         return (pos, objs)
 
     def do_keyword(self, pos, token):
@@ -117,44 +117,55 @@ class PSStackParser(PSBaseParser):
                 self.push((pos, token))
             elif token == KEYWORD_ARRAY_BEGIN:
                 # begin array
-                self.start_type(pos, 'a')
+                self.start_type(pos, "a")
             elif token == KEYWORD_ARRAY_END:
                 # end array
                 try:
-                    self.push(self.end_type('a'))
+                    self.push(self.end_type("a"))
                 except PSTypeError as e:
                     if settings.STRICT:
                         raise e
             elif token == KEYWORD_DICT_BEGIN:
                 # begin dictionary
-                self.start_type(pos, 'd')
+                self.start_type(pos, "d")
             elif token == KEYWORD_DICT_END:
                 # end dictionary
                 try:
-                    (pos, objs) = self.end_type('d')
+                    (pos, objs) = self.end_type("d")
                     if len(objs) % 2 != 0:
-                        raise PSSyntaxError('Invalid dictionary construct: %r' % objs)
+                        raise PSSyntaxError("Invalid dictionary construct: %r" % objs)
                     # construct a Python dictionary.
-                    d = dict((literal_name(k), v) for (k, v) in choplist(2, objs) if v is not None)
+                    d = dict(
+                        (literal_name(k), v)
+                        for (k, v) in choplist(2, objs)
+                        if v is not None
+                    )
                     self.push((pos, d))
                 except PSTypeError as e:
                     if settings.STRICT:
                         raise e
             elif token == KEYWORD_PROC_BEGIN:
                 # begin proc
-                self.start_type(pos, 'p')
+                self.start_type(pos, "p")
             elif token == KEYWORD_PROC_END:
                 # end proc
                 try:
-                    self.push(self.end_type('p'))
+                    self.push(self.end_type("p"))
                 except PSTypeError as e:
                     if settings.STRICT:
                         raise e
-            elif isinstance(token,PSKeyword):
-                log.debug('do_keyword: pos=%r, token=%r, stack=%r', pos, token, self.curstack)
+            elif isinstance(token, PSKeyword):
+                log.debug(
+                    "do_keyword: pos=%r, token=%r, stack=%r", pos, token, self.curstack
+                )
                 self.do_keyword(pos, token)
             else:
-                log.error('unknown token: pos=%r, token=%r, stack=%r', pos, token, self.curstack)
+                log.error(
+                    "unknown token: pos=%r, token=%r, stack=%r",
+                    pos,
+                    token,
+                    self.curstack,
+                )
                 self.do_keyword(pos, token)
                 raise PSSyntaxError("unknown tokens")
             if self.context:
@@ -163,7 +174,7 @@ class PSStackParser(PSBaseParser):
                 self.flush()
         obj = self.results.pop(0)
         try:
-            log.debug('nextobject: %r', obj)
+            log.debug("nextobject: %r", obj)
         except:
-            log.debug('nextobject: (unprintable object)')
+            log.debug("nextobject: (unprintable object)")
         return obj

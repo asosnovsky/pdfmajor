@@ -34,8 +34,7 @@ def resolve_all(x, default=None):
 
 
 def decipher_all(decipher, objid, genno, x):
-    """Recursively deciphers the given object.
-    """
+    """Recursively deciphers the given object."""
     if isinstance(x, bytes):
         return decipher(objid, genno, x)
     if isinstance(x, list):
@@ -44,12 +43,14 @@ def decipher_all(decipher, objid, genno, x):
         for (k, v) in x.items():
             x[k] = decipher_all(decipher, objid, genno, v)
     return x
+
+
 # Type cheking
 def int_value(x):
     x = resolve1(x)
     if not isinstance(x, int):
         if settings.STRICT:
-            raise PDFTypeError('Integer required: %r' % x)
+            raise PDFTypeError("Integer required: %r" % x)
         return 0
     return x
 
@@ -58,7 +59,7 @@ def float_value(x):
     x = resolve1(x)
     if not isinstance(x, float):
         if settings.STRICT:
-            raise PDFTypeError('Float required: %r' % x)
+            raise PDFTypeError("Float required: %r" % x)
         return 0.0
     return x
 
@@ -67,7 +68,7 @@ def num_value(x):
     x = resolve1(x)
     if not isnumber(x):
         if settings.STRICT:
-            raise PDFTypeError('Int or Float required: %r' % x)
+            raise PDFTypeError("Int or Float required: %r" % x)
         return 0
     return x
 
@@ -76,8 +77,8 @@ def str_value(x):
     x = resolve1(x)
     if not isinstance(x, bytes):
         if settings.STRICT:
-            raise PDFTypeError('String required: %r' % x)
-        return ''
+            raise PDFTypeError("String required: %r" % x)
+        return ""
     return x
 
 
@@ -85,7 +86,7 @@ def list_value(x):
     x = resolve1(x)
     if not isinstance(x, (list, tuple)):
         if settings.STRICT:
-            raise PDFTypeError('List required: %r' % x)
+            raise PDFTypeError("List required: %r" % x)
         return []
     return x
 
@@ -94,11 +95,12 @@ def dict_value(x):
     x = resolve1(x)
     if not isinstance(x, dict):
         if settings.STRICT:
-            log.error('PDFTypeError : Dict required: %r', x)
-            raise PDFTypeError('Dict required: %r' % x)
+            log.error("PDFTypeError : Dict required: %r", x)
+            raise PDFTypeError("Dict required: %r" % x)
         return {}
     return x
-    
+
+
 #
 # RunLength decoder (Adobe version) implementation based on PDF Reference
 # version 1.4 section 3.3.4.
@@ -119,20 +121,19 @@ def rldecode(data):
         (2 to 128) times during decompression. A length value of 128
         denotes EOD.
     """
-    decoded = b''
+    decoded = b""
     i = 0
     while i < len(data):
         length = data[i]
         if length == 128:
             break
         if length >= 0 and length < 128:
-            for j in range(i+1,(i+1)+(length+1)):
-                decoded+=int2byte(data[j])
-            
-            i = (i+1) + (length+1)
-        if length > 128:
-            run = int2byte(data[i+1])*(257-length)
-            decoded+=run
-            i = (i+1) + 1
-    return decoded
+            for j in range(i + 1, (i + 1) + (length + 1)):
+                decoded += int2byte(data[j])
 
+            i = (i + 1) + (length + 1)
+        if length > 128:
+            run = int2byte(data[i + 1]) * (257 - length)
+            decoded += run
+            i = (i + 1) + 1
+    return decoded

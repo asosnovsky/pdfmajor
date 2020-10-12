@@ -1,12 +1,7 @@
-
 import logging
 from io import BytesIO, TextIOWrapper
 from ..utils import settings
-from pdfmajor.execptions import (
-    PSSyntaxError, 
-    PSEOF,
-    PDFSyntaxError
-)
+from pdfmajor.execptions import PSSyntaxError, PSEOF, PDFSyntaxError
 from .PSStackParser import PSStackParser
 from .PSStackParser import KWD
 from .PDFStream import PDFStream
@@ -15,7 +10,6 @@ from .PDFStream import int_value
 from .PDFStream import dict_value
 
 log = logging.getLogger(__name__)
-
 
 
 ##  PDFParser
@@ -49,12 +43,12 @@ class PDFParser(PSStackParser):
         self.doc = doc
         return
 
-    KEYWORD_R = KWD(b'R')
-    KEYWORD_NULL = KWD(b'null')
-    KEYWORD_ENDOBJ = KWD(b'endobj')
-    KEYWORD_STREAM = KWD(b'stream')
-    KEYWORD_XREF = KWD(b'xref')
-    KEYWORD_STARTXREF = KWD(b'startxref')
+    KEYWORD_R = KWD(b"R")
+    KEYWORD_NULL = KWD(b"null")
+    KEYWORD_ENDOBJ = KWD(b"endobj")
+    KEYWORD_STREAM = KWD(b"stream")
+    KEYWORD_XREF = KWD(b"xref")
+    KEYWORD_STARTXREF = KWD(b"startxref")
 
     def do_keyword(self, pos, token):
         """Handles PDF-related keywords."""
@@ -72,44 +66,44 @@ class PDFParser(PSStackParser):
         elif token is self.KEYWORD_R:
             # reference to indirect object
             try:
-                ((_, objid), (_, genno)) = self.pop(2) # pylint: disable=E0632
-                (objid, genno) = (int(objid), int(genno)) # pylint: disable=E0632
-                obj = PDFObjRef(self.doc, objid, genno) # pylint: disable=E0632
+                ((_, objid), (_, genno)) = self.pop(2)  # pylint: disable=E0632
+                (objid, genno) = (int(objid), int(genno))  # pylint: disable=E0632
+                obj = PDFObjRef(self.doc, objid, genno)  # pylint: disable=E0632
                 self.push((pos, obj))
             except PSSyntaxError:
                 pass
 
         elif token is self.KEYWORD_STREAM:
             # stream object
-            ((_, dic),) = self.pop(1) # pylint: disable=E0632
+            ((_, dic),) = self.pop(1)  # pylint: disable=E0632
             dic = dict_value(dic)
             objlen = 0
             if not self.fallback:
                 try:
-                    objlen = int_value(dic['Length'])
+                    objlen = int_value(dic["Length"])
                 except KeyError:
                     if settings.STRICT:
-                        raise PDFSyntaxError('/Length is undefined: %r' % dic)
+                        raise PDFSyntaxError("/Length is undefined: %r" % dic)
             self.seek(pos)
             try:
                 (_, line) = self.nextline()  # 'stream'
             except PSEOF:
                 if settings.STRICT:
-                    raise PDFSyntaxError('Unexpected EOF')
+                    raise PDFSyntaxError("Unexpected EOF")
                 return
             pos += len(line)
             self.fp.seek(pos)
             data = bytearray(self.fp.read(objlen))
-            self.seek(pos+objlen)
+            self.seek(pos + objlen)
             while 1:
                 try:
                     (_, line) = self.nextline()
                 except PSEOF:
                     if settings.STRICT:
-                        raise PDFSyntaxError('Unexpected EOF')
+                        raise PDFSyntaxError("Unexpected EOF")
                     break
-                if b'endstream' in line:
-                    i = line.index(b'endstream')
+                if b"endstream" in line:
+                    i = line.index(b"endstream")
                     objlen += i
                     if self.fallback:
                         data += line[:i]
@@ -118,9 +112,15 @@ class PDFParser(PSStackParser):
                 if self.fallback:
                     data += line
             data = bytes(data)
-            self.seek(pos+objlen)
+            self.seek(pos + objlen)
             # XXX limit objlen not to exceed object boundary
-            log.debug('Stream: pos=%d, objlen=%d, dic=%r, data=%r...', pos, objlen, dic, data[:10])
+            log.debug(
+                "Stream: pos=%d, objlen=%d, dic=%r, data=%r...",
+                pos,
+                objlen,
+                dic,
+                data[:10],
+            )
             obj = PDFStream(dic, data, self.doc.decipher)
             self.push((pos, obj))
 
@@ -151,12 +151,13 @@ class PDFStreamParser(PDFParser):
         self.add_results(*self.popall())
         return
 
-    KEYWORD_OBJ = KWD(b'obj')
+    KEYWORD_OBJ = KWD(b"obj")
+
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_R:
             # reference to indirect object
             try:
-                ((_, objid), (_, genno)) = self.pop(2) # pylint: disable=E0632
+                ((_, objid), (_, genno)) = self.pop(2)  # pylint: disable=E0632
                 (objid, genno) = (int(objid), int(genno))
                 obj = PDFObjRef(self.doc, objid, genno)
                 self.push((pos, obj))
@@ -167,7 +168,7 @@ class PDFStreamParser(PDFParser):
             if settings.STRICT:
                 # See PDF Spec 3.4.6: Only the object values are stored in the
                 # stream; the obj and endobj keywords are not used.
-                raise PDFSyntaxError('Keyword endobj found in stream')
+                raise PDFSyntaxError("Keyword endobj found in stream")
             return
         # others
         self.push((pos, token))

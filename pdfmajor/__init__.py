@@ -1,7 +1,6 @@
-
-# 
+#
 # DO NOT EDIT THIS PAGE
-# 
+#
 """
 # PDFMajor 
 
@@ -99,8 +98,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 __version__ = (1, 3, 13)
 
-if __name__ == '__main__':
-    print(
-        "PDFMajor v" + '.'.join(map(str, __version__))
-    )
+if __name__ == "__main__":
+    print("PDFMajor v" + ".".join(map(str, __version__)))
     print(__doc__)

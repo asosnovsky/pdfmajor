@@ -1,6 +1,7 @@
 from ..utils import LATIN_ENCODING, name2unicode
 from .PSStackParser import PSLiteral
 
+
 class EncodingDB(object):
 
     std2unicode = {}
@@ -19,10 +20,10 @@ class EncodingDB(object):
             pdf2unicode[pdf] = c
 
     encodings = {
-        'StandardEncoding': std2unicode,
-        'MacRomanEncoding': mac2unicode,
-        'WinAnsiEncoding': win2unicode,
-        'PDFDocEncoding': pdf2unicode,
+        "StandardEncoding": std2unicode,
+        "MacRomanEncoding": mac2unicode,
+        "WinAnsiEncoding": win2unicode,
+        "PDFDocEncoding": pdf2unicode,
     }
 
     @classmethod
@@ -41,4 +42,3 @@ class EncodingDB(object):
                         pass
                     cid += 1
         return cid2unicode
-
