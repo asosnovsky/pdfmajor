@@ -50,14 +50,14 @@ def parse_comment(initialpos: int, inp: Iterator[PInput]) -> TokenComment:
 			)
 
 def parse_number(initialpos: int, inp: Iterator[PInput]) -> TokenNumber:
-	"""Parses input stream into a comment
+	"""Parses input stream into a number
 
 	Args:
 		initialpos (int): initial position where we started
 		inp (Iterator[PInput])
 
 	Returns:
-		TokenComment
+		TokenNumber
 	"""
 	curtoken = b""
 	is_dec = False
@@ -102,38 +102,3 @@ def parse_number(initialpos: int, inp: Iterator[PInput]) -> TokenNumber:
 			except ValueError:
 				raise InvalidToken(initialpos, curtoken)
 
-# def parse_float(
-# 	initialpos: int, 
-# 	inp: Iterator[PInput], 
-# 	initialtokenval = b""
-# ) -> TokenFloat:
-# 	curtoken = b"" + initialtokenval
-# 	for curpos, s in inp:
-# 		print('->',curpos, s)
-# 		m = END_NUMBER.search(s, 0)
-# 		if not m:
-# 			curtoken += s
-# 		else:
-# 			j = m.start(0)
-# 			curtoken += s[:j]
-# 			next_t = s[j:j+1]
-# 			if next_t == b'.':
-# 				curtoken += b'.'
-# 				s = s[j+1:]
-# 				m = END_NUMBER.search(s, 0)
-# 				if not m:
-# 					curtoken += s
-# 					continue
-# 				else:
-# 					j = m.start(0)
-# 					curtoken += s[:j]
-# 					next_t = s[j+1]
-# 			try:
-# 				print(curpos,j, initialpos)
-# 				return TokenFloat(
-# 					initialpos, 
-# 					cmp_tsize(curpos, initialpos, j), 
-# 					Decimal(curtoken.decode())
-# 				)
-# 			except ValueError:
-# 				raise InvalidToken(initialpos, curtoken)
