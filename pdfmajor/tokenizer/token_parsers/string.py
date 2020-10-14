@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pdfmajor.tokenizer.exceptions import TokenizerEOF
-from pdfmajor.tokenizer.token_parsers.util import PInput, cmp_tsize
+from pdfmajor.tokenizer.token_parsers.util import PInput, SafeBufferIt, cmp_tsize
 from pdfmajor.utils import int2byte
 from pdfmajor.tokenizer.token import (
     TokenString,
@@ -23,47 +23,48 @@ class StringParseState:
 def parse_string(initialpos: int, inp: Iterator[PInput]):
     state = StringParseState(b"", 1)
     for curpos, buf in inp:
-        skip: int = 0
-        for i in range(len(buf) + 1):
-            if i < len(buf):
-                raise TokenizerEOF("Max Iteration Reached!")
-            if skip >= len(buf):
-                break
-        m = END_STRING.search(s, 0)
-        if not m:
-            curtoken += s
-        else:
-            j = m.start(0)
-            curtoken += s[:j]
-            c = s[j : j + 1]
-            if c == b"\\":
-                _parse_string_1
-                return j + 1
-            elif c == b"(":
-                paren += 1
-                curtoken += c
-                return j + 1
-            elif c == b")":
-                paren -= 1
-                if paren:
-                    curtoken += c
-                    return j + 1
-            return TokenString(
-                initialpos, cmp_tsize(curpos, initialpos, j), curtoken.decode()
-            )
+        it = SafeBufferIt(buf)
+        for s in it.into_iter():
+            if state.oct_value is not None:
+                it.skip += parse_string_oct(s, state)
+            else:
+                m = END_STRING.search(s, 0)
+                if not m:
+                    state.curtoken += s
+                else:
+                    j = m.start(0)
+                    state.curtoken += s[:j]
+                    c = s[j : j + 1]
+                    if c == b"\\":
+                        state.oct_value = b""
+                        it.skip += j + 1
+                    elif c == b"(":
+                        state.paren += 1
+                        state.curtoken += c
+                        it.skip += j + 1
+                    elif c == b")":
+                        state.paren -= 1
+                        if state.paren:
+                            state.curtoken += c
+                            it.skip += j + 1
+                    return TokenString(
+                        initialpos,
+                        cmp_tsize(curpos, initialpos, j),
+                        state.curtoken.decode(),
+                    )
 
 
-def parse_string_oct(initialpos: int, inp: Iterator[PInput]):
-    curtoken: bytes = b""
-    oct_val: bytes = b""
-    for curpos, s in inp:
-        for ci in range(len(s)):
-            c = s[ci : ci + 1]
-            if OCT_STRING.match(c) and len(oct_val) < 3:
-                oct_val += c
-            elif oct_val:
-                curtoken += int2byte(int(oct_val, 8))
-                return (curtoken, curpos + ci)
-            elif c in ESC_STRING:
-                curtoken += int2byte(ESC_STRING[c])
-                return (curtoken, curpos + ci + 1)
+def parse_string_oct(s: bytes, state: StringParseState) -> int:
+    for ci in range(len(s)):
+        c = s[ci : ci + 1]
+        if OCT_STRING.match(c) and len(state.oct_value) < 3:
+            state.oct_value += c
+        elif state.oct_value:
+            state.curtoken += int2byte(int(state.oct_value, 8))
+            return ci
+        elif c in ESC_STRING:
+            state.curtoken += int2byte(ESC_STRING[c])
+            state.oct_value = None
+            return ci + 1
+    state.oct_value = None
+    return len(s) + 1
