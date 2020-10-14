@@ -1,6 +1,7 @@
 import io
+from pdfmajor.tokenizer.token_parsers.string import parse_string
 
-from typing import Iterator
+from typing import Iterator, Optional
 
 from pdfmajor.tokenizer.constants import NONSPC
 from pdfmajor.tokenizer.exceptions import TokenizerEOF
@@ -18,16 +19,22 @@ class PSTokenizer:
         self.bufsize = bufsize
         self.bufpos: int = 0
         self.buf: bytes = b""
-        self.buf_skipstep: int = 0
+        self.buf_skipstep: Optional[int] = None
+
+    def inc_buf_skipstep(self, value: int):
+        if self.buf_skipstep is None:
+            self.buf_skipstep = value
+        else:
+            self.buf_skipstep += value
 
     def iter_buffer(self) -> Iterator[PInput]:
         while True:
-            if (self.buf_skipstep > 0) and (self.buf_skipstep < len(self.buf)):
+            if (self.buf_skipstep is not None) and (self.buf_skipstep < len(self.buf)):
                 yield PInput(
                     self.bufpos + self.buf_skipstep, self.buf[self.buf_skipstep :]
                 )
             else:
-                self.buf_skipstep = 0
+                self.buf_skipstep = None
                 self.bufpos = self.fp.tell()
                 self.buf = self.fp.read(self.bufsize)
                 if not self.buf:
@@ -51,47 +58,46 @@ class PSTokenizer:
             bufpos, buf = cur
             m = NONSPC.search(buf, 0)
             if not m:
-                self.buf_skipstep = 0
+                self.buf_skipstep = None
                 continue
             else:
                 j = m.start(0)
                 c = buf[j : j + 1]
                 if c == b"%":
-                    self.buf_skipstep += j + 1
+                    self.inc_buf_skipstep(j + 1)
                     yield self._check_token(
                         cur, parse_comment(bufpos + j, self.iter_buffer())
                     )
                 elif c == b"/":
-                    self.buf_skipstep += j + 1
+                    self.inc_buf_skipstep(j + 1)
                     yield self._check_token(
                         cur, parse_literal(bufpos + j, self.iter_buffer())
                     )
                 elif c in b"-+":
-                    self.buf_skipstep += j + 1
+                    self.inc_buf_skipstep(j + 1)
                     yield self._check_token(
                         cur, parse_number(bufpos + j, self.iter_buffer(), c)
                     )
                 elif c.isdigit():
-                    self.buf_skipstep += j
+                    self.inc_buf_skipstep(j)
                     yield self._check_token(
                         cur, parse_number(bufpos + j, self.iter_buffer())
                     )
                 elif c == b".":
-                    self.buf_skipstep += j
+                    self.inc_buf_skipstep(j)
                     yield self._check_token(
                         cur, parse_number(bufpos + j, self.iter_buffer())
                     )
                 elif c.isalpha():
-                    self.buf_skipstep += j
+                    self.inc_buf_skipstep(j)
                     yield self._check_token(
                         cur, parse_keyword(bufpos + j, self.iter_buffer())
                     )
                 elif c == b"(":
-                    raise NotImplementedError
-                    # self._curtoken = b""
-                    # self.paren = 1
-                    # self._current_parse_func = self._parse_string
-                    # return j + 1
+                    self.inc_buf_skipstep(j + 1)
+                    yield self._check_token(
+                        cur, parse_string(bufpos + j, self.iter_buffer())
+                    )
                 elif c == b"<":
                     raise NotImplementedError
                     # self._curtoken = b""
@@ -103,9 +109,9 @@ class PSTokenizer:
                     # self._current_parse_func = self._parse_wclose
                     # return j + 1
                 else:
-                    self.buf_skipstep += j + 1
+                    self.inc_buf_skipstep(j + 1)
                     yield self._check_token(cur, TokenKeyword(bufpos + j, 1, c))
 
     def _check_token(self, cur: PInput, token: Token) -> Token:
-        self.buf_skipstep += token.size
+        self.inc_buf_skipstep(token.size)
         return token

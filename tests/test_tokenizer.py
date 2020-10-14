@@ -1,12 +1,15 @@
 from decimal import Decimal
 import io
+from typing import List
 from pdfmajor.tokenizer.token_parsers.string import parse_string
 from pdfmajor.tokenizer import PSTokenizer
 from pdfmajor.tokenizer.token import (
+    Token,
     TokenBoolean,
     TokenComment,
     TokenDecimal,
     TokenInteger,
+    TokenKeyword,
     TokenLiteral,
     TokenString,
 )
@@ -137,3 +140,49 @@ func/a/b{(c)do*}def
         )
         for token in tokenizer.iter_tokens():
             print(token)
+
+    def test_case2(self):
+        tokenizer = PSTokenizer(
+            io.BytesIO(
+                br"""10.32
+0 +1 -2 .5 1.234
+-1.234 990"""
+            )
+        )
+        for token in tokenizer.iter_tokens():
+            print(token)
+
+    def test_case_words1(self):
+        tokenizer = PSTokenizer(
+            io.BytesIO(
+                br"""%!PS
+% This is some secret sauce
+begin end
+ "  @ #
+/a/BCD /Some_Name /foo#5f#xbaa /bar#6a
+/need /oh1oh
+func/a/b
+"""
+            )
+        )
+        expected: List[Token] = [
+            TokenComment(pos=0, size=4, value=b"!PS"),
+            TokenComment(pos=5, size=27, value=b" This is some secret sauce"),
+            TokenKeyword(pos=33, size=5, value=b"begin"),
+            TokenKeyword(pos=39, size=3, value=b"end"),
+            TokenKeyword(pos=44, size=1, value=b'"'),
+            TokenKeyword(pos=47, size=1, value=b"@"),
+            TokenKeyword(pos=49, size=1, value=b"#"),
+            TokenLiteral(pos=51, size=1, value="a"),
+            TokenLiteral(pos=53, size=3, value="BCD"),
+            TokenLiteral(pos=58, size=9, value="Some_Name"),
+            TokenLiteral(pos=69, size=11, value="foo_xbaa"),
+            TokenLiteral(pos=82, size=6, value="barj"),
+            TokenLiteral(pos=90, size=4, value="need"),
+            TokenLiteral(pos=96, size=5, value="oh1oh"),
+            TokenKeyword(pos=103, size=4, value=b"func"),
+            TokenLiteral(pos=107, size=1, value="a"),
+            TokenLiteral(pos=109, size=1, value="b"),
+        ]
+        for i, (etoken, token) in enumerate(zip(expected, tokenizer.iter_tokens())):
+            self.assertEqual(token, etoken, f"Failed at example {i}")

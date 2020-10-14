@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 from decimal import Decimal
 
 T = TypeVar("T")
@@ -13,9 +13,19 @@ class Token(Generic[T]):
         self.value = value
 
     def __repr__(self) -> str:
-        return "<{cls} pos={pos}>{value}</{cls}>".format(
-            cls=self.__class__.__name__, pos=self.pos, value=self.value
+        return "{cls}(pos={pos}, size={size}, value={value})".format(
+            cls=self.__class__.__name__, pos=self.pos, value=self.value, size=self.size
         )
+
+    def __eq__(self, other: Any):
+        if isinstance(other, self.__class__):
+            return (
+                (other.value == self.value)
+                and (other.pos == self.pos)
+                and (other.size == self.size)
+            )
+        else:
+            return False
 
 
 class TokenComment(Token[bytes]):

@@ -57,7 +57,7 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
                     else:
                         return TokenLiteral(
                             initialpos,
-                            cmp_tsize(curpos, initialpos, j),
+                            cmp_tsize(curpos, initialpos, j) - 1,
                             state.curtoken.decode(),
                         )
     raise TokenizerEOF
