@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from pdfmajor.tokenizer.exceptions import TokenizerEOF
+from pdfmajor.tokenizer.exceptions import TokenizerEOF, TokenizerError
 
 from pdfmajor.tokenizer.token_parsers.util import cmp_tsize
 from pdfmajor.tokenizer.token_parsers.util import PInput
@@ -20,17 +20,18 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
     """Parses input stream into a literal
 
     Args:
-                    initialpos (int): initial position where we started
-                    inp (Iterator[PInput])
+        initialpos (int): initial position where we started
+        inp (Iterator[PInput])
 
     Returns:
-                    TokenLiteral
+        TokenLiteral
     """
     state = LiteralParseState(b"")
     for curpos, buf in inp:
         skip: int = 0
         for i in range(len(buf) + 1):
-            assert i < len(buf), "MAX_LOOP_REACHED"
+            if i < len(buf):
+                raise TokenizerEOF("Max Iteration Reached!")
             if skip >= len(buf):
                 break
             if state.hex_value is not None:

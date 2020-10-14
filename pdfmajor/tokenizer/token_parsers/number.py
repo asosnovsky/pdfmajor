@@ -20,14 +20,15 @@ def parse_number(
     """Parses input stream into a number
 
     Args:
-                    initialpos (int): initial position where we started
-                    inp (Iterator[PInput])
-                    sign (str): either a + or -
+        initialpos (int): initial position where we started
+        inp (Iterator[PInput])
+        sign (str): either a + or -
 
     Returns:
-                    TokenNumber
+        TokenNumber
     """
-    assert sign in [b"+", b"-"], "Number was provided an invalid sign {!r}".format(sign)
+    if sign not in [b"+", b"-"]:
+        raise InvalidToken("Number was provided an invalid sign {!r}".format(sign))
     curtoken = b"" + sign
     is_dec = False
     for curpos, s in inp:
