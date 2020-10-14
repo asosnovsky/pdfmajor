@@ -11,6 +11,8 @@ clean:
 
 lint:
 	black pdfmajor
+	bandit -r pdfmajor
+	mypy pdfmajor
 
 test:
 	./venv/bin/python -m unittest discover tests 
