@@ -29,7 +29,7 @@ class TokenHex(Token[bytes]):
 class TokenKeyword(Token[bytes]):
 	pass
 
-class TokenLiteral(Token[bytes]):
+class TokenLiteral(Token[str]):
 	pass
 
 class TokenBoolean(Token[bool]):
