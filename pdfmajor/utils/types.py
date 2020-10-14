@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
-INF = (1 << 31) - 1
-Point = Tuple[float]
+INF = float((1 << 31) - 1)
+Point = Tuple[float, float]
 unicode = str
 
 

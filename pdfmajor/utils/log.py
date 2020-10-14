@@ -1,8 +1,10 @@
 import logging
+from logging import Logger
+from typing import Dict
 
 logging.basicConfig(level=logging.WARNING)
 
-LOGGERS = {}
+LOGGERS: Dict[str, Logger] = {}
 
 
 def set_log_level(debug_level: int):

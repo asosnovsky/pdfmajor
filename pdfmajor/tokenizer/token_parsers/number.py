@@ -1,7 +1,7 @@
 from decimal import Decimal
 from pdfmajor.parser.PSStackParser.constants import END_LITERAL, HEX
 from pdfmajor.utils import int2byte
-from pdfmajor.tokenizer.exceptions import InvalidToken
+from pdfmajor.tokenizer.exceptions import InvalidToken, TokenizerEOF
 from pdfmajor.tokenizer.token import (
     TokenDecimal,
     TokenNumber,
@@ -13,23 +13,21 @@ from pdfmajor.tokenizer.constants import (
 from typing import Iterator, Literal, Union
 from .util import cmp_tsize, PInput
 
-VALID_SIGNS = Union[Literal[b"+"], Literal[b"-"]]
-
 
 def parse_number(
-    initialpos: int, inp: Iterator[PInput], sign: VALID_SIGNS = b"+"
+    initialpos: int, inp: Iterator[PInput], sign: bytes = b"+"
 ) -> TokenNumber:
     """Parses input stream into a number
 
     Args:
-            initialpos (int): initial position where we started
-            inp (Iterator[PInput])
-            sign (str): either a + or -
+                    initialpos (int): initial position where we started
+                    inp (Iterator[PInput])
+                    sign (str): either a + or -
 
     Returns:
-            TokenNumber
+                    TokenNumber
     """
-    assert sign in [b"+", b"-"], f"Number was provided an invalid sign {sign}"
+    assert sign in [b"+", b"-"], "Number was provided an invalid sign {!r}".format(sign)
     curtoken = b"" + sign
     is_dec = False
     for curpos, s in inp:
@@ -70,3 +68,4 @@ def parse_number(
                     )
             except ValueError:
                 raise InvalidToken(initialpos, curtoken)
+    raise TokenizerEOF

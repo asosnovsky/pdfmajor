@@ -80,10 +80,6 @@ class PDFSyntaxError(PDFException):
     pass
 
 
-class PDFTextExtractionNotAllowed(PDFException):
-    pass
-
-
 class PSEOF(PSException):
     pass
 

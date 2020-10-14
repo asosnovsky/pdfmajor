@@ -87,18 +87,18 @@ class PSTokenizer:
                         cur, parse_keyword(bufpos + j, self.iter_buffer())
                     )
                 elif c == b"(":
-                    raise "WIP"
+                    raise NotImplementedError
                     # self._curtoken = b""
                     # self.paren = 1
                     # self._current_parse_func = self._parse_string
                     # return j + 1
                 elif c == b"<":
-                    raise "WIP"
+                    raise NotImplementedError
                     # self._curtoken = b""
                     # self._current_parse_func = self._parse_wopen
                     # return j + 1
                 elif c == b">":
-                    raise "WIP"
+                    raise NotImplementedError
                     # self._curtoken = b""
                     # self._current_parse_func = self._parse_wclose
                     # return j + 1

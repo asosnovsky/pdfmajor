@@ -9,6 +9,9 @@ clean:
 	rm -rf dist
 	rm -rf *.egg-info
 
+lint:
+	black pdfmajor
+
 test:
 	./venv/bin/python -m unittest discover tests 
 

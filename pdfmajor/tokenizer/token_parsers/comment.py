@@ -1,3 +1,4 @@
+from pdfmajor.tokenizer.exceptions import TokenizerEOF
 from pdfmajor.tokenizer.token import (
     TokenComment,
 )
@@ -12,11 +13,11 @@ def parse_comment(initialpos: int, inp: Iterator[PInput]) -> TokenComment:
     """Parses input stream into a comment
 
     Args:
-            initialpos (int): initial position where we started
-            inp (Iterator[PInput])
+                    initialpos (int): initial position where we started
+                    inp (Iterator[PInput])
 
     Returns:
-            TokenComment
+                    TokenComment
     """
     curtoken = b""
     for curpos, s in inp:
@@ -27,3 +28,4 @@ def parse_comment(initialpos: int, inp: Iterator[PInput]) -> TokenComment:
             j = m.start(0)
             curtoken += s[:j]
             return TokenComment(initialpos, cmp_tsize(curpos, initialpos, j), curtoken)
+    raise TokenizerEOF

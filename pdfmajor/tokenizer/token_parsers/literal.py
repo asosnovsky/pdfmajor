@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pdfmajor.tokenizer.exceptions import TokenizerEOF
 
 from pdfmajor.tokenizer.token_parsers.util import cmp_tsize
 from pdfmajor.tokenizer.token_parsers.util import PInput
@@ -19,11 +20,11 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
     """Parses input stream into a literal
 
     Args:
-            initialpos (int): initial position where we started
-            inp (Iterator[PInput])
+                    initialpos (int): initial position where we started
+                    inp (Iterator[PInput])
 
     Returns:
-            TokenLiteral
+                    TokenLiteral
     """
     state = LiteralParseState(b"")
     for curpos, buf in inp:
@@ -62,3 +63,4 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
                             cmp_tsize(curpos, initialpos, j),
                             state.curtoken.decode(),
                         )
+    raise TokenizerEOF
