@@ -11,11 +11,11 @@ def parse_keyword(
     """Parses input stream into a keyword or bool
 
     Args:
-                    initialpos (int): initial position where we started
-                    inp (Iterator[PInput])
+        initialpos (int): initial position where we started
+        inp (Iterator[PInput])
 
     Returns:
-                    Union[TokenKeyword, TokenBoolean]
+        Union[TokenKeyword, TokenBoolean]
     """
     curtoken = b""
     for curpos, s in inp:

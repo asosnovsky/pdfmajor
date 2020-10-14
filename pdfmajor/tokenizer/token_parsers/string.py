@@ -1,33 +1,34 @@
-from decimal import Decimal
-from pdfmajor.parser.PSStackParser.constants import END_LITERAL, HEX
+from dataclasses import dataclass
+from pdfmajor.tokenizer.exceptions import TokenizerEOF
+from pdfmajor.tokenizer.token_parsers.util import PInput, cmp_tsize
 from pdfmajor.utils import int2byte
-from pdfmajor.tokenizer.exceptions import InvalidToken
 from pdfmajor.tokenizer.token import (
-    Token,
-    TokenBoolean,
-    TokenComment,
-    TokenDecimal,
-    TokenKeyword,
-    TokenLiteral,
-    TokenNumber,
-    TokenInteger,
     TokenString,
 )
 from pdfmajor.tokenizer.constants import (
-    END_KEYWORD,
-    END_NUMBER,
     END_STRING,
-    EOL,
     ESC_STRING,
     OCT_STRING,
 )
-from typing import Callable, Iterator, Literal, NamedTuple, Union
+from typing import Iterator, Optional
+
+
+@dataclass
+class StringParseState:
+    curtoken: bytes
+    paren: int
+    oct_value: Optional[bytes] = None
 
 
 def parse_string(initialpos: int, inp: Iterator[PInput]):
-    curtoken = b""
-    paren = 1
-    for curpos, s in inp:
+    state = StringParseState(b"", 1)
+    for curpos, buf in inp:
+        skip: int = 0
+        for i in range(len(buf) + 1):
+            if i < len(buf):
+                raise TokenizerEOF("Max Iteration Reached!")
+            if skip >= len(buf):
+                break
         m = END_STRING.search(s, 0)
         if not m:
             curtoken += s
@@ -36,7 +37,7 @@ def parse_string(initialpos: int, inp: Iterator[PInput]):
             curtoken += s[:j]
             c = s[j : j + 1]
             if c == b"\\":
-                self._current_parse_func = self._parse_string_1
+                _parse_string_1
                 return j + 1
             elif c == b"(":
                 paren += 1
@@ -44,7 +45,7 @@ def parse_string(initialpos: int, inp: Iterator[PInput]):
                 return j + 1
             elif c == b")":
                 paren -= 1
-                if paren:  # WTF, they said balanced parens need no special treatment.
+                if paren:
                     curtoken += c
                     return j + 1
             return TokenString(
