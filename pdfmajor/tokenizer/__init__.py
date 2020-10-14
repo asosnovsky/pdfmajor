@@ -61,9 +61,12 @@ class PSTokenizer:
 				elif c == b"/":
 					self.buf_skipstep += j + 1
 					yield self._check_token(cur, parse_literal(bufpos + j, self.iter_buffer()))
-				elif c in b"-+" or c.isdigit():
+				elif c in b"-+":
 					self.buf_skipstep += j + 1
 					yield self._check_token(cur, parse_number(bufpos + j, self.iter_buffer(), c))
+				elif c.isdigit():
+					self.buf_skipstep += j
+					yield self._check_token(cur, parse_number(bufpos + j, self.iter_buffer()))
 				elif c == b".":
 					self.buf_skipstep += j
 					yield self._check_token(cur, parse_number(bufpos + j, self.iter_buffer()))
