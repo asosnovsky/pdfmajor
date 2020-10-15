@@ -1,5 +1,10 @@
 from dataclasses import dataclass
-from pdfmajor.tokenizer.exceptions import TokenizerEOF, TokenizerError
+from pdfmajor.tokenizer.exceptions import (
+    InvalidHexToken,
+    InvalidToken,
+    TokenizerEOF,
+    TokenizerError,
+)
 
 from pdfmajor.tokenizer.token_parsers.util import SafeBufferIt, cmp_tsize
 from pdfmajor.tokenizer.token_parsers.util import PInput
@@ -29,18 +34,19 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
     state = LiteralParseState(b"")
     for curpos, buf in inp:
         it = SafeBufferIt(buf)
-        for _ in it.into_iter():
+        for subbuf in it.into_iter():
             if state.hex_value is not None:
-                for ci in range(len(buf[it.skip :])):
-                    c = buf[it.skip + ci : it.skip + ci + 1]
+                for ci in range(len(subbuf)):
+                    c = subbuf[ci : ci + 1]
                     if HEX.match(c) and len(state.hex_value) < 2:
                         state.hex_value += c
-                    else:
-                        if state.hex_value:
+                        it.skip += 1
+                        if len(state.hex_value) >= 2:
                             state.curtoken += int2byte(int(state.hex_value, 16))
-                        state.hex_value = None
-                        it.skip += ci
-                        break
+                            state.hex_value = None
+                            break
+                    else:
+                        raise InvalidHexToken(curpos + ci, c)
             else:
                 m = END_LITERAL.search(buf[it.skip :], 0)
                 if not m:
@@ -57,7 +63,7 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
                     else:
                         return TokenLiteral(
                             initialpos,
-                            cmp_tsize(curpos, initialpos, j) - 1,
+                            cmp_tsize(curpos, initialpos, j),
                             state.curtoken.decode(),
                         )
     raise TokenizerEOF

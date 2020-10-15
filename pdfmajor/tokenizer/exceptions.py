@@ -12,5 +12,12 @@ class TokenizerEOF(TokenizerError):
 class InvalidToken(TokenizerError):
     def __init__(self, pos: int, token: bytes) -> None:
         super().__init__(
-            "Invalid Token Found at {pos}, of value={v:r}".format(pos=pos, v=token)
+            "Invalid Token Found at {pos}, of value={v}".format(pos=pos, v=str(token))
+        )
+
+
+class InvalidHexToken(TokenizerError):
+    def __init__(self, pos: int, token: bytes) -> None:
+        super().__init__(
+            "Invalid Hex Found at {pos}, of value={v}".format(pos=pos, v=str(token))
         )

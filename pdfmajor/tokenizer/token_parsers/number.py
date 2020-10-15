@@ -53,7 +53,7 @@ def parse_number(
                     j += nj
                 return TokenDecimal(
                     initialpos,
-                    cmp_tsize(curpos, initialpos, j),
+                    cmp_tsize(curpos, initialpos, j + 1),
                     Decimal(curtoken.decode()),
                 )
             try:

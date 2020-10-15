@@ -71,7 +71,7 @@ class PSTokenizer:
                 elif c == b"/":
                     self.inc_buf_skipstep(j + 1)
                     yield self._check_token(
-                        cur, parse_literal(bufpos + j, self.iter_buffer())
+                        cur, parse_literal(bufpos + j + 1, self.iter_buffer())
                     )
                 elif c in b"-+":
                     self.inc_buf_skipstep(j + 1)
