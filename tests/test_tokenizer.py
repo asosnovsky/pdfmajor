@@ -1,5 +1,6 @@
-from decimal import Decimal
 import io
+from random import randint
+from decimal import Decimal
 from typing import List
 from pdfmajor.tokenizer.token_parsers.string import parse_string
 from pdfmajor.tokenizer import PSTokenizer
@@ -13,7 +14,7 @@ from pdfmajor.tokenizer.token import (
     TokenLiteral,
     TokenString,
 )
-from pdfmajor.tokenizer.token_parsers.util import PInput
+from pdfmajor.tokenizer.token_parsers.util import PInput, SafeBufferIt
 from pdfmajor.tokenizer.token_parsers.comment import parse_comment
 from pdfmajor.tokenizer.token_parsers.keyword import parse_keyword
 from pdfmajor.tokenizer.token_parsers.number import parse_number
@@ -34,6 +35,16 @@ def make_stream_iter(data: bytes, initpos: int = 0):
                 raise "EOF"
 
     return iter_stream
+
+
+class Util(TestCase):
+    def test_safebuff(self):
+        it = SafeBufferIt(
+            b"this is a lengthy comment that ends here\nso this is not reachable"
+        )
+        for subbuf in it.into_iter():
+            self.assertEqual(len(subbuf), len(it.buffer) - it.skip)
+            it.skip += randint(1, max(len(subbuf) - 1, 1))
 
 
 class Individual(TestCase):
