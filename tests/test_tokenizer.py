@@ -185,7 +185,7 @@ func/a/b{(c)do*}def
         self.run_test(
             raw=br"""10.32
 0 +1 -2 .5 1.234
--1.234 990""",
+-1.234 990 """,
             expected=[
                 TokenDecimal(pos=0, size=5, value=Decimal("10.32")),
                 TokenInteger(pos=6, size=1, value=0),
