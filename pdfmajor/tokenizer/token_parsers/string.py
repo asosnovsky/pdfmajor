@@ -18,7 +18,16 @@ class StringParseState:
     escaped_value: Optional[bytes] = None
 
 
-def parse_string(initialpos: int, inp: Iterator[PInput]):
+def parse_string(initialpos: int, inp: Iterator[PInput]) -> TokenString:
+    """Parses input stream into a simple string object
+
+    Args:
+        initialpos (int): initial position where we started
+        inp (Iterator[PInput])
+
+    Returns:
+        TokenString
+    """
     state = StringParseState(b"", 1)
     for curpos, buf in inp:
         it = SafeBufferIt(buf)
