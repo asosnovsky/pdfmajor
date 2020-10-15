@@ -1,4 +1,7 @@
 import io
+from pdfmajor.tokenizer.token_parsers.dictionary_hexstring import (
+    parse_double_angled_bracket,
+)
 from pdfmajor.tokenizer.token_parsers.string import parse_string
 
 from typing import Iterator, Optional
@@ -10,7 +13,7 @@ from pdfmajor.tokenizer.token_parsers.literal import parse_literal
 from pdfmajor.tokenizer.token_parsers.number import parse_number
 from pdfmajor.tokenizer.token_parsers.comment import parse_comment
 from pdfmajor.tokenizer.token_parsers.util import PInput
-from pdfmajor.tokenizer.token import Token, TokenKeyword
+from pdfmajor.tokenizer.token import TDictVaue, Token, TokenDictionary, TokenKeyword
 
 
 class PSTokenizer:
@@ -99,15 +102,15 @@ class PSTokenizer:
                         cur, parse_string(bufpos + j, self.iter_buffer())
                     )
                 elif c == b"<":
-                    raise NotImplementedError
-                    # self._curtoken = b""
-                    # self._current_parse_func = self._parse_wopen
-                    # return j + 1
+                    self.inc_buf_skipstep(j)
+                    yield self._check_token(
+                        cur, parse_double_angled_bracket(bufpos + j, self.iter_buffer())
+                    )
                 elif c == b">":
-                    raise NotImplementedError
-                    # self._curtoken = b""
-                    # self._current_parse_func = self._parse_wclose
-                    # return j + 1
+                    self.inc_buf_skipstep(j)
+                    if buf[j : j + 2] == ">>":
+                        self.inc_buf_skipstep(1)
+                        yield TokenDictionary(bufpos + j, 2, TDictVaue.CLOSE)
                 else:
                     self.inc_buf_skipstep(j + 1)
                     yield self._check_token(cur, TokenKeyword(bufpos + j, 1, c))
