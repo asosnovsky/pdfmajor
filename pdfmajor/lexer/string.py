@@ -61,17 +61,17 @@ def parse_string_escape(buffer: SafeBufferIt, state: StringParseState):
     for pos, buf in buffer:
         for ci in range(len(buf)):
             c = buf[ci : ci + 1]
-            if len(state.escaped_value) < 3:
+            if len(state.escaped_value) < 3:  # type: ignore
                 state.escaped_value += c
                 buffer.seek(pos + ci + 1)
-            if len(state.escaped_value) == 1:
+            if len(state.escaped_value) == 1:  # type: ignore
                 if (ci < 1) and (c in ESC_STRING):
                     state.curtoken += bytes([ESC_STRING[c]])
                     state.escaped_value = None
                     return
-            elif OCT_STRING.match(state.escaped_value):
-                if len(state.escaped_value) == 3:
-                    state.curtoken += bytes([int(state.escaped_value, 8)])
+            elif OCT_STRING.match(state.escaped_value):  # type: ignore
+                if len(state.escaped_value) == 3:  # type: ignore
+                    state.curtoken += bytes([int(state.escaped_value, 8)])  # type: ignore
                     state.escaped_value = None
                     return
             else:

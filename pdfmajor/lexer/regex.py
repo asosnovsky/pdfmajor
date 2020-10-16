@@ -16,3 +16,6 @@ ESC_STRING = {
     b")": 41,
     b"\\": 92,
 }
+END_HEX_STRING = re.compile(br"[^\s0-9a-fA-F]")
+HEX_PAIR = re.compile(br"[0-9a-fA-F]{2}|.")
+SPC = re.compile(br"\s")
