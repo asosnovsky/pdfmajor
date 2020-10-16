@@ -1,10 +1,11 @@
 import io
+from pdfmajor.lexer.string import parse_string
 from unittest import TestCase
 
 from pdfmajor.lexer.name import parse_name
 from pdfmajor.lexer.keyword import parse_keyword
 from pdfmajor.safebufiterator import SafeBufferIt
-from pdfmajor.lexer.token import TokenBoolean, TokenComment, TokenName
+from pdfmajor.lexer.token import TokenBoolean, TokenComment, TokenName, TokenString
 from pdfmajor.lexer.comment import parse_comment
 
 
@@ -83,12 +84,42 @@ class Basics(TestCase):
                 self.assertEqual(token.value, "foo_aa")
                 self.assertEqual(token.end_loc, 8)
 
-    # def test_parse_string(self):
-    #     for buf_size in [2, 3, 50, 1000]:
-    #         with self.subTest(buf_end_loc=buf_size):
-    #             iter_stream = make_stream_iter(br"this % is not a comment.) ", 88)
-    #             token = parse_string(88, iter_stream(buf_size))
-    #             self.assertIsInstance(token, TokenString)
-    #             self.assertEqual(token.start_loc, 88)
-    #             self.assertEqual(token.value, "this % is not a comment.")
-    #             self.assertEqual(token.end_loc, 88 + 25)
+    def test_parse_string(self):
+        for buf_size in [2, 3, 50, 1000]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(br"this % is not a comment.) ", buf_size)
+                token = parse_string(buffer)
+                self.assertIsInstance(token, TokenString)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, "this % is not a comment.")
+                self.assertEqual(token.end_loc, 25)
+
+    def test_parse_string_nest_brackets(self):
+        for buf_size in [1, 2, 3, 50, 100]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(br"x - (y*2-z-(2+3))) ", 88)
+                token = parse_string(buffer)
+                self.assertIsInstance(token, TokenString)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, "x - (y*2-z-(2+3))")
+                self.assertEqual(token.end_loc, 18)
+
+    def test_parse_string_hex_chars(self):
+        for buf_size in [1, 2, 3, 50, 100]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(br"def\040\0\0404ghi) (bach\\slask)  ", 39)
+                token = parse_string(buffer)
+                self.assertIsInstance(token, TokenString)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, "def  4ghi")
+                self.assertEqual(token.end_loc, 18)
+
+    def test_parse_string_escape_char(self):
+        for buf_size in [1, 2, 3, 50, 100]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(br"bach\\slask)  ", 39)
+                token = parse_string(buffer)
+                self.assertIsInstance(token, TokenString)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, r"bach\slask")
+                self.assertEqual(token.end_loc, 12)
