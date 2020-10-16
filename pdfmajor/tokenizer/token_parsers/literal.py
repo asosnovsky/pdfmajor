@@ -1,12 +1,10 @@
 from dataclasses import dataclass
 from pdfmajor.tokenizer.exceptions import (
     InvalidHexToken,
-    InvalidToken,
     TokenizerEOF,
-    TokenizerError,
 )
 
-from pdfmajor.tokenizer.token_parsers.util import SafeBufferIt, cmp_tsize
+from pdfmajor.tokenizer.token_parsers.util import SafeBufferIt
 from pdfmajor.tokenizer.token_parsers.util import PInput
 from pdfmajor.tokenizer.token import TokenLiteral
 from pdfmajor.utils import int2byte
@@ -48,14 +46,14 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
                     else:
                         raise InvalidHexToken(curpos + ci, c)
             else:
-                m = END_LITERAL.search(buf[it.skip :], 0)
+                m = END_LITERAL.search(subbuf, 0)
                 if not m:
-                    state.curtoken += buf[it.skip :]
+                    state.curtoken += subbuf
                     it.skip = len(buf)
                 else:
-                    j: int = m.start(0) + it.skip
-                    state.curtoken += buf[it.skip : j]
-                    c = buf[j : j + 1]
+                    j: int = m.start(0)
+                    state.curtoken += subbuf[:j]
+                    c = subbuf[j : j + 1]
                     if c == b"#":
                         state.hex_value = b""
                         it.skip = j + 1
@@ -63,7 +61,7 @@ def parse_literal(initialpos: int, inp: Iterator[PInput]) -> TokenLiteral:
                     else:
                         return TokenLiteral(
                             initialpos,
-                            cmp_tsize(curpos, initialpos, j),
+                            curpos + it.skip + j,
                             state.curtoken.decode(),
                         )
     raise TokenizerEOF

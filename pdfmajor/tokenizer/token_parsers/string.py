@@ -1,14 +1,17 @@
+from pdfmajor.tokenizer.exceptions import TokenizerError
+import re
 from dataclasses import dataclass
-from pdfmajor.tokenizer.token_parsers.util import PInput, SafeBufferIt, cmp_tsize
+from pdfmajor.tokenizer.token_parsers.util import PInput, SafeBufferIt
 from pdfmajor.tokenizer.token import (
     TokenString,
 )
 from pdfmajor.tokenizer.constants import (
     END_STRING,
     ESC_STRING,
-    OCT_STRING,
 )
 from typing import Iterator, Optional
+
+OCT_STRING = re.compile(br"^[0-7]{1,3}$")
 
 
 @dataclass
@@ -33,12 +36,12 @@ def parse_string(initialpos: int, inp: Iterator[PInput]) -> TokenString:
         it = SafeBufferIt(buf)
         for s in it.into_iter():
             if state.escaped_value is not None:
-                it.skip += parse_string_escape(s, state)
+                parse_string_escape(it, state)
             else:
                 m = END_STRING.search(s, 0)
                 if not m:
                     state.curtoken += s
-                    it.skip = len(s)
+                    it.skip += len(s)
                 else:
                     j = m.start(0)
                     state.curtoken += s[:j]
@@ -55,25 +58,35 @@ def parse_string(initialpos: int, inp: Iterator[PInput]) -> TokenString:
                         if state.paren:
                             state.curtoken += next_char
                             it.skip += j + 1
-                    return TokenString(
-                        initialpos,
-                        cmp_tsize(curpos, initialpos, j),
-                        state.curtoken.decode(),
-                    )
+                        else:
+                            return TokenString(
+                                initialpos,
+                                curpos + it.skip + j + 1,
+                                state.curtoken.decode(),
+                            )
+    raise TokenizerError("end of parse_string")
 
 
-def parse_string_escape(s: bytes, state: StringParseState) -> int:
-    for ci in range(len(s)):
-        c = s[ci : ci + 1]
-        if (ci < 1) and (c in ESC_STRING):
-            state.curtoken += bytes([ESC_STRING[c]])
-            state.escaped_value = None
-            return 1
-        if OCT_STRING.match(c) and len(state.escaped_value) < 3:
-            state.escaped_value += c
-        elif len(state.escaped_value) == 3:
-            state.curtoken += bytes([int(state.escaped_value, 8)])
-            return 3
-
-    state.escaped_value = None
-    return len(s) + 1
+def parse_string_escape(it: SafeBufferIt, state: StringParseState):
+    if state.escaped_value is None:
+        raise TokenizerError("state.escaped_value is None")
+    for s in it.into_iter():
+        for ci in range(len(s)):
+            c = s[ci : ci + 1]
+            if len(state.escaped_value) < 3:
+                it.skip += 1
+                state.escaped_value += c
+            if len(state.escaped_value) == 1:
+                if (ci < 1) and (c in ESC_STRING):
+                    state.curtoken += bytes([ESC_STRING[c]])
+                    state.escaped_value = None
+                    return
+            elif OCT_STRING.match(state.escaped_value):
+                if len(state.escaped_value) == 3:
+                    state.curtoken += bytes([int(state.escaped_value, 8)])
+                    state.escaped_value = None
+                    return
+            else:
+                it.skip -= 1
+                state.escaped_value = None
+                return

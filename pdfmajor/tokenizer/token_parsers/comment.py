@@ -27,5 +27,5 @@ def parse_comment(initialpos: int, inp: Iterator[PInput]) -> TokenComment:
         else:
             j = m.start(0)
             curtoken += s[:j]
-            return TokenComment(initialpos, cmp_tsize(curpos, initialpos, j), curtoken)
+            return TokenComment(initialpos, curpos + j, curtoken)
     raise TokenizerEOF

@@ -2,7 +2,7 @@ from pdfmajor.tokenizer.exceptions import TokenizerEOF
 from pdfmajor.tokenizer.token import TokenBoolean, TokenKeyword
 from pdfmajor.tokenizer.constants import END_KEYWORD
 from typing import Iterator, Union
-from .util import cmp_tsize, PInput
+from .util import PInput
 
 
 def parse_keyword(
@@ -26,11 +26,9 @@ def parse_keyword(
             j = m.start(0)
             curtoken += s[:j]
             if curtoken == b"true":
-                return TokenBoolean(initialpos, cmp_tsize(curpos, initialpos, j), True)
+                return TokenBoolean(initialpos, curpos + j, True)
             elif curtoken == b"false":
-                return TokenBoolean(initialpos, cmp_tsize(curpos, initialpos, j), False)
+                return TokenBoolean(initialpos, curpos + j, False)
             else:
-                return TokenKeyword(
-                    initialpos, cmp_tsize(curpos, initialpos, j), curtoken
-                )
+                return TokenKeyword(initialpos, curpos + j, curtoken)
     raise TokenizerEOF

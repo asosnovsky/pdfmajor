@@ -1,7 +1,5 @@
 from decimal import Decimal
-from pdfmajor.parser.PSStackParser.constants import END_LITERAL, HEX
-from pdfmajor.utils import int2byte
-from pdfmajor.tokenizer.exceptions import InvalidToken, TokenizerEOF
+from pdfmajor.tokenizer.exceptions import InvalidToken, TokenizerEOF, TokenizerError
 from pdfmajor.tokenizer.token import (
     TokenDecimal,
     TokenNumber,
@@ -10,8 +8,8 @@ from pdfmajor.tokenizer.token import (
 from pdfmajor.tokenizer.constants import (
     END_NUMBER,
 )
-from typing import Iterator, Literal, Union
-from .util import cmp_tsize, PInput
+from typing import Iterator
+from .util import PInput
 
 
 def parse_number(
@@ -28,7 +26,7 @@ def parse_number(
         TokenNumber
     """
     if sign not in [b"+", b"-"]:
-        raise InvalidToken("Number was provided an invalid sign {!r}".format(sign))
+        raise TokenizerError("Number was provided an invalid sign {!r}".format(sign))
     curtoken = b"" + sign
     is_dec = False
     for curpos, s in inp:
@@ -53,20 +51,18 @@ def parse_number(
                     j += nj
                 return TokenDecimal(
                     initialpos,
-                    cmp_tsize(curpos, initialpos, j + 1),
+                    curpos + j + 1,
                     Decimal(curtoken.decode()),
                 )
             try:
                 if is_dec:
                     return TokenDecimal(
                         initialpos,
-                        cmp_tsize(curpos, initialpos, j),
+                        curpos + j,
                         Decimal(curtoken.decode()),
                     )
                 else:
-                    return TokenInteger(
-                        initialpos, cmp_tsize(curpos, initialpos, j), int(curtoken)
-                    )
+                    return TokenInteger(initialpos, curpos + j, int(curtoken))
             except ValueError:
                 raise InvalidToken(initialpos, curtoken)
     raise TokenizerEOF

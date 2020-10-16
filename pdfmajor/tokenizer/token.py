@@ -8,22 +8,25 @@ T = TypeVar("T")
 class Token(Generic[T]):
     __slots__ = ["pos", "size", "value"]
 
-    def __init__(self, pos: int, size: int, value: T) -> None:
-        self.size = size
-        self.pos = pos
+    def __init__(self, start_loc: int, end_loc: int, value: T) -> None:
+        self.start_loc = start_loc
+        self.end_loc = end_loc
         self.value = value
 
     def __repr__(self) -> str:
-        return "{cls}(pos={pos}, size={size}, value={value})".format(
-            cls=self.__class__.__name__, pos=self.pos, value=self.value, size=self.size
+        return "{cls}(start={start_loc}, end={end_loc}, value='{value}')".format(
+            cls=self.__class__.__name__,
+            start_loc=self.start_loc,
+            value=self.value,
+            end_loc=self.end_loc,
         )
 
     def __eq__(self, other: Any):
         if isinstance(other, self.__class__):
             return (
                 (other.value == self.value)
-                and (other.pos == self.pos)
-                and (other.size == self.size)
+                and (other.start_loc == self.start_loc)
+                and (other.end_loc == self.end_loc)
             )
         else:
             return False

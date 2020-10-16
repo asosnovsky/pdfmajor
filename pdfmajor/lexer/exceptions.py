@@ -14,3 +14,10 @@ class InvalidHexToken(LexerError):
         super().__init__(
             "Invalid Hex Found at {pos}, of value={v}".format(pos=pos, v=str(token))
         )
+
+
+class InvalidToken(LexerError):
+    def __init__(self, pos: int, token: bytes) -> None:
+        super().__init__(
+            "Invalid Token Found at {pos}, of value={v}".format(pos=pos, v=str(token))
+        )

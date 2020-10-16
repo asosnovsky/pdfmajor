@@ -1,4 +1,6 @@
+from decimal import Decimal
 import io
+from pdfmajor.lexer.number import parse_number
 from pdfmajor.lexer.dict_and_hex import parse_double_angled_bracket, parse_hexstring
 from pdfmajor.lexer.string import parse_string
 from unittest import TestCase
@@ -10,8 +12,10 @@ from pdfmajor.lexer.token import (
     TDictVaue,
     TokenBoolean,
     TokenComment,
+    TokenDecimal,
     TokenDictionary,
     TokenHexString,
+    TokenInteger,
     TokenName,
     TokenString,
 )
@@ -164,3 +168,25 @@ class Basics(TestCase):
                 self.assertEqual(token.start_loc, -1)
                 self.assertEqual(token.value, b"\x10 1\xa1*")
                 self.assertEqual(token.end_loc, 14)
+
+    def test_parse_float(self):
+        for buf_size in [2, 3, 50]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(b"0.120 + some invalid text", buf_size)
+                token = parse_number(buffer)
+                self.assertIsInstance(token, TokenDecimal)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, Decimal("0.12"))
+                self.assertEqual(token.end_loc, 5)
+
+    def test_parse_int(self):
+        for buf_size in [2, 3, 50]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(
+                    b"130 oh oh 0.12 + some invalid text", buf_size
+                )
+                token = parse_number(buffer)
+                self.assertIsInstance(token, TokenInteger)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, 130)
+                self.assertEqual(token.end_loc, 3)
