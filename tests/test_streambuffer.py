@@ -1,6 +1,6 @@
 import io
 from unittest import TestCase
-from pdfmajor.streambuffer import EOF, BufferStream
+from pdfmajor.streambuffer import StreamEOF, BufferStream
 
 
 class UseCase(TestCase):
@@ -18,7 +18,10 @@ class UseCase(TestCase):
     def test_itraises(self):
         it = BufferStream(io.BytesIO(b"this"))
         list(it)  # read everything
-        with self.assertRaises(EOF):
+        with self.assertRaises(StreamEOF):
+            for _ in it:
+                pass
+        with self.assertRaises(EOFError):
             for _ in it:
                 pass
 
