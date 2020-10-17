@@ -19,7 +19,7 @@ from pdfmajor.lexer.token import (
     TokenArray,
     TokenBoolean,
     TokenComment,
-    TokenDecimal,
+    TokenReal,
     TokenDictionary,
     TokenHexString,
     TokenInteger,
@@ -192,7 +192,7 @@ class Basics(TestCase):
             with self.subTest(buf_end_loc=buf_size):
                 buffer = make_stream_iter(b"0.120 + some invalid text", buf_size)
                 token = parse_number(buffer)
-                self.assertIsInstance(token, TokenDecimal)
+                self.assertIsInstance(token, TokenReal)
                 self.assertEqual(token.start_loc, -1)
                 self.assertEqual(token.value, Decimal("0.12"))
                 self.assertEqual(token.end_loc, 5)
@@ -294,8 +294,8 @@ func/a/b{(c)do*}def
                 TokenInteger(start_loc=54, end_loc=55, value=0),
                 TokenInteger(start_loc=56, end_loc=58, value=1),
                 TokenInteger(start_loc=59, end_loc=61, value=-2),
-                TokenDecimal(start_loc=62, end_loc=64, value=Decimal("0.5")),
-                TokenDecimal(start_loc=65, end_loc=70, value=Decimal("1.234")),
+                TokenReal(start_loc=62, end_loc=64, value=Decimal("0.5")),
+                TokenReal(start_loc=65, end_loc=70, value=Decimal("1.234")),
                 TokenString(start_loc=71, end_loc=76, value="abc"),
                 TokenString(start_loc=77, end_loc=79, value=""),
                 TokenString(start_loc=80, end_loc=97, value="abc ( def ) ghi"),
@@ -339,13 +339,13 @@ func/a/b{(c)do*}def
 0 +1 -2 .5 1.234
 -1.234 990 """,
             expected=[
-                TokenDecimal(start_loc=0, end_loc=5, value=Decimal("10.32")),
+                TokenReal(start_loc=0, end_loc=5, value=Decimal("10.32")),
                 TokenInteger(start_loc=6, end_loc=7, value=0),
                 TokenInteger(start_loc=8, end_loc=10, value=1),
                 TokenInteger(start_loc=11, end_loc=13, value=-2),
-                TokenDecimal(start_loc=14, end_loc=16, value=Decimal("0.5")),
-                TokenDecimal(start_loc=17, end_loc=22, value=Decimal("1.234")),
-                TokenDecimal(start_loc=23, end_loc=29, value=Decimal("-1.234")),
+                TokenReal(start_loc=14, end_loc=16, value=Decimal("0.5")),
+                TokenReal(start_loc=17, end_loc=22, value=Decimal("1.234")),
+                TokenReal(start_loc=23, end_loc=29, value=Decimal("-1.234")),
                 TokenInteger(start_loc=30, end_loc=33, value=990),
             ],
         )

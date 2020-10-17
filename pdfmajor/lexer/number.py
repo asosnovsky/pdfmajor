@@ -3,7 +3,7 @@ from typing import Optional
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import InvalidToken, LexerEOF, LexerError
 from pdfmajor.lexer.token import (
-    TokenDecimal,
+    TokenReal,
     TokenNumber,
     TokenInteger,
 )
@@ -46,7 +46,7 @@ def parse_number(
                 buffer.seek(pos + j)
                 try:
                     if is_decimal:
-                        return TokenDecimal(
+                        return TokenReal(
                             initialpos,
                             buffer.tell(),
                             Decimal(curtoken.decode()),

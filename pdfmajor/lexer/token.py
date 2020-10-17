@@ -8,7 +8,7 @@ T = TypeVar("T")
 class Token(Generic[T]):
     """A generic class representing PDF Token"""
 
-    __slots__ = ["pos", "size", "value"]
+    __slots__ = ["start_loc", "end_loc", "value"]
 
     def __init__(self, start_loc: int, end_loc: int, value: T) -> None:
         self.start_loc = start_loc
@@ -86,21 +86,21 @@ class TokenHexString(Token[bytes]):
 
 class TokenInteger(Token[int]):
     """Token representing PDF integers
-    Detection of this type of token can be found in PDF 1.7
+    Detection of this type of token can be found in PDF 1.7 spec section 7.3.3
     """
 
     pass
 
 
-class TokenDecimal(Token[Decimal]):
+class TokenReal(Token[Decimal]):
     """Token representing PDF decimals
-    Detection of this type of token can be found in PDF 1.7
+    Detection of this type of token can be found in PDF 1.7 spec section 7.3.3
     """
 
     pass
 
 
-TokenNumber = Union[TokenInteger, TokenDecimal]
+TokenNumber = Union[TokenInteger, TokenReal]
 
 
 class TDictValue(Enum):
