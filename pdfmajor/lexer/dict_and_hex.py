@@ -21,7 +21,7 @@ def parse_double_angled_bracket(
     first_char = step.data[0:1]
     if first_char == b"<":
         buffer.seek(step.pos + 1)
-        return TokenDictionary(initialpos, 2, TDictValue.OPEN)
+        return TokenDictionary(initialpos, buffer.tell(), TDictValue.OPEN)
     buffer.seek(step.pos)
     return parse_hexstring(buffer)
 

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import InvalidToken, LexerEOF, LexerError
 from pdfmajor.lexer.token import (
@@ -11,12 +12,15 @@ from pdfmajor.lexer.regex import (
 )
 
 
-def parse_number(buffer: BufferStream, sign: bytes = b"+") -> TokenNumber:
+def parse_number(
+    buffer: BufferStream, sign: bytes = b"+", initialpos: Optional[int] = None
+) -> TokenNumber:
     """Parses input stream into a number
 
     Args:
         buffer (BufferStream)
         sign (str): either a + or -
+        initialpos (Optional[int])
 
     Returns:
         TokenNumber
@@ -25,7 +29,7 @@ def parse_number(buffer: BufferStream, sign: bytes = b"+") -> TokenNumber:
         raise LexerError("Number was provided an invalid sign {!r}".format(sign))
     curtoken = b"" + sign
     is_decimal = False
-    initialpos = buffer.tell() - 1
+    initialpos = buffer.tell() - 1 if initialpos is None else initialpos
     for pos, buf in buffer:
         m = END_NUMBER.search(buf, 0)
         if not m:

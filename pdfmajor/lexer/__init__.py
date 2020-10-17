@@ -45,10 +45,10 @@ class PDFLexer:
                     yield parse_number(self.buffer, next_char)
                 elif next_char.isdigit() or next_char == b".":
                     self.buffer.seek(bufpos + j)
-                    yield parse_number(self.buffer)
+                    yield parse_number(self.buffer, initialpos=self.buffer.tell())
                 elif next_char.isalpha():
                     self.buffer.seek(bufpos + j)
-                    yield parse_keyword(self.buffer)
+                    yield parse_keyword(self.buffer, self.buffer.tell())
                 elif next_char == b"(":
                     self.buffer.seek(bufpos + j + 1)
                     yield parse_string(self.buffer)
