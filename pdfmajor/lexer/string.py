@@ -3,7 +3,7 @@ from typing import Optional
 from pdfmajor.lexer.regex import END_STRING, ESC_STRING, OCT_STRING
 from pdfmajor.lexer.token import TokenString
 from pdfmajor.lexer.exceptions import LexerEOF, LexerError
-from pdfmajor.safebufiterator import SafeBufferIt
+from pdfmajor.safebufiterator import BufferStream
 
 
 @dataclass
@@ -13,11 +13,11 @@ class StringParseState:
     escaped_value: Optional[bytes] = None
 
 
-def parse_string(buffer: SafeBufferIt) -> TokenString:
+def parse_string(buffer: BufferStream) -> TokenString:
     """Parses input stream into a simple string object
 
     Args:
-        buffer (SafeBufferIt)
+        buffer (BufferStream)
 
     Returns:
         TokenString
@@ -55,7 +55,7 @@ def parse_string(buffer: SafeBufferIt) -> TokenString:
     raise LexerEOF
 
 
-def parse_string_escape(buffer: SafeBufferIt, state: StringParseState):
+def parse_string_escape(buffer: BufferStream, state: StringParseState):
     if state.escaped_value is None:
         raise LexerError("state.escaped_value is None")
     for pos, buf in buffer:

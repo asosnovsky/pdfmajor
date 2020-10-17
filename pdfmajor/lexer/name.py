@@ -5,7 +5,7 @@ from pdfmajor.lexer.exceptions import (
     LexerError,
 )
 
-from pdfmajor.safebufiterator import SafeBufferIt
+from pdfmajor.safebufiterator import BufferStream
 from pdfmajor.lexer.token import TokenName
 from pdfmajor.lexer.regex import HEX, END_LITERAL
 
@@ -19,11 +19,11 @@ class LiteralParseState:
     hex_value: Optional[bytes] = None
 
 
-def parse_name(buffer: SafeBufferIt) -> TokenName:
+def parse_name(buffer: BufferStream) -> TokenName:
     """Parses input stream into a literal name
 
     Args:
-        buffer (SafeBufferIt)
+        buffer (BufferStream)
 
     Returns:
         TokenName

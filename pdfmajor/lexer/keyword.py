@@ -1,15 +1,15 @@
-from pdfmajor.safebufiterator import SafeBufferIt
+from pdfmajor.safebufiterator import BufferStream
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.token import TokenBoolean, TokenKeyword
 from pdfmajor.lexer.regex import END_KEYWORD
 from typing import Union
 
 
-def parse_keyword(buffer: SafeBufferIt) -> Union[TokenKeyword, TokenBoolean]:
+def parse_keyword(buffer: BufferStream) -> Union[TokenKeyword, TokenBoolean]:
     """Parses input stream into a keyword or bool
 
     Args:
-        buffer (SafeBufferIt)
+        buffer (BufferStream)
 
     Returns:
         Union[TokenKeyword, TokenBoolean]

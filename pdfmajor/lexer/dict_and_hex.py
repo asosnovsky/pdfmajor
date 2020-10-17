@@ -1,18 +1,17 @@
-from pdfmajor.tokenizer.token_parsers.util import PInput
-from pdfmajor.safebufiterator import SafeBufferIt
+from pdfmajor.safebufiterator import BufferStream
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.regex import END_HEX_STRING, HEX_PAIR, SPC
-from pdfmajor.lexer.token import TDictVaue, TokenDictionary, TokenHexString
+from pdfmajor.lexer.token import TDictValue, TokenDictionary, TokenHexString
 from typing import Union
 
 
 def parse_double_angled_bracket(
-    buffer: SafeBufferIt,
+    buffer: BufferStream,
 ) -> Union[TokenHexString, TokenDictionary]:
     """Parses input stream into a hex string object or match a simple dictionary token
 
     Args:
-        buffer (SafeBufferIt)
+        buffer (BufferStream)
 
     Returns:
         Union[TokenHexString, TokenDictionary]
@@ -22,16 +21,16 @@ def parse_double_angled_bracket(
     first_char = step.data[0:1]
     if first_char == b"<":
         buffer.seek(step.pos + 1)
-        return TokenDictionary(initialpos, 2, TDictVaue.OPEN)
+        return TokenDictionary(initialpos, 2, TDictValue.OPEN)
     buffer.seek(step.pos)
     return parse_hexstring(buffer)
 
 
-def parse_hexstring(buffer: SafeBufferIt) -> TokenHexString:
+def parse_hexstring(buffer: BufferStream) -> TokenHexString:
     """Parses the input string into hex string
 
     Args:
-        buffer (SafeBufferIt)
+        buffer (BufferStream)
 
     Returns:
         TokenHexString

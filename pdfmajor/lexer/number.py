@@ -1,21 +1,21 @@
 from decimal import Decimal
-from pdfmajor.safebufiterator import SafeBufferIt
+from pdfmajor.safebufiterator import BufferStream
 from pdfmajor.lexer.exceptions import InvalidToken, LexerEOF, LexerError
 from pdfmajor.lexer.token import (
     TokenDecimal,
     TokenNumber,
     TokenInteger,
 )
-from pdfmajor.tokenizer.constants import (
+from pdfmajor.lexer.regex import (
     END_NUMBER,
 )
 
 
-def parse_number(buffer: SafeBufferIt, sign: bytes = b"+") -> TokenNumber:
+def parse_number(buffer: BufferStream, sign: bytes = b"+") -> TokenNumber:
     """Parses input stream into a number
 
     Args:
-        buffer (SafeBufferIt)
+        buffer (BufferStream)
         sign (str): either a + or -
 
     Returns:

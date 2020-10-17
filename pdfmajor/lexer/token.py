@@ -100,12 +100,15 @@ class TokenDecimal(Token[Decimal]):
     pass
 
 
-class TDictVaue(Enum):
+TokenNumber = Union[TokenInteger, TokenDecimal]
+
+
+class TDictValue(Enum):
     OPEN = "<<"
     CLOSE = ">>"
 
 
-class TokenDictionary(Token[TDictVaue]):
+class TokenDictionary(Token[TDictValue]):
     """Token representing the brackets of dictionary
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.7
     """
@@ -113,4 +116,14 @@ class TokenDictionary(Token[TDictVaue]):
     pass
 
 
-TokenNumber = Union[TokenInteger, TokenDecimal]
+class TArrayValue(Enum):
+    OPEN = "["
+    CLOSE = "]"
+
+
+class TokenArray(Token[TArrayValue]):
+    """Token representing the brackets of an array
+    Detection of this type of token can be found in PDF 1.7 spec section 7.3.6
+    """
+
+    pass

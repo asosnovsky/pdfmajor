@@ -5,7 +5,7 @@ class LexerError(PDFMajorException):
     pass
 
 
-class LexerEOF(LexerError):
+class LexerEOF(LexerError, EOFError):
     pass
 
 

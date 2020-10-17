@@ -19,3 +19,5 @@ ESC_STRING = {
 END_HEX_STRING = re.compile(br"[^\s0-9a-fA-F]")
 HEX_PAIR = re.compile(br"[0-9a-fA-F]{2}|.")
 SPC = re.compile(br"\s")
+NONSPC = re.compile(br"\S")
+END_NUMBER = re.compile(br"[^0-9]")

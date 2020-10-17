@@ -3,7 +3,7 @@ from typing import NamedTuple
 from pdfmajor.execptions import PDFMajorException
 
 
-class EOF(PDFMajorException):
+class StreamEOF(PDFMajorException, EOFError):
     def __init__(self) -> None:
         super().__init__("reached the end of the file or buffer stream!")
 
@@ -13,7 +13,7 @@ class BufferedBytes(NamedTuple):
     data: bytes
 
 
-class SafeBufferIt:
+class BufferStream:
     """A safe reader for bytes that has a few nice additional utilities"""
 
     __slots__ = ["fp", "buffer_size"]
@@ -50,18 +50,30 @@ class SafeBufferIt:
         """
         return self.fp.tell()
 
+    def read(self, size: int) -> BufferedBytes:
+        """Reads the amount of bytes specified
+
+        Args:
+            size (int): number of bytes to read
+
+        Returns:
+            BufferedBytes
+        """
+        pos = self.tell()
+        buf = self.fp.read(size)
+        return BufferedBytes(pos, buf)
+
     def __iter__(self):
         if self.fp.read(1) == b"":
-            raise EOF
+            raise StreamEOF
         self.seekd(-1)
         return self
 
     def __next__(self):
-        pos = self.tell()
-        buf = self.fp.read(self.buffer_size)
-        if len(buf) == 0:
+        bbyte = self.read(self.buffer_size)
+        if len(bbyte.data) == 0:
             raise StopIteration
-        return BufferedBytes(pos, buf)
+        return bbyte
 
     def close(self):
         self.fp.close()

@@ -1,12 +1,12 @@
 import io
 from unittest import TestCase
-from pdfmajor.safebufiterator import EOF, SafeBufferIt
+from pdfmajor.safebufiterator import EOF, BufferStream
 
 
 class UseCase(TestCase):
     def test_safebuff(self):
         for bufsize in [2, 33, 65, 66, 100, 200]:
-            it = SafeBufferIt(
+            it = BufferStream(
                 io.BytesIO(
                     b"this is a lengthy comment that ends here\nso this is not reachable"
                 ),
@@ -16,7 +16,7 @@ class UseCase(TestCase):
                 self.assertLessEqual(len(subbuf), it.buffer_size)
 
     def test_itraises(self):
-        it = SafeBufferIt(io.BytesIO(b"this"))
+        it = BufferStream(io.BytesIO(b"this"))
         list(it)  # read everything
         with self.assertRaises(EOF):
             for _ in it:
@@ -24,7 +24,7 @@ class UseCase(TestCase):
 
     def test_seekd(self):
         for bufsize in [2, 33, 65, 66, 100, 200]:
-            it = SafeBufferIt(
+            it = BufferStream(
                 io.BytesIO(
                     b"this is a lengthy comment that ends here\nso this is not reachable"
                 ),
