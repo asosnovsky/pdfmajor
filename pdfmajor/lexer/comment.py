@@ -3,7 +3,7 @@ from pdfmajor.lexer.regex import EOL
 from pdfmajor.lexer.token import (
     TokenComment,
 )
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 
 
 def parse_comment(buffer: BufferStream) -> TokenComment:

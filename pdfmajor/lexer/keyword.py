@@ -1,4 +1,4 @@
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.token import TokenBoolean, TokenKeyword
 from pdfmajor.lexer.regex import END_KEYWORD

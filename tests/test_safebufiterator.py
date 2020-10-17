@@ -1,6 +1,6 @@
 import io
 from unittest import TestCase
-from pdfmajor.safebufiterator import EOF, BufferStream
+from pdfmajor.streambuffer import EOF, BufferStream
 
 
 class UseCase(TestCase):

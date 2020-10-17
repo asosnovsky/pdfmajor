@@ -1,5 +1,5 @@
 from decimal import Decimal
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import InvalidToken, LexerEOF, LexerError
 from pdfmajor.lexer.token import (
     TokenDecimal,

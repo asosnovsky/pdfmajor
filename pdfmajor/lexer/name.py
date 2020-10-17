@@ -5,7 +5,7 @@ from pdfmajor.lexer.exceptions import (
     LexerError,
 )
 
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.token import TokenName
 from pdfmajor.lexer.regex import HEX, END_LITERAL
 

@@ -1,4 +1,4 @@
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.regex import END_HEX_STRING, HEX_PAIR, SPC
 from pdfmajor.lexer.token import TDictValue, TokenDictionary, TokenHexString

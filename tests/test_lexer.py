@@ -11,7 +11,7 @@ from pdfmajor.lexer.dict_and_hex import parse_double_angled_bracket, parse_hexst
 from pdfmajor.lexer.string import parse_string
 from pdfmajor.lexer.name import parse_name
 from pdfmajor.lexer.keyword import parse_keyword
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.token import (
     TDictValue,
     Token,

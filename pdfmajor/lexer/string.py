@@ -3,7 +3,7 @@ from typing import Optional
 from pdfmajor.lexer.regex import END_STRING, ESC_STRING, OCT_STRING
 from pdfmajor.lexer.token import TokenString
 from pdfmajor.lexer.exceptions import LexerEOF, LexerError
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 
 
 @dataclass

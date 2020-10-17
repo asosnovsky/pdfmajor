@@ -15,7 +15,7 @@ from pdfmajor.lexer.token import (
     TokenKeyword,
     TokenArray,
 )
-from pdfmajor.safebufiterator import BufferStream
+from pdfmajor.streambuffer import BufferStream
 
 
 class PDFLexer:
