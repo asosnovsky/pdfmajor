@@ -68,6 +68,14 @@ class TokenBoolean(Token[bool]):
     pass
 
 
+class TokenNull(Token[None]):
+    """Token representing the PDF null object
+    Detection of this type of token can be found in PDF 1.7 spec section 7.3.9
+    """
+
+    pass
+
+
 class TokenString(Token[str]):
     """Token representing PDF literal string
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.4.2

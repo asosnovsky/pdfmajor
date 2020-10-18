@@ -1,6 +1,6 @@
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import LexerEOF
-from pdfmajor.lexer.token import TokenBoolean, TokenKeyword
+from pdfmajor.lexer.token import TokenBoolean, TokenKeyword, TokenNull
 from pdfmajor.lexer.regex import END_KEYWORD
 from typing import Optional, Union
 
@@ -31,6 +31,8 @@ def parse_keyword(
                 return TokenBoolean(initialpos, buffer.tell(), True)
             elif curtoken == b"false":
                 return TokenBoolean(initialpos, buffer.tell(), False)
+            elif curtoken == b"null":
+                return TokenNull(initialpos, buffer.tell(), None)
             else:
                 return TokenKeyword(initialpos, buffer.tell(), curtoken)
     raise LexerEOF

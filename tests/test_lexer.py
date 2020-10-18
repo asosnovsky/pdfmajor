@@ -19,6 +19,7 @@ from pdfmajor.lexer.token import (
     TokenArray,
     TokenBoolean,
     TokenComment,
+    TokenNull,
     TokenReal,
     TokenDictionary,
     TokenHexString,
@@ -84,6 +85,16 @@ class Basics(TestCase):
                 self.assertEqual(token.start_loc, -1)
                 self.assertEqual(token.value, False)
                 self.assertEqual(token.end_loc, 5)
+
+    def test_parse_null(self):
+        for buf_size in [2, 3, 50]:
+            with self.subTest(buf_end_loc=buf_size):
+                buffer = make_stream_iter(b"null Nothing here", buf_size)
+                token = parse_keyword(buffer)
+                self.assertIsInstance(token, TokenNull)
+                self.assertEqual(token.start_loc, -1)
+                self.assertEqual(token.value, None)
+                self.assertEqual(token.end_loc, 4)
 
     def test_parse_word(self):
         for buf_size in [2, 3, 50]:
