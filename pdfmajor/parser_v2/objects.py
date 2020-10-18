@@ -3,8 +3,14 @@
 
 from abc import ABCMeta, abstractmethod
 from pdfmajor.execptions import ParserError
-from pdfmajor.lexer.token import PDFName, TokenName, TokenPrimitive
-from typing import Any, Dict, Generic, List, NamedTuple, Optional, TypeVar, Union
+from pdfmajor.lexer.token import (
+    PDFName,
+    TokenComment,
+    TokenKeyword,
+    TokenName,
+    TokenPrimitive,
+)
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 TToken = TypeVar("TToken", bound=TokenPrimitive)
 
@@ -22,8 +28,13 @@ class PDFObject(metaclass=ABCMeta):
         """returns the python variation of this object"""
         raise NotImplementedError
 
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, self.__class__):
+            return False
+        return o.to_python() == self.to_python()
 
-class PDFContextualObject(PDFObject, metaclass=ABCMeta):
+
+class PDFContextualObject(PDFObject):
     """An abstract class representing objects that require context for construction"""
 
     @abstractmethod
@@ -31,7 +42,7 @@ class PDFContextualObject(PDFObject, metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class PDFPrimivite(Generic[TToken], PDFObject):
+class PDFPrimitive(Generic[TToken], PDFObject):
     """A class representing any simple primitive data type as specified in PDF spec 1.7 section 7.3"""
 
     def __init__(self, token: TToken) -> None:
@@ -41,7 +52,43 @@ class PDFPrimivite(Generic[TToken], PDFObject):
         return self.token.value
 
     def to_python(self):
-        return self.value
+        return self.get_value()
+
+
+class PDFKeyword(PDFObject):
+    """A class representing a PDF keyword"""
+
+    def __init__(self, token: TokenKeyword) -> None:
+        self.token = token
+
+    def get_value(self):
+        return self.token.value
+
+    def to_python(self):
+        return self.get_value()
+
+
+class PDFComment(PDFObject):
+    """A class representing a PDF comment"""
+
+    def __init__(self, token: TokenComment) -> None:
+        self.token = token
+
+    def get_value(self):
+        return self.token.value
+
+    def to_python(self):
+        return self.get_value()
+
+
+class PDFNull(PDFObject):
+    """A class representing a PDF null object"""
+
+    def get_value(self):
+        return None
+
+    def to_python(self):
+        return None
 
 
 class PDFDictionary(Dict[PDFName, PDFObject], PDFContextualObject):
@@ -54,7 +101,7 @@ class PDFDictionary(Dict[PDFName, PDFObject], PDFContextualObject):
 
     def pass_item(self, item: PDFObject):
         if self.name is None:
-            if isinstance(item, PDFPrimivite) and isinstance(item.token, TokenName):
+            if isinstance(item, PDFPrimitive) and isinstance(item.token, TokenName):
                 self.name = item.get_value()
                 if self.strict:
                     raise ParserError("Invalid token provided to dictionary")

@@ -116,11 +116,8 @@ class TokenReal(Token[Decimal]):
 
 TokenNumber = Union[TokenInteger, TokenReal]
 TokenPrimitive = Union[
-    TokenComment,
-    TokenKeyword,
     TokenName,
     TokenBoolean,
-    TokenNull,
     TokenString,
     TokenHexString,
     TokenInteger,
@@ -138,11 +135,8 @@ def is_primitive(token: Token) -> bool:
         bool: True if primitive
     """
     for opt in [
-        TokenComment,
-        TokenKeyword,
         TokenName,
         TokenBoolean,
-        TokenNull,
         TokenString,
         TokenHexString,
         TokenInteger,

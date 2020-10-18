@@ -1,7 +1,10 @@
 from decimal import Decimal
 import io
+from pdfmajor.parser_v2.indirect_objects import IndirectObject
+from pdfmajor.parser_v2.l2 import PDFL2Parser
 from pdfmajor.parser_v2.objects import PDFName
 from pdfmajor.parser_v2.l1 import PDFL1Parser
+from pdfmajor.streambuffer import StreamEOF
 from unittest import TestCase
 
 
@@ -70,3 +73,31 @@ class L1(TestCase):
                 ],
             ],
         )
+
+
+class L2(TestCase):
+    def test_parse_simple_indobj(self):
+        parser = PDFL2Parser(
+            io.BytesIO(
+                br"""
+            12 1 obj (Bring) endobj
+            100 0 obj
+            <33>
+            endobj
+            13 8
+            obj
+            << /x 1 /y 3>> endobj
+        """
+            )
+        )
+        expected = [
+            (12, 1, "Bring"),
+            (100, 0, b"3"),
+            (13, 8, {PDFName("x"): 1, PDFName("y"): 3}),
+        ]
+        for obj, eobj in zip(parser.iter_objects(), expected):
+            self.assertIsInstance(obj, IndirectObject)
+            self.assertEqual(obj, parser.inobjects.get_indobject(eobj[0], eobj[1]))
+            self.assertEqual(obj.to_python(), eobj[2])
+        with self.assertRaises(StreamEOF):
+            next(parser.iter_objects())

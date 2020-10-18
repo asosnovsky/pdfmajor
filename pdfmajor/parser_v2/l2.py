@@ -1,46 +1,28 @@
 import io
+from pdfmajor.parser_v2.l1 import PDFL1Parser
 from pdfmajor.parser_v2.exceptions import ParserError
 from pdfmajor.parser_v2.objects import (
-    PDFArray,
-    PDFDictionary,
-    PDFPrimivite,
+    PDFContextualObject,
+    PDFKeyword,
+    PDFPrimitive,
     PDFObject,
 )
-from typing import Any, Iterator, List, Optional
+from typing import Iterator, List, Optional, Tuple
 from pdfmajor.lexer.token import (
-    TArrayValue,
-    TDictValue,
-    TokenArray,
-    TokenDictionary,
-    TokenComplexType,
-    TokenComplexTypeVal,
-    is_primitive,
+    TokenInteger,
 )
-from pdfmajor.lexer import PDFLexer
-from pdfmajor.parser_v2.context import PDFParseContext
+from pdfmajor.parser_v2.indirect_objects import IndirectObjectCollection
 
 
-class PDFL1Parser:
-    """Level 1 PDF Parser"""
+class PDFL2Parser:
+    """Level 2 PDF Parser"""
 
     def __init__(
         self, fp: io.BufferedIOBase, buffer_size: int = 4096, strict: bool = True
     ) -> None:
-        self.lexer = PDFLexer(fp, buffer_size)
+        self.l1 = PDFL1Parser(fp, buffer_size, strict)
         self.strict = strict
-        self.context_stack: List[PDFParseContext] = []
-
-    @property
-    def current_context(self) -> Optional[PDFParseContext]:
-        """Returns the current context of the parsing state
-
-        Returns:
-            Optional[PDFParseContext]
-        """
-        if len(self.context_stack) > 0:
-            return self.context_stack[-1]
-        else:
-            return None
+        self.inobjects = IndirectObjectCollection()
 
     def seek(self, offset: int) -> int:
         """moves the offset of the reader to a certain spot, and returns the new offset
@@ -51,7 +33,7 @@ class PDFL1Parser:
         Returns:
             int: new offset
         """
-        return self.lexer.seek(offset)
+        return self.l1.seek(offset)
 
     def iter_objects(self) -> Iterator[PDFObject]:
         """Iterates over the objects in the current byte stream using level 2 parsing
@@ -59,21 +41,47 @@ class PDFL1Parser:
         Yields:
             PDFObject
         """
-        for token in self.lexer.iter_tokens():
-            if is_primitive(token):
-                cur_ctx = self.current_context
-                obj = PDFPrimivite(token)  # type: ignore
-                if cur_ctx is None:
-                    yield obj
-                else:
-                    cur_ctx.push(obj)
-            elif isinstance(token, TokenArray):
-                obj = self.__deal_with_obj(token, PDFArray, TArrayValue.OPEN)
-                if obj is not None:
-                    yield obj
-            elif isinstance(token, TokenDictionary):
-                obj = self.__deal_with_obj(token, PDFDictionary, TDictValue.OPEN)
-                if obj is not None:
-                    yield obj
+        object_list: List[PDFObject] = []
+        ctx_list: List[PDFContextualObject] = []
+        for obj in self.l1.iter_objects():
+            if isinstance(obj, PDFKeyword):
+                if obj.get_value() == b"obj":
+                    if len(object_list) < 2:
+                        raise ParserError("recieved 'obj' but missing leading tokens")
+                    ctx_list.append(
+                        self.inobjects.create_indobject(
+                            *_get_indobj_values(object_list)
+                        )
+                    )
+                elif obj.get_value() == b"endobj":
+                    if len(ctx_list) > 0:
+                        last_ctx_obj = ctx_list.pop()
+                        if len(ctx_list) > 0:
+                            ctx_list[-1].pass_item(last_ctx_obj)
+                        else:
+                            yield last_ctx_obj.get_value()
+                elif obj.get_value() == b"R":
+                    cur_indobj = self.inobjects.get_indobject(
+                        *_get_indobj_values(object_list)
+                    )
+                    if len(ctx_list) > 0:
+                        ctx_list[-1].pass_item(cur_indobj)
+                    else:
+                        yield cur_indobj.get_value()
+            elif len(ctx_list) == 0:
+                object_list.append(obj)
+            elif len(ctx_list) > 0:
+                ctx_list[-1].pass_item(obj)
             else:
-                raise ParserError(f"Invalid token provided {token}")
+                raise ParserError(f"Invalid obj provided {obj}")
+
+
+def _get_indobj_values(object_list: List[PDFObject]) -> Tuple[int, int]:
+    gen_num = object_list.pop()
+    obj_num = object_list.pop()
+    if isinstance(gen_num, PDFPrimitive) and isinstance(obj_num, PDFPrimitive):
+        if isinstance(gen_num.token, TokenInteger) and isinstance(
+            obj_num.token, TokenInteger
+        ):
+            return (obj_num.to_python(), gen_num.to_python())
+    raise ParserError("missing leading tokens for object reference")
