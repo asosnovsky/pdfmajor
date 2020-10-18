@@ -2,6 +2,7 @@ import io
 from pdfmajor.parser_v2.l1 import PDFL1Parser
 from pdfmajor.parser_v2.exceptions import ParserError
 from pdfmajor.parser_v2.objects import (
+    PDFComment,
     PDFContextualObject,
     PDFPrimitive,
     PDFObject,
@@ -45,7 +46,7 @@ class PDFL2Parser:
         ctx_list: List[PDFContextualObject] = []
         for obj in self.l1.iter_objects():
             if isinstance(obj, TokenKeyword):
-                if obj.get_value() == b"obj":
+                if obj.value == b"obj":
                     if len(object_list) < 2:
                         raise ParserError("recieved 'obj' but missing leading tokens")
                     ctx_list.append(
@@ -53,14 +54,14 @@ class PDFL2Parser:
                             *_get_indobj_values(object_list)
                         )
                     )
-                elif obj.get_value() == b"endobj":
+                elif obj.value == b"endobj":
                     if len(ctx_list) > 0:
                         last_ctx_obj = ctx_list.pop()
                         if len(ctx_list) > 0:
                             ctx_list[-1].pass_item(last_ctx_obj)
                         else:
                             yield last_ctx_obj.get_value()
-                elif obj.get_value() == b"R":
+                elif obj.value == b"R":
                     cur_indobj = self.inobjects.get_indobject(
                         *_get_indobj_values(object_list)
                     )
@@ -68,6 +69,8 @@ class PDFL2Parser:
                         ctx_list[-1].pass_item(cur_indobj)
                     else:
                         yield cur_indobj.get_value()
+            elif isinstance(obj, PDFComment):
+                yield obj
             elif len(ctx_list) == 0:
                 object_list.append(obj)
             elif len(ctx_list) > 0:

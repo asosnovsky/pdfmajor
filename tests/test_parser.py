@@ -1,9 +1,10 @@
 from decimal import Decimal
 import io
+from typing import Callable, List
 from pdfmajor.lexer.token import TokenInteger, TokenKeyword, TokenString
-from pdfmajor.parser_v2.indirect_objects import IndirectObject
+from pdfmajor.parser_v2.indirect_objects import IndirectObject, IndirectObjectCollection
 from pdfmajor.parser_v2.l2 import PDFL2Parser
-from pdfmajor.parser_v2.objects import PDFName, PDFPrimitive
+from pdfmajor.parser_v2.objects import PDFComment, PDFName, PDFObject, PDFPrimitive
 from pdfmajor.parser_v2.l1 import PDFL1Parser
 from pdfmajor.streambuffer import StreamEOF
 from unittest import TestCase
@@ -97,6 +98,22 @@ class L1(TestCase):
 
 
 class L2(TestCase):
+    def run_test(
+        self,
+        raw: bytes,
+        expected: Callable[[IndirectObjectCollection], List[PDFObject]],
+    ):
+        parser = PDFL2Parser(io.BytesIO(raw))
+        for i, (eobj, obj) in enumerate(
+            zip(expected(parser.inobjects), parser.iter_objects()), 1
+        ):
+            self.assertEqual(obj, eobj, f"Failed at example #{i}")
+        try:
+            next_obj = next(parser.iter_objects())
+            self.assertIsNone(next_obj)
+        except (EOFError, StopIteration) as e:
+            self.assertIsNotNone(e)
+
     def test_parse_simple_indobj(self):
         parser = PDFL2Parser(
             io.BytesIO(
@@ -108,7 +125,7 @@ class L2(TestCase):
             13 8
             obj
             << /x 1 /y 3>> endobj
-        """
+            """
             )
         )
         expected = [
@@ -122,3 +139,22 @@ class L2(TestCase):
             self.assertEqual(obj.to_python(), eobj[2])
         with self.assertRaises(StreamEOF):
             next(parser.iter_objects())
+
+    def test_parse_comments(self):
+        self.run_test(
+            br"""
+                10 0 % object references
+                obj % start of object
+                    (testing) % object content
+                endobj %closing the object
+                11 1 obj 2 endobj
+            """,
+            expected=lambda indobjc: [
+                PDFComment(b" object references", (22, 41)),
+                PDFComment(b" start of object", (62, 79)),
+                PDFComment(b" object content", (110, 126)),
+                indobjc.get_indobject(10, 0),
+                PDFComment(b"closing the object", (150, 169)),
+                indobjc.get_indobject(11, 1),
+            ],
+        )

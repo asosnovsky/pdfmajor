@@ -10,7 +10,7 @@ from pdfmajor.lexer.token import (
     TokenName,
     TokenPrimitive,
 )
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar
 
 TToken = TypeVar("TToken", bound=TokenPrimitive)
 
@@ -32,6 +32,11 @@ class PDFObject(metaclass=ABCMeta):
         if not isinstance(o, self.__class__):
             return False
         return o.to_python() == self.to_python()
+
+    def __repr__(self) -> str:
+        return "{cls}({data})".format(
+            cls=self.__class__.__name__, data=self.to_python()
+        )
 
 
 class PDFContextualObject(PDFObject):
@@ -58,14 +63,20 @@ class PDFPrimitive(Generic[TToken], PDFObject):
 class PDFComment(PDFObject):
     """A class representing a PDF comment"""
 
-    def __init__(self, token: TokenComment) -> None:
-        self.token = token
+    def __init__(self, comment: bytes, loc: Tuple[int, int] = (0, 0)) -> None:
+        """
+        Args:
+            comment (bytes): the comment data
+            loc (Tuple[int, int], optional): location of the comment in the byte-stream. Defaults to (0, 0).
+        """
+        self.comment = comment
+        self.location = loc
 
     def get_value(self):
-        return self.token.value
+        return self.comment
 
     def to_python(self):
-        return self.get_value()
+        return (self.get_value(), self.location)
 
 
 class PDFNull(PDFObject):

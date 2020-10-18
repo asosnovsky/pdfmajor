@@ -111,7 +111,7 @@ class PDFL1Parser:
                 else:
                     cur_ctx.pass_item(obj)
             elif isinstance(token, TokenComment):
-                yield PDFComment(token)
+                yield PDFComment(token.value, (token.start_loc, token.end_loc))
             elif isinstance(token, TokenKeyword):
                 yield token
             elif isinstance(token, TokenNull):
