@@ -75,7 +75,12 @@ class PDFComment(PDFObject):
     def get_value(self):
         return self.comment
 
-    def to_python(self):
+    def to_python(self) -> Tuple[bytes, Tuple[int, int]]:
+        """returns the value of the comment and where it is in the byte-strea,
+
+        Returns:
+            Tuple[bytes, Tuple[int, int]]: the first value in the tuple is the comment value and the second is the start and end location in the byte stream
+        """
         return (self.get_value(), self.location)
 
 
