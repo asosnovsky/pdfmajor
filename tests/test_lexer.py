@@ -16,17 +16,21 @@ from pdfmajor.lexer.token import (
     PDFName,
     TArrayValue,
     TDictValue,
+    TObjValue,
+    TStreamValue,
     Token,
     TokenArray,
     TokenBoolean,
     TokenComment,
     TokenNull,
+    TokenObj,
     TokenReal,
     TokenDictionary,
     TokenHexString,
     TokenInteger,
     TokenKeyword,
     TokenName,
+    TokenStream,
     TokenString,
 )
 from pdfmajor.lexer.comment import parse_comment
@@ -262,13 +266,13 @@ endobj
 endobj
 """,
             expected=[
-                TokenKeyword(0, 9, b"endstream"),
-                TokenKeyword(10, 16, b"endobj"),
+                TokenStream(0, 9, TStreamValue.END),
+                TokenObj(10, 16, TObjValue.END),
                 TokenInteger(17, 18, 4),
                 TokenInteger(19, 20, 0),
-                TokenKeyword(21, 24, b"obj"),
+                TokenObj(21, 24, TObjValue.START),
                 TokenInteger(28, 32, 2618),
-                TokenKeyword(33, 39, b"endobj"),
+                TokenObj(33, 39, TObjValue.END),
             ],
         )
 

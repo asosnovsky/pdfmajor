@@ -180,5 +180,27 @@ class TokenArray(Token[TArrayValue]):
     pass
 
 
-TokenComplexType = Union[TokenDictionary, TokenArray]
-TokenComplexTypeVal = Union[TDictValue, TArrayValue]
+class TStreamValue(Enum):
+    START = "stream"
+    END = "endstream"
+
+
+class TokenStream(Token[TStreamValue]):
+    """Tokens representing the starting and ending of a PDF stream as specified in PDF spec 1.7 section 7.3.8.1"""
+
+    pass
+
+
+class TObjValue(Enum):
+    START = "obj"
+    END = "endobj"
+
+
+class TokenObj(Token[TObjValue]):
+    """Tokens representing the starting and ending of an indirect PDF object as specified in PDF spec 1.7 section 7.3.10"""
+
+    pass
+
+
+TokenComplexType = Union[TokenDictionary, TokenArray, TokenStream, TokenObj]
+TokenComplexTypeVal = Union[TDictValue, TArrayValue, TStreamValue, TObjValue]
