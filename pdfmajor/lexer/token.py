@@ -53,8 +53,9 @@ class TokenKeyword(Token[bytes]):
     pass
 
 
-class PDFName(NamedTuple):
-    value: str
+class PDFName(str):
+    def __repr__(self) -> str:
+        return f"/{self}"
 
 
 class TokenName(Token[PDFName]):
