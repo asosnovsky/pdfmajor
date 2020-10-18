@@ -3,13 +3,13 @@ from pdfmajor.parser_v2.l1 import PDFL1Parser
 from pdfmajor.parser_v2.exceptions import ParserError
 from pdfmajor.parser_v2.objects import (
     PDFContextualObject,
-    PDFKeyword,
     PDFPrimitive,
     PDFObject,
 )
-from typing import Iterator, List, Optional, Tuple
+from typing import Iterator, List, Tuple
 from pdfmajor.lexer.token import (
     TokenInteger,
+    TokenKeyword,
 )
 from pdfmajor.parser_v2.indirect_objects import IndirectObjectCollection
 
@@ -44,7 +44,7 @@ class PDFL2Parser:
         object_list: List[PDFObject] = []
         ctx_list: List[PDFContextualObject] = []
         for obj in self.l1.iter_objects():
-            if isinstance(obj, PDFKeyword):
+            if isinstance(obj, TokenKeyword):
                 if obj.get_value() == b"obj":
                     if len(object_list) < 2:
                         raise ParserError("recieved 'obj' but missing leading tokens")

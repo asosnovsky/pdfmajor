@@ -1,8 +1,9 @@
 from decimal import Decimal
 import io
+from pdfmajor.lexer.token import TokenInteger, TokenKeyword, TokenString
 from pdfmajor.parser_v2.indirect_objects import IndirectObject
 from pdfmajor.parser_v2.l2 import PDFL2Parser
-from pdfmajor.parser_v2.objects import PDFName
+from pdfmajor.parser_v2.objects import PDFName, PDFPrimitive
 from pdfmajor.parser_v2.l1 import PDFL1Parser
 from pdfmajor.streambuffer import StreamEOF
 from unittest import TestCase
@@ -73,6 +74,26 @@ class L1(TestCase):
                 ],
             ],
         )
+
+    def test_parse_keeps_keywords(self):
+        parser = PDFL1Parser(
+            io.BytesIO(
+                br"""
+            12 1 obj (Bring) endobj
+        """
+            )
+        )
+        expected = [
+            PDFPrimitive(TokenInteger(13, 15, 12)),
+            PDFPrimitive(TokenInteger(16, 17, 1)),
+            TokenKeyword(18, 21, b"obj"),
+            PDFPrimitive(TokenString(22, 29, "Bring")),
+            TokenKeyword(30, 36, b"endobj"),
+        ]
+        for obj, eobj in zip(parser.iter_objects(), expected):
+            self.assertEqual(obj, eobj)
+        with self.assertRaises(StreamEOF):
+            next(parser.iter_objects())
 
 
 class L2(TestCase):

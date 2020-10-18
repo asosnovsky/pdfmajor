@@ -55,19 +55,6 @@ class PDFPrimitive(Generic[TToken], PDFObject):
         return self.get_value()
 
 
-class PDFKeyword(PDFObject):
-    """A class representing a PDF keyword"""
-
-    def __init__(self, token: TokenKeyword) -> None:
-        self.token = token
-
-    def get_value(self):
-        return self.token.value
-
-    def to_python(self):
-        return self.get_value()
-
-
 class PDFComment(PDFObject):
     """A class representing a PDF comment"""
 

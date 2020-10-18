@@ -5,12 +5,11 @@ from pdfmajor.parser_v2.objects import (
     PDFComment,
     PDFContextualObject,
     PDFDictionary,
-    PDFKeyword,
     PDFNull,
     PDFPrimitive,
     PDFObject,
 )
-from typing import Any, Iterator, List, Optional, Type
+from typing import Iterator, List, Optional, Type, Union
 from pdfmajor.lexer.token import (
     TArrayValue,
     TDictValue,
@@ -96,7 +95,7 @@ class PDFL1Parser:
         """
         return self.lexer.seek(offset)
 
-    def iter_objects(self) -> Iterator[PDFObject]:
+    def iter_objects(self) -> Iterator[Union[PDFObject, TokenKeyword]]:
         """Iterates over the objects in the current byte stream using level 1 parsing
 
         Yields:
@@ -114,7 +113,7 @@ class PDFL1Parser:
             elif isinstance(token, TokenComment):
                 yield PDFComment(token)
             elif isinstance(token, TokenKeyword):
-                yield PDFKeyword(token)
+                yield token
             elif isinstance(token, TokenNull):
                 yield PDFNull()
             elif isinstance(token, TokenArray):
