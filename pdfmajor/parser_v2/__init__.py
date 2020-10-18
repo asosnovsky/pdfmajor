@@ -7,7 +7,6 @@ from pdfmajor.lexer.token import (
     TDictValue,
     TokenArray,
     TokenDictionary,
-    TokenPrimitive,
     is_primitive,
 )
 from pdfmajor.lexer import PDFLexer
