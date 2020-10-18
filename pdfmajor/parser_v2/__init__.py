@@ -5,9 +5,8 @@ from pdfmajor.parser_v2.objects import (
     PDFDictionary,
     PDFPrimivite,
     PDFObject,
-    PDFComplexType,
 )
-from typing import Any, Callable, Iterator, List, Optional
+from typing import Any, Iterator, List, Optional
 from pdfmajor.lexer.token import (
     TArrayValue,
     TDictValue,
@@ -22,6 +21,13 @@ from pdfmajor.parser_v2.context import PDFParseContext
 
 
 class PDFParser:
+    """A PDF token parser
+    this parser parses the bytes in three steps
+    1. Generate tokens from the byte stream using the PDFLexer
+    2. Level 1 Parsing: Match Low level objects such as primitive types, arrays, dictionaries
+    3. Level 2 Parsing: Match high level objects such as Streams and Indirect objects
+    """
+
     def __init__(
         self, fp: io.BufferedIOBase, buffer_size: int = 4096, strict: bool = True
     ) -> None:
@@ -53,7 +59,7 @@ class PDFParser:
         return self.lexer.seek(offset)
 
     def iter_objects(self) -> Iterator[PDFObject]:
-        """Iterates over the objects in the current byte stream
+        """Iterates over the objects in the current byte stream using level 1 parsing
 
         Yields:
             PDFObject

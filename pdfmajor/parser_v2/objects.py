@@ -32,7 +32,7 @@ class PDFPrimivite(Generic[TToken], PDFObject):
     def get_value(self):
         return self.token.value
 
-    def to_python(self) -> Union[TToken.value]:
+    def to_python(self):
         return self.value
 
 
@@ -82,6 +82,17 @@ class PDFStream(PDFObject):
         fdecode_parms: Optional[List[PDFDictionary]] = None,
         dl: Optional[int] = None,
     ) -> None:
+        """
+        Args:
+            offset (int): the offset where the stream itself starts
+            length (int): the length of the stream
+            filter (Optional[List[PDFName]], optional): The names of a filter that shall be applied in  processing the stream data. Defaults to None.
+            decode_parms (Optional[List[PDFDictionary]], optional):  Parameter dictionaries used by the filters specified by filter. Defaults to None.
+            f (Optional[Any], optional): The file containing the stream data. If this entry is present, the bytes between stream and endstream shall be ignored. However, the Length entry should still specify the number of those bytes (usually, there are no bytes and Length is 0).. Defaults to None.
+            ffilter (Optional[List[PDFName]], optional): The names of a filter that shall be applied in processing of the external file. Defaults to None.
+            fdecode_parms (Optional[List[PDFDictionary]], optional):  Parameter dictionaries used by the filters specified by ffilter. Defaults to None.
+            dl (Optional[int], optional): A  non-negative  integer  representing  the  number  of  bytes  in  the  decoded  (defiltered)  stream.  It  can  be  used to determine, for example, whether enough disk space is available to write a stream to a file.This  value  shall  be  considered  a  hint  only;  for  some  stream  filters, it may not be possible to determine this value precisely. Defaults to None.
+        """
         self.offset = offset
         self.length = length
         self.filter = filter
