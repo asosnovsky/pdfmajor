@@ -53,10 +53,10 @@ class PDFParser:
         return self.lexer.seek(offset)
 
     def iter_objects(self) -> Iterator[PDFObject]:
-        """Iterates over the objects in the current stream
+        """Iterates over the objects in the current byte stream
 
         Yields:
-            [type]: [description]
+            PDFObject
         """
         for token in self.lexer.iter_tokens():
             if is_primitive(token):
