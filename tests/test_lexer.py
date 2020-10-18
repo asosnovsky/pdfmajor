@@ -13,6 +13,7 @@ from pdfmajor.lexer.name import parse_name
 from pdfmajor.lexer.keyword import parse_keyword
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.token import (
+    PDFName,
     TArrayValue,
     TDictValue,
     Token,
@@ -113,7 +114,7 @@ class Basics(TestCase):
                 token = parse_name(buffer)
                 self.assertIsInstance(token, TokenName)
                 self.assertEqual(token.start_loc, -1)
-                self.assertEqual(token.value, "Some_Name")
+                self.assertEqual(token.value, PDFName("Some_Name"))
                 self.assertEqual(token.end_loc, 9)
 
     def test_parse_literal_names_hex(self):
@@ -123,7 +124,7 @@ class Basics(TestCase):
                 token = parse_name(buffer)
                 self.assertIsInstance(token, TokenName)
                 self.assertEqual(token.start_loc, -1)
-                self.assertEqual(token.value, "foo_aa")
+                self.assertEqual(token.value, PDFName("foo_aa"))
                 self.assertEqual(token.end_loc, 8)
 
     def test_parse_string(self):
@@ -245,7 +246,7 @@ class Lexer(TestCase):
         self.run_test(
             b"/Length 4 0 R\n",
             expected=[
-                TokenName(0, 7, "Length"),
+                TokenName(0, 7, PDFName("Length")),
                 TokenInteger(8, 9, 4),
                 TokenInteger(10, 11, 0),
                 TokenKeyword(12, 13, b"R"),
@@ -298,10 +299,10 @@ func/a/b{(c)do*}def
                 TokenKeyword(start_loc=16, end_loc=17, value=b'"'),
                 TokenKeyword(start_loc=19, end_loc=20, value=b"@"),
                 TokenKeyword(start_loc=21, end_loc=22, value=b"#"),
-                TokenName(start_loc=23, end_loc=25, value="a"),
-                TokenName(start_loc=25, end_loc=29, value="BCD"),
-                TokenName(start_loc=30, end_loc=40, value="Some_Name"),
-                TokenName(start_loc=41, end_loc=53, value="foo_naa"),
+                TokenName(start_loc=23, end_loc=25, value=PDFName("a")),
+                TokenName(start_loc=25, end_loc=29, value=PDFName("BCD")),
+                TokenName(start_loc=30, end_loc=40, value=PDFName("Some_Name")),
+                TokenName(start_loc=41, end_loc=53, value=PDFName("foo_naa")),
                 TokenInteger(start_loc=54, end_loc=55, value=0),
                 TokenInteger(start_loc=56, end_loc=58, value=1),
                 TokenInteger(start_loc=59, end_loc=61, value=-2),
@@ -325,8 +326,8 @@ func/a/b{(c)do*}def
                     start_loc=211, end_loc=225, value=b"\xab\xcd\x00\x124\x05"
                 ),
                 TokenKeyword(start_loc=226, end_loc=230, value=b"func"),
-                TokenName(start_loc=230, end_loc=232, value="a"),
-                TokenName(start_loc=232, end_loc=234, value="b"),
+                TokenName(start_loc=230, end_loc=232, value=PDFName("a")),
+                TokenName(start_loc=232, end_loc=234, value=PDFName("b")),
                 TokenKeyword(start_loc=234, end_loc=235, value=b"{"),
                 TokenString(start_loc=235, end_loc=238, value="c"),
                 TokenKeyword(start_loc=238, end_loc=241, value=b"do*"),
@@ -338,9 +339,9 @@ func/a/b{(c)do*}def
                 TokenKeyword(start_loc=254, end_loc=255, value=b"!"),
                 TokenArray(start_loc=256, end_loc=257, value=TArrayValue.CLOSE),
                 TokenDictionary(start_loc=258, end_loc=260, value=TDictValue.OPEN),
-                TokenName(start_loc=261, end_loc=265, value="foo"),
+                TokenName(start_loc=261, end_loc=265, value=PDFName("foo")),
                 TokenString(start_loc=266, end_loc=271, value="bar"),
-                TokenDictionary(start_loc=273, end_loc=274, value=TDictValue.CLOSE),
+                TokenDictionary(start_loc=272, end_loc=274, value=TDictValue.CLOSE),
             ],
         )
 
@@ -381,15 +382,15 @@ func/a/b
                 TokenKeyword(start_loc=44, end_loc=45, value=b'"'),
                 TokenKeyword(start_loc=47, end_loc=48, value=b"@"),
                 TokenKeyword(start_loc=49, end_loc=50, value=b"#"),
-                TokenName(start_loc=51, end_loc=53, value="a"),
-                TokenName(start_loc=53, end_loc=57, value="BCD"),
-                TokenName(start_loc=58, end_loc=68, value="Some_Name"),
-                TokenName(start_loc=69, end_loc=81, value="foo_naa"),
-                TokenName(start_loc=82, end_loc=89, value="barj"),
-                TokenName(start_loc=90, end_loc=95, value="need"),
-                TokenName(start_loc=96, end_loc=102, value="oh1oh"),
+                TokenName(start_loc=51, end_loc=53, value=PDFName("a")),
+                TokenName(start_loc=53, end_loc=57, value=PDFName("BCD")),
+                TokenName(start_loc=58, end_loc=68, value=PDFName("Some_Name")),
+                TokenName(start_loc=69, end_loc=81, value=PDFName("foo_naa")),
+                TokenName(start_loc=82, end_loc=89, value=PDFName("barj")),
+                TokenName(start_loc=90, end_loc=95, value=PDFName("need")),
+                TokenName(start_loc=96, end_loc=102, value=PDFName("oh1oh")),
                 TokenKeyword(start_loc=103, end_loc=107, value=b"func"),
-                TokenName(start_loc=107, end_loc=109, value="a"),
-                TokenName(start_loc=109, end_loc=111, value="b"),
+                TokenName(start_loc=107, end_loc=109, value=PDFName("a")),
+                TokenName(start_loc=109, end_loc=111, value=PDFName("b")),
             ],
         )

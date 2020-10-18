@@ -6,7 +6,7 @@ from pdfmajor.lexer.exceptions import (
 )
 
 from pdfmajor.streambuffer import BufferStream
-from pdfmajor.lexer.token import TokenName
+from pdfmajor.lexer.token import PDFName, TokenName
 from pdfmajor.lexer.regex import HEX, END_LITERAL
 
 
@@ -62,6 +62,6 @@ def parse_name(buffer: BufferStream) -> TokenName:
                     return TokenName(
                         initialpos,
                         buffer.tell(),
-                        state.curtoken.decode(),
+                        PDFName(state.curtoken.decode()),
                     )
     raise LexerEOF

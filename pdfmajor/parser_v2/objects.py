@@ -2,14 +2,10 @@
 
 
 from pdfmajor.execptions import ParserError
-from pdfmajor.lexer.token import TokenName, TokenPrimitive
+from pdfmajor.lexer.token import PDFName, TokenName, TokenPrimitive
 from typing import Dict, Generic, List, NamedTuple, Optional, TypeVar, Union
 
 TToken = TypeVar("TToken", bound=TokenPrimitive)
-
-
-class PDFName(NamedTuple):
-    value: str
 
 
 class PDFPrimivite(Generic[TToken]):
@@ -18,15 +14,13 @@ class PDFPrimivite(Generic[TToken]):
 
     @property
     def value(self):
-        if isinstance(self.token, TokenName):
-            return PDFName(self.token.value)
         return self.token.value
 
 
-class PDFDictionary(Dict[PDFPrimivite[TokenName], "PDFObject"]):
+class PDFDictionary(Dict[PDFName, "PDFObject"]):
     def __init__(self, strict: bool = False) -> None:
         super().__init__()
-        self.name: Optional[str] = None
+        self.name: Optional[PDFName] = None
         self.strict = strict
 
     def pass_item(self, item: "PDFObject"):
@@ -51,7 +45,9 @@ class PDFArray(List["PDFObject"]):
 
 
 class PDFStream(object):
-    pass
+    @property
+    def value(self):
+        return self
 
 
 PDFComplexType = Union[PDFDictionary, PDFArray, PDFStream]

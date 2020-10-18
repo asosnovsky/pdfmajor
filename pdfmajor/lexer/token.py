@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Generic, NamedTuple, TypeVar, Union
 from decimal import Decimal
 
 T = TypeVar("T")
@@ -53,7 +53,11 @@ class TokenKeyword(Token[bytes]):
     pass
 
 
-class TokenName(Token[str]):
+class PDFName(NamedTuple):
+    value: str
+
+
+class TokenName(Token[PDFName]):
     """Token representing literal name tokens
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.5
     """
