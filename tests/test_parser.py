@@ -39,3 +39,12 @@ class Basic(TestCase):
                 },
             },
         )
+
+    def test_parse_array(self):
+        parser = PDFParser(
+            io.BytesIO(br"""[ 549  3.14  false  (  Ralph )   /SomeName ]""")
+        )
+        obj = next(parser.iter_objects())
+        self.assertListEqual(
+            obj, [549, Decimal("3.14"), False, "  Ralph ", PDFName("SomeName")]
+        )

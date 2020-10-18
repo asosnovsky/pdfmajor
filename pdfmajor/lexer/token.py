@@ -178,3 +178,7 @@ class TokenArray(Token[TArrayValue]):
     """
 
     pass
+
+
+TokenComplexType = Union[TokenDictionary, TokenArray]
+TokenComplexTypeVal = Union[TDictValue, TArrayValue]

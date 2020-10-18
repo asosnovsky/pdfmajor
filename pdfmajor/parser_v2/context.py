@@ -32,7 +32,7 @@ class PDFParseContext:
             ParserError: raises if an invalid complex object is used
         """
         if isinstance(self.pdfobject, PDFArray):
-            self.pdfobject.append(item)
+            self.pdfobject.pass_item(item)
         elif isinstance(self.pdfobject, PDFDictionary):
             self.pdfobject.pass_item(item)
         elif isinstance(self.pdfobject, PDFStream):

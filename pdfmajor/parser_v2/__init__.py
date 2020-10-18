@@ -1,12 +1,20 @@
 import io
 from pdfmajor.parser_v2.exceptions import ParserError
-from pdfmajor.parser_v2.objects import PDFArray, PDFDictionary, PDFPrimivite, PDFObject
-from typing import Iterator, List, Optional
+from pdfmajor.parser_v2.objects import (
+    PDFArray,
+    PDFDictionary,
+    PDFPrimivite,
+    PDFObject,
+    PDFComplexType,
+)
+from typing import Any, Callable, Iterator, List, Optional
 from pdfmajor.lexer.token import (
     TArrayValue,
     TDictValue,
     TokenArray,
     TokenDictionary,
+    TokenComplexType,
+    TokenComplexTypeVal,
     is_primitive,
 )
 from pdfmajor.lexer import PDFLexer
@@ -59,40 +67,45 @@ class PDFParser:
                 else:
                     cur_ctx.push(obj)
             elif isinstance(token, TokenArray):
-                if token.value == TArrayValue.OPEN:
-                    self.context_stack.append(PDFParseContext(PDFArray()))
-                elif len(self.context_stack) > 0:
-                    last_ctx = self.context_stack.pop()
-                    if isinstance(last_ctx.pdfobject, PDFArray):
-                        cur_ctx = self.current_context
-                        if cur_ctx is None:
-                            yield last_ctx.pdfobject
-                        else:
-                            cur_ctx.push(last_ctx.pdfobject)
-                    elif self.strict:
-                        raise ParserError(f"Invalid end of array specified at {token}")
-                elif self.strict:
-                    raise ParserError(
-                        f"Invalid end of array specified at {token} with no start"
-                    )
+                obj = self.__deal_with_obj(token, PDFArray, TArrayValue.OPEN)
+                if obj is not None:
+                    yield obj
             elif isinstance(token, TokenDictionary):
-                if token.value == TDictValue.OPEN:
-                    self.context_stack.append(PDFParseContext(PDFDictionary()))
-                elif len(self.context_stack) > 0:
-                    last_ctx = self.context_stack.pop()
-                    if isinstance(last_ctx.pdfobject, PDFDictionary):
-                        cur_ctx = self.current_context
-                        if cur_ctx is None:
-                            yield last_ctx.pdfobject
-                        else:
-                            cur_ctx.push(last_ctx.pdfobject)
-                    elif self.strict:
-                        raise ParserError(
-                            f"Invalid end of dictionary specified at {token}"
-                        )
-                elif self.strict:
-                    raise ParserError(
-                        f"Invalid end of dictionary specified at {token} with no start"
-                    )
+                obj = self.__deal_with_obj(token, PDFDictionary, TDictValue.OPEN)
+                if obj is not None:
+                    yield obj
             else:
                 raise ParserError(f"Invalid token provided {token}")
+
+    def __deal_with_obj(
+        self,
+        token: TokenComplexType,
+        cls_const: Any,
+        open_t: TokenComplexTypeVal,
+    ) -> Optional[PDFObject]:
+        """generic method for processing things that have a start and end token
+
+        Args:
+            token (TokenComplexType)
+            cls_const (Any): the class constructor for the object
+            open_t (TokenComplexTypeVal): the value represnting 'open' for the object
+
+        Returns:
+            Optional[PDFObject]
+        """
+        if token.value == open_t:
+            self.context_stack.append(PDFParseContext(cls_const()))
+        elif len(self.context_stack) > 0:
+            last_ctx = self.context_stack.pop()
+            if isinstance(last_ctx.pdfobject, cls_const):
+                cur_ctx = self.current_context
+                if cur_ctx is None:
+                    return last_ctx.pdfobject
+                else:
+                    cur_ctx.push(last_ctx.pdfobject)
+            elif self.strict:
+                raise ParserError(f"Invalid end of {cls_const} specified at {token}")
+        elif self.strict:
+            raise ParserError(
+                f"Invalid end of {cls_const} specified at {token} with no start"
+            )
