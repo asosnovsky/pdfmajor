@@ -48,3 +48,25 @@ class Basic(TestCase):
         self.assertListEqual(
             obj, [549, Decimal("3.14"), False, "  Ralph ", PDFName("SomeName")]
         )
+
+    def test_parse_nested_array(self):
+        parser = PDFParser(
+            io.BytesIO(
+                br"""[ [10 30] [22 33] [
+                << /x 0 /y 5 >>
+                << /x 10 /y 5 >>
+            ] ]"""
+            )
+        )
+        obj = next(parser.iter_objects())
+        self.assertListEqual(
+            obj,
+            [
+                [10, 30],
+                [22, 33],
+                [
+                    {PDFName("x"): 0, PDFName("y"): 5},
+                    {PDFName("x"): 10, PDFName("y"): 5},
+                ],
+            ],
+        )
