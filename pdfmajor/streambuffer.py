@@ -72,7 +72,7 @@ class BufferStream:
     def __next__(self):
         bbyte = self.read(self.buffer_size)
         if len(bbyte.data) == 0:
-            raise StopIteration
+            raise StopIteration(f"no data {bbyte}")
         return bbyte
 
     def close(self):

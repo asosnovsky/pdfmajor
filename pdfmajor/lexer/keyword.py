@@ -1,13 +1,11 @@
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.exceptions import LexerEOF
-from pdfmajor.lexer.token import TokenBoolean, TokenKeyword, TokenNull
+from pdfmajor.lexer.token import Token, TokenBoolean, TokenKeyword, TokenNull
 from pdfmajor.lexer.regex import END_KEYWORD
 from typing import Optional, Union
 
 
-def parse_keyword(
-    buffer: BufferStream, initialpos: Optional[int] = None
-) -> Union[TokenKeyword, TokenBoolean]:
+def parse_keyword(buffer: BufferStream, initialpos: Optional[int] = None) -> Token:
     """Parses input stream into a keyword or bool
 
     Args:
@@ -15,7 +13,7 @@ def parse_keyword(
         initialpos (Optional[int])
 
     Returns:
-        Union[TokenKeyword, TokenBoolean]
+        Token
     """
     curtoken = b""
     initialpos = buffer.tell() - 1 if initialpos is None else initialpos

@@ -70,7 +70,7 @@ class PDFLexer:
                     yield parse_double_angled_bracket(self.buffer)
                 elif next_char == b">":
                     self.buffer.seek(bufpos + j + 1)
-                    if buf[j : j + 2] == ">>":
+                    if buf[j : j + 2] == b">>":
                         self.buffer.seekd(1)
                         yield TokenDictionary(
                             bufpos + j, bufpos + j + 2, TDictValue.CLOSE

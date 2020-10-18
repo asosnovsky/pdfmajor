@@ -36,6 +36,7 @@ class Token(Generic[T]):
             return False
 
 
+# Primitive Tokens
 class TokenComment(Token[bytes]):
     """Token representing PDF comments
     Detection of this type of token can be found in PDF 1.7 spec section 7.2.3
@@ -109,8 +110,45 @@ class TokenReal(Token[Decimal]):
 
 
 TokenNumber = Union[TokenInteger, TokenReal]
+TokenPrimitive = Union[
+    TokenComment,
+    TokenKeyword,
+    TokenName,
+    TokenBoolean,
+    TokenNull,
+    TokenString,
+    TokenHexString,
+    TokenInteger,
+    TokenReal,
+]
 
 
+def is_primitive(token: Token) -> bool:
+    """determins is a token represents a primitive pdf object such as boolean, null, integer etc
+
+    Args:
+        token (Token)
+
+    Returns:
+        bool: True if primitive
+    """
+    for opt in [
+        TokenComment,
+        TokenKeyword,
+        TokenName,
+        TokenBoolean,
+        TokenNull,
+        TokenString,
+        TokenHexString,
+        TokenInteger,
+        TokenReal,
+    ]:
+        if isinstance(token, opt):
+            return True
+    return False
+
+
+# Tokens for complex objects
 class TDictValue(Enum):
     OPEN = "<<"
     CLOSE = ">>"
