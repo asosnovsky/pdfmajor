@@ -1,13 +1,13 @@
 from decimal import Decimal
 import io
 from pdfmajor.parser_v2.objects import PDFName
-from pdfmajor.parser_v2 import PDFParser
+from pdfmajor.parser_v2.l1 import PDFL1Parser
 from unittest import TestCase
 
 
-class Basic(TestCase):
+class L1(TestCase):
     def test_parse_dict(self):
-        parser = PDFParser(
+        parser = PDFL1Parser(
             io.BytesIO(
                 br"""<<  /Type      /Example
                          /Subtype   /DictionaryExample      
@@ -41,7 +41,7 @@ class Basic(TestCase):
         )
 
     def test_parse_array(self):
-        parser = PDFParser(
+        parser = PDFL1Parser(
             io.BytesIO(br"""[ 549  3.14  false  (  Ralph )   /SomeName ]""")
         )
         obj = next(parser.iter_objects())
@@ -50,7 +50,7 @@ class Basic(TestCase):
         )
 
     def test_parse_nested_array(self):
-        parser = PDFParser(
+        parser = PDFL1Parser(
             io.BytesIO(
                 br"""[ [10 30] [22 33] [
                 << /x 0 /y 5 >>

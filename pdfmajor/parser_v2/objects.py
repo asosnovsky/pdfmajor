@@ -23,6 +23,14 @@ class PDFObject(metaclass=ABCMeta):
         raise NotImplementedError
 
 
+class PDFContextualObject(PDFObject, metaclass=ABCMeta):
+    """An abstract class representing objects that require context for construction"""
+
+    @abstractmethod
+    def pass_item(self, item: PDFObject):
+        raise NotImplementedError
+
+
 class PDFPrimivite(Generic[TToken], PDFObject):
     """A class representing any simple primitive data type as specified in PDF spec 1.7 section 7.3"""
 
@@ -36,7 +44,7 @@ class PDFPrimivite(Generic[TToken], PDFObject):
         return self.value
 
 
-class PDFDictionary(Dict[PDFName, PDFObject], PDFObject):
+class PDFDictionary(Dict[PDFName, PDFObject], PDFContextualObject):
     """A class representing a PDF Dictionary as specified in PDF spec 1.7 section 7.3.7"""
 
     def __init__(self, strict: bool = False) -> None:
@@ -58,7 +66,7 @@ class PDFDictionary(Dict[PDFName, PDFObject], PDFObject):
         return dict(self)
 
 
-class PDFArray(List[PDFObject], PDFObject):
+class PDFArray(List[PDFObject], PDFContextualObject):
     """A class representing a PDF Array as specified in PDF spec 1.7 section 7.3.6"""
 
     def pass_item(self, item: PDFObject):
@@ -117,6 +125,3 @@ class PDFStream(PDFObject):
             else [x.to_python() for x in self.fdecode_parms],
             "dl": self.dl,
         }
-
-
-PDFComplexType = Union[PDFDictionary, PDFArray, PDFStream]
