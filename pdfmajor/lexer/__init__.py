@@ -22,10 +22,23 @@ class PDFLexer:
     def __init__(self, fp: io.BufferedIOBase, buffer_size: int = 4096) -> None:
         self.buffer = BufferStream(fp, buffer_size=buffer_size)
 
-    def seek(self, pos: int):
-        self.buffer.seek(pos)
+    def seek(self, pos: int) -> int:
+        """moves the offset of the reader to a certain spot, and returns the new offset
+
+        Args:
+            offset (int)
+
+        Returns:
+            int: new offset
+        """
+        return self.buffer.seek(pos)
 
     def iter_tokens(self) -> Iterator[Token]:
+        """Iterates over the tokens in the stream
+
+        Yields:
+            Iterator[Token]
+        """
         for bufpos, buf in self.buffer:
             m = NONSPC.search(buf, 0)
             if not m:
