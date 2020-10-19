@@ -1,18 +1,19 @@
-from decimal import Decimal
 import io
+
 from typing import Callable, List
-from pdfmajor.lexer.token import TokenInteger, TokenKeyword, TokenString
-from pdfmajor.parser_v2.indirect_objects import IndirectObject, IndirectObjectCollection
-from pdfmajor.parser_v2.l2 import PDFL2Parser
-from pdfmajor.parser_v2.objects import PDFComment, PDFName, PDFObject, PDFPrimitive
-from pdfmajor.parser_v2.l1 import PDFL1Parser
-from pdfmajor.streambuffer import StreamEOF
+from decimal import Decimal
 from unittest import TestCase
 
+from pdfmajor.streambuffer import StreamEOF
+from pdfmajor.parser_v3.objects.indirect import IndirectObject, IndirectObjectCollection
+from pdfmajor.parser_v3.objects.base import PDFObject
+from pdfmajor.parser_v3 import PDFParser
+from pdfmajor.parser_v3.objects.comment import PDFComment
 
-class L1(TestCase):
+
+class Collections(TestCase):
     def test_parse_dict(self):
-        parser = PDFL1Parser(
+        parser = PDFParser(
             io.BytesIO(
                 br"""<<  /Type      /Example
                          /Subtype   /DictionaryExample      
@@ -25,97 +26,65 @@ class L1(TestCase):
                             /LastItem  (  not! )      
                             /VeryLastItem  (  OK ) >>
                             >>"""
-            )
+            ),
+            strict=True,
         )
         obj = next(parser.iter_objects())
         self.assertDictEqual(
-            obj,
+            obj.to_python(),
             {
-                PDFName("Type"): PDFName("Example"),
-                PDFName("Subtype"): PDFName("DictionaryExample"),
-                PDFName("Version"): Decimal("0.01"),
-                PDFName("IntegerItem"): 12,
-                PDFName("StringItem"): " a string ",
-                PDFName("Subdictionary"): {
-                    PDFName("Item1"): Decimal("0.4"),
-                    PDFName("Item2"): True,
-                    PDFName("LastItem"): "  not! ",
-                    PDFName("VeryLastItem"): "  OK ",
+                "Type": "/Example",
+                "Subtype": "/DictionaryExample",
+                "Version": Decimal("0.01"),
+                "IntegerItem": 12,
+                "StringItem": " a string ",
+                "Subdictionary": {
+                    "Item1": Decimal("0.4"),
+                    "Item2": True,
+                    "LastItem": "  not! ",
+                    "VeryLastItem": "  OK ",
                 },
             },
         )
 
     def test_parse_array(self):
-        parser = PDFL1Parser(
-            io.BytesIO(br"""[ 549  3.14  false  (  Ralph )   /SomeName ]""")
+        parser = PDFParser(
+            io.BytesIO(br"""[ 549  3.14  false  (  Ralph )   /SomeName ]"""),
+            strict=True,
         )
         obj = next(parser.iter_objects())
         self.assertListEqual(
-            obj, [549, Decimal("3.14"), False, "  Ralph ", PDFName("SomeName")]
+            obj.to_python(),
+            [549, Decimal("3.14"), False, "  Ralph ", "/SomeName"],
         )
 
     def test_parse_nested_array(self):
-        parser = PDFL1Parser(
+        parser = PDFParser(
             io.BytesIO(
                 br"""[ [10 30] [22 33] [
                 << /x 0 /y 5 >>
                 << /x 10 /y 5 >>
             ] ]"""
-            )
+            ),
+            strict=True,
         )
         obj = next(parser.iter_objects())
         self.assertListEqual(
-            obj,
+            obj.to_python(),
             [
                 [10, 30],
                 [22, 33],
                 [
-                    {PDFName("x"): 0, PDFName("y"): 5},
-                    {PDFName("x"): 10, PDFName("y"): 5},
+                    {"x": 0, "y": 5},
+                    {"x": 10, "y": 5},
                 ],
             ],
         )
 
-    def test_parse_keeps_keywords(self):
-        parser = PDFL1Parser(
-            io.BytesIO(
-                br"""
-            12 1 obj (Bring) endobj
-        """
-            )
-        )
-        expected = [
-            PDFPrimitive(TokenInteger(13, 15, 12)),
-            PDFPrimitive(TokenInteger(16, 17, 1)),
-            TokenKeyword(18, 21, b"obj"),
-            PDFPrimitive(TokenString(22, 29, "Bring")),
-            TokenKeyword(30, 36, b"endobj"),
-        ]
-        for obj, eobj in zip(parser.iter_objects(), expected):
-            self.assertEqual(obj, eobj)
-        with self.assertRaises(StreamEOF):
-            next(parser.iter_objects())
 
-
-class L2(TestCase):
-    def run_test(
-        self,
-        raw: bytes,
-        expected: Callable[[IndirectObjectCollection], List[PDFObject]],
-    ):
-        parser = PDFL2Parser(io.BytesIO(raw))
-        for i, (eobj, obj) in enumerate(
-            zip(expected(parser.inobjects), parser.iter_objects()), 1
-        ):
-            self.assertEqual(obj, eobj, f"Failed at example #{i}")
-        try:
-            next_obj = next(parser.iter_objects())
-            self.assertIsNone(next_obj)
-        except (EOFError, StopIteration) as e:
-            self.assertIsNotNone(e)
-
+class IndirectObjects(TestCase):
     def test_parse_simple_indobj(self):
-        parser = PDFL2Parser(
+        parser = PDFParser(
             io.BytesIO(
                 br"""
             12 1 obj (Bring) endobj
@@ -126,19 +95,69 @@ class L2(TestCase):
             obj
             << /x 1 /y 3>> endobj
             """
-            )
+            ),
+            strict=True,
         )
         expected = [
             (12, 1, "Bring"),
             (100, 0, b"3"),
-            (13, 8, {PDFName("x"): 1, PDFName("y"): 3}),
+            (13, 8, {"x": 1, "y": 3}),
         ]
         for obj, eobj in zip(parser.iter_objects(), expected):
             self.assertIsInstance(obj, IndirectObject)
-            self.assertEqual(obj, parser.inobjects.get_indobject(eobj[0], eobj[1]))
+            self.assertEqual(
+                obj,
+                parser.state.indirect_object_collection.get_indobject(eobj[0], eobj[1]),
+            )
             self.assertEqual(obj.to_python(), eobj[2])
         with self.assertRaises(StreamEOF):
             next(parser.iter_objects())
+
+    def test_parse_obj_with_references(self):
+        parser = PDFParser(
+            io.BytesIO(
+                br"""
+            12 1 obj (Bring) endobj
+            10 2 obj << /lastone 12 1 R >> endobj
+
+            """
+            ),
+            strict=True,
+        )
+        expected = [
+            parser.state.indirect_object_collection.get_indobject(12, 1),
+            parser.state.indirect_object_collection.get_indobject(10, 2),
+        ]
+        for obj, exp in zip(parser.iter_objects(), expected):
+            self.assertEqual(obj, exp)
+        with self.assertRaises(StreamEOF):
+            next(parser.iter_objects())
+        sec_obj = parser.state.indirect_object_collection.get_indobject(
+            10, 2
+        ).get_object()
+        self.assertEqual(
+            sec_obj.to_python(),
+            {"lastone": "Bring"},
+        )
+
+    def run_test(
+        self,
+        raw: bytes,
+        expected: Callable[[IndirectObjectCollection], List[PDFObject]],
+    ):
+        parser = PDFParser(io.BytesIO(raw), strict=True)
+        for i, (eobj, obj) in enumerate(
+            zip(
+                expected(parser.state.indirect_object_collection), parser.iter_objects()
+            ),
+            1,
+        ):
+            self.assertEqual(obj, eobj, f"Failed at example #{i}")
+        try:
+            next_obj = next(parser.iter_objects())
+            self.assertIsNone(next_obj)
+        except (EOFError, StopIteration) as e:
+            self.assertIsNotNone(e)
 
     def test_parse_comments(self):
         self.run_test(

@@ -53,12 +53,7 @@ class TokenKeyword(Token[bytes]):
     pass
 
 
-class PDFName(str):
-    def __repr__(self) -> str:
-        return f"/{self}"
-
-
-class TokenName(Token[PDFName]):
+class TokenName(Token[str]):
     """Token representing literal name tokens
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.5
     """

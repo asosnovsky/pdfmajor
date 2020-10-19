@@ -1,7 +1,7 @@
-from pdfmajor.parser_v2.exceptions import ParserError
-from pdfmajor.lexer.token import TokenNull
 from typing import Dict, Tuple
-from .objects import PDFContextualObject, PDFNull, PDFObject, PDFPrimitive
+from ..exceptions import ParserError
+from .base import PDFContextualObject, PDFObject
+from .primitives import PDFNull
 
 
 class IndirectObjectCollection:
@@ -68,7 +68,7 @@ class IndirectObject(PDFContextualObject):
             )
         self.__col.objs[(self.obj_num, self.gen_num)] = obj
 
-    def get_value(self):
+    def clone(self):
         return IndirectObject(self.__col, self.obj_num, self.gen_num, True)
 
     def to_python(self):
