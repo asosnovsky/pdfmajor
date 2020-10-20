@@ -7,8 +7,9 @@ from unittest import TestCase
 from pdfmajor.streambuffer import StreamEOF
 from pdfmajor.parser_v3.objects.indirect import IndirectObject, IndirectObjectCollection
 from pdfmajor.parser_v3.objects.base import PDFObject
-from pdfmajor.parser_v3 import PDFParser
 from pdfmajor.parser_v3.objects.comment import PDFComment
+from pdfmajor.parser_v3.objects.stream import PDFStream
+from pdfmajor.parser_v3 import PDFParser
 
 
 class Collections(TestCase):
@@ -177,3 +178,33 @@ class IndirectObjects(TestCase):
                 indobjc.get_indobject(11, 1),
             ],
         )
+
+    def test_parse_stream(self):
+        parser = PDFParser(
+            io.BytesIO(
+                br"""
+            5 0 obj
+<< /Type /XRef /Length 124 /Filter /FlateDecode >>
+stream
+"<99><A3><C1>l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567
+<80>endstream
+endobj
+        """
+            )
+        )
+        for obj in parser.iter_objects():
+            self.assertIsInstance(obj, IndirectObject)
+            self.assertIsInstance(obj.get_object(), PDFStream)
+            self.assertDictEqual(
+                obj.get_object().to_python(),
+                {
+                    "offset": 78,
+                    "length": 0,
+                    "filter": None,
+                    "decode_parms": None,
+                    "f": None,
+                    "ffilter": None,
+                    "fdecode_parms": None,
+                    "dl": None,
+                },
+            )

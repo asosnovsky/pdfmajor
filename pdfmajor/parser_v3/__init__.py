@@ -1,4 +1,5 @@
 import io
+from pdfmajor.parser_v3.objects.stream import PDFStream
 from typing import Iterator, Optional
 
 from pdfmajor.lexer import PDFLexer
@@ -85,6 +86,24 @@ class PDFParser:
                         yield last_ctx.clone()
                     elif self.strict:
                         raise ParserError(f"Invalid position for 'endobj' {token}")
+                elif token.value == b"stream":
+                    last_ctx = self.state.current_context
+                    if last_ctx is not None and isinstance(last_ctx, IndirectObject):
+                        stream = PDFStream(token.end_loc, 0)
+                        stream.pass_item(last_ctx.get_object())
+                        last_ctx.save_object(PDFStream(token.end_loc, 0))
+                        self.state.context_stack.append(stream)
+                        self.lexer.seek(stream.offset + stream.length)
+                    else:
+                        raise ParserError(
+                            f"PDFStream is missing initilization dictionary"
+                        )
+                elif token.value == b"endstream":
+                    stream = self.state.context_stack.pop()
+                    if not isinstance(stream, PDFStream):
+                        raise ParserError(f"Invalid position for 'endstream' {token}")
+                else:
+                    raise ParserError(f"Invalud Keyword {token}")
             elif isinstance(token, TokenArray):
                 for obj in self.state.flush_int_collections():
                     yield obj
