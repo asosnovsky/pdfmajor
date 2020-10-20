@@ -11,6 +11,7 @@
 
 import sys
 import array
+from typing import Optional
 from pdfmajor.execptions import EOFB, InvalidData, ByteSkip
 from abc import abstractmethod
 
@@ -551,13 +552,15 @@ class CCITTFaxDecoder(CCITTG4Parser):
         return
 
 
-def ccittfaxdecode(data, params):
-    K = params.get("K")
-    cols = params.get("Columns")
-    bytealign = params.get("EncodedByteAlign")
-    reversed = params.get("BlackIs1")
+def ccittfaxdecode(
+    data: bytes,
+    Columns: int,
+    EncodedByteAlign: bool = False,
+    BlackIs1: bool = False,
+    K: Optional[int] = None,
+) -> bytes:
     if K == -1:
-        parser = CCITTFaxDecoder(cols, bytealign=bytealign, reversed=reversed)
+        parser = CCITTFaxDecoder(Columns, bytealign=EncodedByteAlign, reversed=BlackIs1)
     else:
         raise ValueError(K)
     parser.feedbytes(data)
