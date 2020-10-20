@@ -40,5 +40,5 @@ class PDFDictionary(Dict[str, PDFObject], PDFContextualObject):
             self.last_name = self.name
             self.name = None
 
-    def to_python(self) -> Dict[PDFName, Any]:
+    def to_python(self) -> Dict[str, Any]:
         return {k: v.to_python() for k, v in self.items()}

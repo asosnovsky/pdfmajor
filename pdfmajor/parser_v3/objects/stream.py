@@ -1,5 +1,5 @@
 from pdfmajor.parser_v3.exceptions import ParserError
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 from .base import PDFContextualObject, PDFObject
 from .primitives import PDFName
 from .collections import PDFDictionary
@@ -18,6 +18,7 @@ class PDFStream(PDFContextualObject):
         ffilter: Optional[List[PDFName]] = None,
         fdecode_parms: Optional[List[PDFDictionary]] = None,
         dl: Optional[int] = None,
+        other_metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Args:
@@ -38,6 +39,7 @@ class PDFStream(PDFContextualObject):
         self.ffilter = ffilter
         self.fdecode_parms = fdecode_parms
         self.dl = dl
+        self.other_metadata = other_metadata if other_metadata is not None else {}
 
     def pass_item(self, item: PDFObject) -> None:
         if not isinstance(item, PDFDictionary):
@@ -49,6 +51,7 @@ class PDFStream(PDFContextualObject):
         self.f = data.get("F", self.f)
         self.ffilter = data.get("FFilter", self.ffilter)
         self.fdecode_parms = data.get("FDecodeParms", self.fdecode_parms)
+        self.other_metadata = data
 
     def to_python(self):
         return {
