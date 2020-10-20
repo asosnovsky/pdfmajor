@@ -14,7 +14,7 @@ from pdfmajor.lexer.token import (
 
 from .state import ParsingState
 from .parsers import attempt_parse_prim, deal_with_collection_object
-from .exceptions import ParserError
+from .exceptions import InvalidKeywordPos, ParserError
 
 from .objects.base import PDFObject
 from .objects.collections import PDFArray, PDFDictionary
@@ -85,7 +85,7 @@ class PDFParser:
                     if isinstance(last_ctx, IndirectObject):
                         yield last_ctx.clone()
                     elif self.strict:
-                        raise ParserError(f"Invalid position for 'endobj' {token}")
+                        raise InvalidKeywordPos(token)
                 elif token.value == b"stream":
                     last_ctx = self.state.current_context
                     if last_ctx is not None and isinstance(last_ctx, IndirectObject):
@@ -101,9 +101,9 @@ class PDFParser:
                 elif token.value == b"endstream":
                     stream = self.state.context_stack.pop()
                     if not isinstance(stream, PDFStream):
-                        raise ParserError(f"Invalid position for 'endstream' {token}")
+                        raise InvalidKeywordPos(token)
                 else:
-                    raise ParserError(f"Invalud Keyword {token}")
+                    raise InvalidKeywordPos(token)
             elif isinstance(token, TokenArray):
                 for obj in self.state.flush_int_collections():
                     yield obj

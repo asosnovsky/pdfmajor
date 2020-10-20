@@ -1,5 +1,5 @@
 from typing import Dict, Tuple
-from ..exceptions import ParserError
+from ..exceptions import InvalidIndirectObjAccess, ParserError
 from .base import PDFContextualObject, PDFObject
 from .primitives import PDFNull
 
@@ -63,7 +63,7 @@ class IndirectObject(PDFContextualObject):
 
     def save_object(self, obj: PDFObject):
         if self.__read_only:
-            raise ParserError(
+            raise InvalidIndirectObjAccess(
                 f"attempted to override a read-only reference of an object {obj}"
             )
         self.__col.objs[(self.obj_num, self.gen_num)] = obj
@@ -76,7 +76,7 @@ class IndirectObject(PDFContextualObject):
 
     def pass_item(self, item: PDFObject):
         if self.__read_only:
-            raise ParserError(
+            raise InvalidIndirectObjAccess(
                 f"attempted to add to an read-only reference of an object {item}"
             )
         cur_obj = self.get_object()
@@ -85,4 +85,4 @@ class IndirectObject(PDFContextualObject):
         elif isinstance(cur_obj, PDFNull):
             self.save_object(item)
         else:
-            raise ParserError(f"Invalid redefinition of an object {item}")
+            raise InvalidIndirectObjAccess(f"Invalid redefinition of an object {item}")
