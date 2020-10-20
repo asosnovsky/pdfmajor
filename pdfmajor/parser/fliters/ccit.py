@@ -9,11 +9,24 @@
 #     "FACSIMILE CODING SCHEMES AND CODING CONTROL FUNCTIONS FOR GROUP 4 FACSIMILE APPARATUS"
 
 
-import sys
 import array
+
 from typing import Optional
-from pdfmajor.execptions import EOFB, InvalidData, ByteSkip
 from abc import abstractmethod
+
+from ..exceptions import DecodeFailed
+
+
+class CCITEOFB(DecodeFailed):
+    pass
+
+
+class CCITInvalidData(DecodeFailed):
+    pass
+
+
+class CCITByteSkip(DecodeFailed):
+    pass
 
 
 def get_bytes(data):
@@ -332,10 +345,10 @@ class CCITTG4Parser(BitParser):
             try:
                 for m in (128, 64, 32, 16, 8, 4, 2, 1):
                     self._parse_bit(byte & m)
-            except ByteSkip:
+            except CCITByteSkip:
                 self._accept = self._parse_mode
                 self._state = self.MODE
-            except EOFB:
+            except CCITEOFB:
                 break
         return
 
@@ -355,17 +368,17 @@ class CCITTG4Parser(BitParser):
             self._accept = self._parse_uncompressed
             return self.UNCOMPRESSED
         elif mode == "e":
-            raise EOFB
+            raise CCITEOFB
         elif isinstance(mode, int):
             self._do_vertical(mode)
             self._flush_line()
             return self.MODE
         else:
-            raise InvalidData(mode)
+            raise CCITInvalidData(mode)
 
     def _parse_horiz1(self, n):
         if n is None:
-            raise InvalidData
+            raise CCITInvalidData
         self._n1 += n
         if n < 64:
             self._n2 = 0
@@ -378,7 +391,7 @@ class CCITTG4Parser(BitParser):
 
     def _parse_horiz2(self, n):
         if n is None:
-            raise InvalidData
+            raise CCITInvalidData
         self._n2 += n
         if n < 64:
             self._color = 1 - self._color
@@ -393,7 +406,7 @@ class CCITTG4Parser(BitParser):
 
     def _parse_uncompressed(self, bits):
         if not bits:
-            raise InvalidData
+            raise CCITInvalidData
         if bits.startswith("T"):
             self._accept = self._parse_mode
             self._color = int(bits[1])
@@ -445,7 +458,7 @@ class CCITTG4Parser(BitParser):
             self._y += 1
             self._reset_line()
             if self.bytealign:
-                raise ByteSkip
+                raise CCITByteSkip
         return
 
     def _do_vertical(self, dx):

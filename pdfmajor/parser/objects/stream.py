@@ -1,4 +1,4 @@
-from pdfmajor.parser_v3.exceptions import ParserError
+from pdfmajor.parser.exceptions import ParserError
 from typing import Any, Dict, List, Optional
 from .base import PDFContextualObject, PDFObject
 from .primitives import PDFName

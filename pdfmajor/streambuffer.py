@@ -1,6 +1,6 @@
 import io
 from typing import NamedTuple
-from pdfmajor.execptions import PDFMajorException
+from pdfmajor.exceptions import PDFMajorException
 
 
 class StreamEOF(PDFMajorException, EOFError):

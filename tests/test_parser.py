@@ -5,11 +5,11 @@ from decimal import Decimal
 from unittest import TestCase
 
 from pdfmajor.streambuffer import StreamEOF
-from pdfmajor.parser_v3.objects.indirect import IndirectObject, IndirectObjectCollection
-from pdfmajor.parser_v3.objects.base import PDFObject
-from pdfmajor.parser_v3.objects.comment import PDFComment
-from pdfmajor.parser_v3.objects.stream import PDFStream
-from pdfmajor.parser_v3 import PDFParser
+from pdfmajor.parser.objects.indirect import IndirectObject, IndirectObjectCollection
+from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.parser.objects.comment import PDFComment
+from pdfmajor.parser.objects.stream import PDFStream
+from pdfmajor.parser import PDFParser
 
 
 class Collections(TestCase):

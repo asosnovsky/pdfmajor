@@ -1,4 +1,4 @@
-from pdfmajor.execptions import PDFMajorException
+from pdfmajor.exceptions import PDFMajorException
 
 
 class LexerError(PDFMajorException):
