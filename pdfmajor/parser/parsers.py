@@ -1,4 +1,4 @@
-from typing import List, Optional, NamedTuple, Type
+from typing import Iterator, List, Optional, NamedTuple, Type
 
 from pdfmajor.lexer.token import Token, TokenComplexType, TokenComplexTypeVal
 
@@ -26,7 +26,7 @@ def attempt_parse_prim(token: Token, state: ParsingState) -> ParsingAttempt:
     """
     prim_obj = get_obj_from_token_primitive(token)
     if prim_obj is not None:
-        out = []
+        out: List[PDFObject] = []
         state.set_last_obj(prim_obj)
         if isinstance(prim_obj, PDFInteger):
             if len(state.int_collection) <= 1:
@@ -50,7 +50,7 @@ def deal_with_collection_object(
     cls_const: Type[PDFContextualObject],
     open_t: TokenComplexTypeVal,
     strict: bool = False,
-) -> Optional[PDFObject]:
+) -> Iterator[PDFObject]:
     """generic method for processing things that have a start and end token
 
     Args:
@@ -68,7 +68,8 @@ def deal_with_collection_object(
         if isinstance(last_ctx, cls_const):
             cur_ctx = state.current_context
             if cur_ctx is None:
-                return last_ctx
+                yield last_ctx
+                return
             else:
                 cur_ctx.pass_item(last_ctx)
         elif strict:
@@ -77,4 +78,3 @@ def deal_with_collection_object(
         raise ParserError(
             f"Invalid end of {cls_const} specified at {token} with no start"
         )
-    return None

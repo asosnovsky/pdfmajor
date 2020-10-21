@@ -12,7 +12,6 @@
 import array
 
 from typing import Optional
-from abc import abstractmethod
 
 from ..exceptions import DecodeFailed
 
@@ -76,7 +75,6 @@ class BitParser(object):
             self._state = self._accept(v)
         return
 
-    @abstractmethod
     def _accept(self, v):
         raise NotImplementedError
 

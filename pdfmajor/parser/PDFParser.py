@@ -1,6 +1,6 @@
 import io
 from pdfmajor.parser.objects.stream import PDFStream
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Union
 
 from pdfmajor.lexer import PDFLexer
 from pdfmajor.lexer.token import (
@@ -16,7 +16,7 @@ from .state import ParsingState
 from .parsers import attempt_parse_prim, deal_with_collection_object
 from .exceptions import InvalidKeywordPos, ParserError
 
-from .objects.base import PDFObject
+from .objects.base import PDFContextualObject, PDFObject
 from .objects.collections import PDFArray, PDFDictionary
 from .objects.comment import PDFComment
 from .objects.indirect import IndirectObject
@@ -109,40 +109,35 @@ class PDFParser:
                     elif self.strict:
                         raise InvalidKeywordPos(token)
                 elif token.value == b"stream":
-                    last_ctx = self.state.current_context
-                    if last_ctx is not None and isinstance(last_ctx, IndirectObject):
-                        stream = PDFStream(token.end_loc, 0)
-                        stream.pass_item(last_ctx.get_object())
-                        last_ctx.save_object(PDFStream(token.end_loc, 0))
-                        self.state.context_stack.append(stream)
-                        self.lexer.seek(stream.offset + stream.length)
-                    else:
-                        raise ParserError(
-                            f"PDFStream is missing initilization dictionary"
-                        )
+                    self._on_stream(token)
                 elif token.value == b"endstream":
-                    stream = self.state.context_stack.pop()
+                    stream: PDFContextualObject = self.state.context_stack.pop()
                     if not isinstance(stream, PDFStream):
                         raise InvalidKeywordPos(token)
                 else:
                     raise InvalidKeywordPos(token)
             elif isinstance(token, TokenArray):
-                for obj in self.state.flush_int_collections():
-                    yield obj
-                obj = deal_with_collection_object(
+                yield from self.state.flush_int_collections()
+                yield from deal_with_collection_object(
                     self.state, token, PDFArray, TArrayValue.OPEN, strict=self.strict
                 )
-                if obj is not None:
-                    yield obj
             elif isinstance(token, TokenDictionary):
-                for obj in self.state.flush_int_collections():
-                    yield obj
-                obj = deal_with_collection_object(
+                yield from self.state.flush_int_collections()
+                yield from deal_with_collection_object(
                     self.state,
                     token=token,
                     cls_const=PDFDictionary,
                     open_t=TDictValue.OPEN,
                     strict=self.strict,
                 )
-                if obj is not None:
-                    yield obj
+
+    def _on_stream(self, token: TokenKeyword):
+        last_ctx = self.state.current_context
+        if last_ctx is not None and isinstance(last_ctx, IndirectObject):
+            stream = PDFStream(token.end_loc, 0)
+            stream.pass_item(last_ctx.get_object())
+            last_ctx.save_object(PDFStream(token.end_loc, 0))
+            self.state.context_stack.append(stream)
+            self.lexer.seek(stream.offset + stream.length)
+        else:
+            raise ParserError(f"PDFStream is missing initilization dictionary")

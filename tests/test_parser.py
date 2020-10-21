@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 
 from typing import Callable, List
 from decimal import Decimal
@@ -10,6 +11,8 @@ from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.comment import PDFComment
 from pdfmajor.parser.objects.stream import PDFStream
 from pdfmajor.parser.PDFParser import PDFParser
+
+CURRENT_FOLDER = Path(__file__).parent
 
 
 class Collections(TestCase):
@@ -208,3 +211,11 @@ endobj
                     "dl": None,
                 },
             )
+
+
+# class PDFStreamParsing(TestCase):
+#     def test_simple(self):
+#         with (CURRENT_FOLDER / "samples" / "pdf" / "chars.pdf").open("br") as fp:
+#             parser = PDFParser(fp)
+#             for obj in parser.iter_objects():
+#                 print(obj)

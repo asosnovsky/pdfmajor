@@ -3,6 +3,7 @@ from typing import Dict, Generic, Optional, Type, TypeVar
 
 from pdfmajor.lexer.token import (
     Token,
+    TokenPrimitive,
     TokenBoolean,
     TokenHexString,
     TokenInteger,
@@ -18,11 +19,23 @@ T = TypeVar("T", str, bytes, int, bool, Decimal)
 
 
 class PDFPrimitiveObject(PDFObject, Generic[T]):
-    def __init__(self, value: T) -> None:
+    __slots__ = ("value", "start_loc", "end_loc")
+
+    def __init__(self, value: T, start_loc: int, end_loc: int) -> None:
         self.value: T = value
+        self.start_loc = start_loc
+        self.end_loc = end_loc
 
     def to_python(self) -> T:
         return self.value
+
+    @classmethod
+    def from_token(cls, token: TokenPrimitive):
+        return cls(
+            value=token.value,  # type: ignore
+            start_loc=token.start_loc,
+            end_loc=token.end_loc,
+        )
 
 
 class PDFString(PDFPrimitiveObject[str]):
@@ -78,7 +91,7 @@ def get_obj_from_token_primitive(token: Token) -> Optional[PDFObject]:
     """
     obj_const = _token_to_obj_map.get(type(token), None)
     if obj_const:
-        return obj_const(token.value)
+        return obj_const.from_token(token)  # type: ignore
     elif isinstance(token, TokenNull):
         return PDFNull()
     else:

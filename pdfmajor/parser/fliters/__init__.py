@@ -56,7 +56,7 @@ def process_filters_on_data(
             params = {}
             if len(decode_parms) > 0:
                 params = decode_parms.pop()
-            filter_type = detect_filter_type(f.value)
+            filter_type = detect_filter_type(f)
             data = decode_bytes(filter_type, data, **params)
     return data
 
