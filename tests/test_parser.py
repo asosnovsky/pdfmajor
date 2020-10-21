@@ -9,7 +9,7 @@ from pdfmajor.parser.objects.indirect import IndirectObject, IndirectObjectColle
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.comment import PDFComment
 from pdfmajor.parser.objects.stream import PDFStream
-from pdfmajor.parser import PDFParser
+from pdfmajor.parser.PDFParser import PDFParser
 
 
 class Collections(TestCase):
