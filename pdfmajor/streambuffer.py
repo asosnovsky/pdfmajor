@@ -1,5 +1,5 @@
 import io
-from typing import NamedTuple
+from typing import Iterator, NamedTuple
 from pdfmajor.exceptions import PDFMajorException
 
 
@@ -83,3 +83,31 @@ class BufferStream:
 
     def __exit__(self):
         self.close()
+
+    def into_reverse_reader_iter(self) -> Iterator[BufferedBytes]:
+        """reads the file in reverse, outputting complete lines
+
+        Yields:
+            BufferedBytes
+        """
+        self.fp.seek(0, 2)
+        pos = self.fp.tell()
+        buf = b""
+        n = -1
+        while 0 < pos:
+            prevpos = pos
+            pos = max(0, pos - self.buffer_size)
+            self.fp.seek(pos)
+            s = self.fp.read(prevpos - pos)
+            if not s:
+                break
+            while True:
+                n = max(s.rfind(b"\r"), s.rfind(b"\n"))
+                if n == -1:
+                    buf = s + buf
+                    break
+                yield BufferedBytes(pos=n + 1, data=(s[n + 1 :] + buf))
+                s = s[:n]
+                buf = b""
+        if len(buf) > 0 and pos == 0 and n == -1:
+            yield BufferedBytes(pos=n + 1, data=buf)
