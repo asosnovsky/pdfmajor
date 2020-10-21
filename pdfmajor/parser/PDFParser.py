@@ -1,6 +1,6 @@
 import io
 from pdfmajor.parser.objects.stream import PDFStream
-from typing import Iterator, Optional, Union
+from typing import Iterator, List, Optional, Union
 
 from pdfmajor.lexer import PDFLexer
 from pdfmajor.lexer.token import (
@@ -79,12 +79,7 @@ class PDFParser:
         for token in self.lexer.iter_tokens():
             attempt_prim = attempt_parse_prim(token, self.state)
             if attempt_prim.success:
-                cur_ctx = self.state.current_context
-                for obj in attempt_prim.next_objs:
-                    if cur_ctx is not None:
-                        cur_ctx.pass_item(obj)
-                    else:
-                        yield obj
+                yield from self._feed_or_yield_objs(attempt_prim.next_objs)
             elif isinstance(token, TokenComment):
                 yield self.state.set_last_obj(
                     PDFComment(
@@ -94,26 +89,15 @@ class PDFParser:
                 )
             elif isinstance(token, TokenKeyword):
                 if token.value == b"R":
-                    obj = self.state.get_indobjects()
-                    cur_ctx = self.state.current_context
-                    if cur_ctx is not None:
-                        cur_ctx.pass_item(obj)
-                    else:
-                        yield obj
+                    yield from self._on_indirect_ref_close()
                 elif token.value == b"obj":
                     self.state.initialize_indirect_obj()
                 elif token.value == b"endobj":
-                    last_ctx = self.state.context_stack.pop()
-                    if isinstance(last_ctx, IndirectObject):
-                        yield last_ctx.clone()
-                    elif self.strict:
-                        raise InvalidKeywordPos(token)
+                    yield from self._on_endobj(token)
                 elif token.value == b"stream":
                     self._on_stream(token)
                 elif token.value == b"endstream":
-                    stream: PDFContextualObject = self.state.context_stack.pop()
-                    if not isinstance(stream, PDFStream):
-                        raise InvalidKeywordPos(token)
+                    self._on_endstream(token)
                 else:
                     raise InvalidKeywordPos(token)
             elif isinstance(token, TokenArray):
@@ -131,6 +115,29 @@ class PDFParser:
                     strict=self.strict,
                 )
 
+    def _feed_or_yield_objs(self, next_objs: List[PDFObject]):
+        cur_ctx = self.state.current_context
+        for obj in next_objs:
+            if cur_ctx is not None:
+                cur_ctx.pass_item(obj)
+            else:
+                yield obj
+
+    def _on_indirect_ref_close(self):
+        obj = self.state.get_indobjects()
+        cur_ctx = self.state.current_context
+        if cur_ctx is not None:
+            cur_ctx.pass_item(obj)
+        else:
+            yield obj
+
+    def _on_endobj(self, token: TokenKeyword):
+        last_ctx = self.state.context_stack.pop()
+        if isinstance(last_ctx, IndirectObject):
+            yield last_ctx.clone()
+        elif self.strict:
+            raise InvalidKeywordPos(token)
+
     def _on_stream(self, token: TokenKeyword):
         last_ctx = self.state.current_context
         if last_ctx is not None and isinstance(last_ctx, IndirectObject):
@@ -141,3 +148,8 @@ class PDFParser:
             self.lexer.seek(stream.offset + stream.length)
         else:
             raise ParserError(f"PDFStream is missing initilization dictionary")
+
+    def _on_endstream(self, token: TokenKeyword):
+        stream: PDFContextualObject = self.state.context_stack.pop()
+        if not isinstance(stream, PDFStream):
+            raise InvalidKeywordPos(token)
