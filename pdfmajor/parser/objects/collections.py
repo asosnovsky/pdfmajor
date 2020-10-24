@@ -23,6 +23,13 @@ class PDFDictionary(Dict[str, PDFObject], PDFContextualObject):
         self.last_name: Optional[PDFName] = None
         self.strict = strict
 
+    @classmethod
+    def from_dict(cls, d: Dict[str, PDFObject]):
+        new_obj = cls()
+        for key, val in d.items():
+            new_obj[key] = val
+        return new_obj
+
     @property
     def last_item_value(self):
         return self[self.last_name]

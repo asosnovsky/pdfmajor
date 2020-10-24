@@ -222,7 +222,7 @@ class Basics(TestCase):
 
 class Lexer(TestCase):
     def run_test(self, raw: bytes, expected: List[Token]):
-        tokenizer = PDFLexer(io.BytesIO(raw))
+        tokenizer = PDFLexer.from_bytes(raw)
         for i, (etoken, token) in enumerate(zip(expected, tokenizer.iter_tokens()), 1):
             self.assertEqual(token, etoken, f"Failed at example #{i}")
         try:

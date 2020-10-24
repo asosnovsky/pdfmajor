@@ -19,8 +19,19 @@ from pdfmajor.streambuffer import BufferStream
 
 
 class PDFLexer:
-    def __init__(self, fp: io.BufferedIOBase, buffer_size: int = 4096) -> None:
-        self.buffer = BufferStream(fp, buffer_size=buffer_size)
+    def __init__(self, buffer: BufferStream) -> None:
+        self.buffer = buffer
+
+    @classmethod
+    def from_iobuffer(cls, fp: io.BufferedIOBase, buffer_size: int = 4096):
+        return cls(BufferStream(fp, buffer_size=buffer_size))
+
+    @classmethod
+    def from_bytes(cls, data: bytes, buffer_size: int = 4096):
+        return cls(BufferStream(io.BytesIO(data), buffer_size=buffer_size))
+
+    def tell(self) -> int:
+        return self.buffer.tell()
 
     def seek(self, pos: int) -> int:
         """moves the offset of the reader to a certain spot, and returns the new offset

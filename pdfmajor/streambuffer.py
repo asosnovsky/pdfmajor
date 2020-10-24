@@ -1,5 +1,5 @@
 import io
-from typing import Iterator, NamedTuple
+from typing import Iterator, NamedTuple, Optional
 from pdfmajor.exceptions import PDFMajorException
 
 
@@ -19,8 +19,34 @@ class BufferStream:
     __slots__ = ["fp", "buffer_size"]
 
     def __init__(self, fp: io.BufferedIOBase, buffer_size: int = 4096) -> None:
+        """[summary]
+
+        Args:
+            fp (io.BufferedIOBase)
+            buffer_size (int, optional): maximum length of the bytes this will read at each iteration. Defaults to 4096.
+        """
         self.fp = fp
         self.buffer_size = buffer_size
+
+    def get_slice(
+        self, offset: int, length: int, buffer_size: Optional[int] = None
+    ) -> "BufferStream":
+        """Creates a slice of the current byte-stream and returns a BufferStream based on that slice
+        Args:
+            offset (int): where the slice starts
+            length (int): length of the slice
+            buffer_size (int, optional) buffer size for new slice. Defaults to self.buffer_size
+        Returns:
+            BufferStream
+        """
+        cur_pos = self.tell()
+        self.seek(offset)
+        bslice = self.fp.read(length)
+        self.seek(cur_pos)
+        return BufferStream(
+            io.BytesIO(bslice),
+            buffer_size=buffer_size if buffer_size is not None else self.buffer_size,
+        )
 
     def seekd(self, step: int) -> int:
         """similar to self.fp.seek but you move the offset relative to where you are now
@@ -63,6 +89,27 @@ class BufferStream:
         buf = self.fp.read(size)
         return BufferedBytes(pos, buf)
 
+    def readline(self) -> BufferedBytes:
+        """Reads upto a line-end
+
+        Returns:
+            BufferedBytes
+        """
+        pos = self.tell()
+        buf = self.fp.readline()
+        return BufferedBytes(pos, buf)
+
+    def get_firstnonempty_line(self) -> Optional[BufferedBytes]:
+        """reads line-by-line until we find a none-empty line
+
+        Returns:
+            Optional[BufferedBytes]
+        """
+        for bbline in self.into_line_iter():
+            if bbline.data.strip():
+                return bbline
+        return None
+
     def __iter__(self):
         if self.fp.read(1) == b"":
             raise StreamEOF
@@ -83,6 +130,23 @@ class BufferStream:
 
     def __exit__(self):
         self.close()
+
+    def into_line_iter(self) -> Iterator[BufferedBytes]:
+        """reads the stream line by line
+
+        Raises:
+            StreamEOF
+
+        Yields:
+            BufferedBytes
+        """
+        last_pos = self.tell()
+        while True:
+            bbyte = self.readline()
+            if self.tell() == last_pos:
+                raise StreamEOF
+            yield bbyte
+            last_pos = bbyte.pos
 
     def into_reverse_reader_iter(self) -> Iterator[BufferedBytes]:
         """reads the file in reverse, outputting complete lines

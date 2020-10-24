@@ -1,7 +1,6 @@
 import io
-
+from pdfmajor.streambuffer import BufferStream
 from .objects.stream import PDFStream
-from .state import ParsingState
 from .PDFParser import PDFParser
 from .fliters import process_filters_on_data
 
@@ -10,20 +9,17 @@ class PDFStreamPasrser(PDFParser):
     def __init__(
         self,
         stream: PDFStream,
-        fp: io.BufferedIOBase,
-        state: ParsingState,
-        buffer_size: int = 4096,
+        buffer: BufferStream,
         strict: bool = True,
     ) -> None:
-        fp.seek(stream.offset)
-        data = fp.read(stream.length)
+        cur_pos = buffer.tell()
+        buffer.seek(stream.offset)
+        data = buffer.read(stream.length).data
+        buffer.seek(cur_pos)
         data = process_filters_on_data(data, stream.filter, stream.decode_parms)
         data = process_filters_on_data(data, stream.ffilter, stream.fdecode_parms)
         self.stream = stream
         super().__init__(
-            fp=io.BytesIO(data),
-            buffer_size=buffer_size,
-            state=state,
+            buffer=BufferStream(io.BytesIO(data), buffer_size=stream.length),
             strict=strict,
-            retain_obj_on_seek=True,
         )

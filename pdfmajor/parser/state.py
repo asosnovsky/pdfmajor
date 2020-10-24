@@ -4,33 +4,32 @@ from .exceptions import ParserError
 from .objects.base import PDFContextualObject, PDFObject
 from .objects.primitives import PDFInteger
 from .objects.comment import PDFComment
-from .objects.indirect import IndirectObject, IndirectObjectCollection
+from .objects.indirect import IndirectObject
 
 
 class ParsingState:
 
-    __slots__ = [
-        "context_stack",
-        "int_collection",
-        "last_obj",
-        "indirect_object_collection",
-    ]
+    __slots__ = ["context_stack", "int_collection", "last_obj", "strict"]
 
     def __init__(
         self,
         context_stack: List[PDFContextualObject],
         int_collection: List[PDFInteger],
         last_obj: Optional[PDFObject] = None,
-        indirect_object_collection: Optional[IndirectObjectCollection] = None,
+        strict: bool = False,
     ) -> None:
         self.context_stack = context_stack
         self.int_collection = int_collection
-        self.int_collection = int_collection
         self.last_obj = last_obj
-        self.indirect_object_collection = (
-            indirect_object_collection
-            if indirect_object_collection is not None
-            else IndirectObjectCollection()
+        self.strict = strict
+
+    def __repr__(self) -> str:
+        return "ParsingState:[{stackc}]({cur_stack}, ints={ints}, last={lobj}, strict={strict})".format(
+            stackc=len(self.context_stack),
+            cur_stack=self.current_context,
+            ints=self.int_collection,
+            lobj=self.last_obj,
+            strict=self.strict,
         )
 
     @property
@@ -76,22 +75,15 @@ class ParsingState:
             return (obj_num.to_python(), gen_num.to_python())
         raise ParserError("missing leading tokens for object reference")
 
-    def get_indobjects(self) -> IndirectObject:
-        """Gets an indirect object, based on the values in 'self.int_collection'
+    def initialize_indirect_obj(self, offset: int):
+        """Initilizes an indirect object based off the values in self.int_collection
 
-        Raises:
-            ParserError: if the int_collection does not have two elements
-
-        Returns:
-            IndirectObject
+        Args:
+            offset (int): position for the 'obj' keyword
         """
         obj_num, gen_num = self.get_indobj_values()
-        return self.indirect_object_collection.get_indobject(obj_num, gen_num)
-
-    def initialize_indirect_obj(self):
-        obj_num, gen_num = self.get_indobj_values()
         self.context_stack.append(
-            self.indirect_object_collection.create_indobject(obj_num, gen_num)
+            IndirectObject(obj_num=obj_num, gen_num=gen_num, offset=offset)
         )
 
     def flush_int_collections(self) -> Iterator[PDFObject]:
@@ -108,3 +100,19 @@ class ParsingState:
             for obj in self.int_collection:
                 yield obj
         self.int_collection = []
+
+    def feed_or_yield_objs(self, next_objs: List[PDFObject]) -> Iterator[PDFObject]:
+        """If there context, then feed the objects into it, otherwise yield them
+
+        Args:
+            next_objs (List[PDFObject])
+
+        Yields:
+            PDFObject
+        """
+        cur_ctx = self.current_context
+        for obj in next_objs:
+            if cur_ctx is not None:
+                cur_ctx.pass_item(obj)
+            else:
+                yield obj

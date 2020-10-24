@@ -6,7 +6,15 @@ class ParserError(PDFMajorException):
     pass
 
 
-class InvalidKeywordPos(ParserError):
+class BrokenFile(ParserError):
+    pass
+
+
+class UnexpectedEOF(BrokenFile, EOFError):
+    pass
+
+
+class InvalidKeywordPos(BrokenFile):
     def __init__(self, token: TokenKeyword) -> None:
         self.token = token
         super().__init__(
@@ -18,9 +26,17 @@ class InvalidIndirectObjAccess(ParserError):
     pass
 
 
-class DecodeFailed(ParserError):
+class DecodeFailed(BrokenFile):
     pass
 
 
 class InvalidDecoderOrNotImplemented(DecodeFailed, NotImplementedError):
+    pass
+
+
+class PDFNoValidXRef(BrokenFile, EOFError):
+    pass
+
+
+class InvalidXref(ParserError, KeyError):
     pass

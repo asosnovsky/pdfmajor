@@ -1,7 +1,12 @@
 import io
-from pdfmajor.parser.objects.stream import PDFStream
-from typing import Iterator, List, Optional, Union
 
+from typing import Dict, Iterator, Optional, Tuple
+
+from pdfmajor.streambuffer import BufferStream
+from pdfmajor.parser.objects.stream import PDFStream
+from pdfmajor.parser.exceptions import InvalidXref
+from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.lexer.token import TokenKeyword
 from pdfmajor.lexer import PDFLexer
 from pdfmajor.lexer.token import (
     TArrayValue,
@@ -11,15 +16,54 @@ from pdfmajor.lexer.token import (
     TokenDictionary,
     TokenKeyword,
 )
-
-from .state import ParsingState
-from .parsers import attempt_parse_prim, deal_with_collection_object
-from .exceptions import InvalidKeywordPos, ParserError
-
+from .objects.indirect import IndirectObject
 from .objects.base import PDFContextualObject, PDFObject
 from .objects.collections import PDFArray, PDFDictionary
 from .objects.comment import PDFComment
-from .objects.indirect import IndirectObject
+from .state import ParsingState
+from .parsers import attempt_parse_prim, deal_with_collection_object
+from .exceptions import InvalidKeywordPos, BrokenFile, InvalidKeywordPos, ParserError
+
+
+class XRefDB:
+    """A class for collection references to objects"""
+
+    def __init__(self, parser: "PDFParser") -> None:
+        self.objs: Dict[Tuple[int, int], IndirectObject] = {}
+        self.parser = parser
+
+    def save_indobject(self, indobj: IndirectObject):
+        if self.objs.get((indobj.obj_num, indobj.gen_num), None) is None:
+            self.objs[(indobj.obj_num, indobj.gen_num)] = indobj
+
+    def get_object_from_indobj(self, indobj: IndirectObject) -> PDFObject:
+        return self.get_object(indobj.obj_num, indobj.gen_num)
+
+    def get_object(self, obj_num: int, gen_num: int) -> PDFObject:
+        """get the actual value of the reference, if the value does not exists return the Null object as specified in PDF spec 1.7 section 7.3.10
+
+        Args:
+            obj_num (int): object number
+            gen_num (int): generation number
+
+        Returns:
+            PDFObject
+        """
+        indobj = self.objs.get((obj_num, gen_num), None)
+        if indobj is None:
+            raise InvalidXref(
+                f"xref not found for object retrieval {obj_num}, {gen_num}"
+            )
+        else:
+            obj = indobj.get_object()
+            if obj is not None:
+                return obj
+            cur_pos = self.parser.tell()
+            self.parser.seek(indobj.offset)
+            obj = next(self.parser.iter_objects())
+            indobj.save_object(obj)
+            self.parser.seek(cur_pos)
+            return obj
 
 
 class PDFParser:
@@ -27,11 +71,9 @@ class PDFParser:
 
     def __init__(
         self,
-        fp: io.BufferedIOBase,
-        buffer_size: int = 4096,
-        state: Optional[ParsingState] = None,
+        buffer: BufferStream,
+        db: Optional[XRefDB] = None,
         strict: bool = True,
-        retain_obj_on_seek: bool = False,
     ) -> None:
         """
 
@@ -40,35 +82,48 @@ class PDFParser:
             buffer_size (int, optional): the size of the reads. Defaults to 4096.
             state (Optional[ParsingState], optional): the parsing state. Defaults to None.
             strict (bool, optional): whether we want to throw errors over common decoding issues. Defaults to True.
-            retain_obj_on_seek (bool, optional): whether we want to ensure we keep the object collection when changing the offset using the self.seek methodm this does not apply if you specify the state when using the seek method!. Defaults to False.
         """
-        self.lexer = PDFLexer(fp, buffer_size)
+        self.lexer = PDFLexer(buffer)
+        self.db = XRefDB(self)
         self.strict = strict
-        self.state = ParsingState([], []) if state is None else state
-        self.retain_obj_on_seek = retain_obj_on_seek
 
-    def seek(self, offset: int, state: Optional[ParsingState] = None) -> int:
+    @classmethod
+    def from_iobuffer(
+        cls,
+        fp: io.BufferedIOBase,
+        buffer_size: int = 4096,
+        strict: bool = True,
+    ):
+        return cls(
+            BufferStream(fp, buffer_size=buffer_size),
+            strict=strict,
+        )
+
+    @classmethod
+    def from_bytes(
+        cls,
+        data: bytes,
+        buffer_size: int = 4096,
+        strict: bool = True,
+    ):
+        return cls(
+            BufferStream(io.BytesIO(data), buffer_size=buffer_size),
+            strict=strict,
+        )
+
+    def seek(self, offset: int) -> int:
         """moves the offset of the reader to a certain spot, and returns the new offset
 
         Args:
             offset (int)
-            state (Optional[ParsingState]): this will override our current state
 
         Returns:
             int: new offset
         """
-        self.state = (
-            ParsingState(
-                [],
-                [],
-                indirect_object_collection=self.state.indirect_object_collection
-                if not self.retain_obj_on_seek
-                else None,
-            )
-            if state is None
-            else state
-        )
         return self.lexer.seek(offset)
+
+    def tell(self) -> int:
+        return self.lexer.tell()
 
     def iter_objects(self) -> Iterator[PDFObject]:
         """Iterates over the objects in the current byte stream
@@ -76,12 +131,13 @@ class PDFParser:
         Yields:
             PDFObject
         """
+        state = ParsingState([], [], strict=self.strict)
         for token in self.lexer.iter_tokens():
-            attempt_prim = attempt_parse_prim(token, self.state)
+            attempt_prim = attempt_parse_prim(token, state)
             if attempt_prim.success:
-                yield from self._feed_or_yield_objs(attempt_prim.next_objs)
+                yield from state.feed_or_yield_objs(attempt_prim.next_objs)
             elif isinstance(token, TokenComment):
-                yield self.state.set_last_obj(
+                yield state.set_last_obj(
                     PDFComment(
                         token.value,
                         (token.start_loc, token.end_loc),
@@ -89,67 +145,99 @@ class PDFParser:
                 )
             elif isinstance(token, TokenKeyword):
                 if token.value == b"R":
-                    yield from self._on_indirect_ref_close()
+                    yield from self._on_indirect_ref_close(state)
                 elif token.value == b"obj":
-                    self.state.initialize_indirect_obj()
+                    state.initialize_indirect_obj(token.start_loc)
                 elif token.value == b"endobj":
-                    yield from self._on_endobj(token)
+                    yield self._on_endobj(state, token)
                 elif token.value == b"stream":
-                    self._on_stream(token)
+                    self._on_stream(
+                        state,
+                        token,
+                    )
                 elif token.value == b"endstream":
-                    self._on_endstream(token)
+                    self._on_endstream(state, token)
                 else:
                     raise InvalidKeywordPos(token)
             elif isinstance(token, TokenArray):
-                yield from self.state.flush_int_collections()
+                yield from state.flush_int_collections()
                 yield from deal_with_collection_object(
-                    self.state, token, PDFArray, TArrayValue.OPEN, strict=self.strict
+                    state, token, PDFArray, TArrayValue.OPEN, strict=self.strict
                 )
             elif isinstance(token, TokenDictionary):
-                yield from self.state.flush_int_collections()
+                yield from state.flush_int_collections()
                 yield from deal_with_collection_object(
-                    self.state,
+                    state,
                     token=token,
                     cls_const=PDFDictionary,
                     open_t=TDictValue.OPEN,
                     strict=self.strict,
                 )
 
-    def _feed_or_yield_objs(self, next_objs: List[PDFObject]):
-        cur_ctx = self.state.current_context
-        for obj in next_objs:
-            if cur_ctx is not None:
-                cur_ctx.pass_item(obj)
-            else:
-                yield obj
+    def _on_endobj(self, state: ParsingState, token: TokenKeyword) -> IndirectObject:
+        """finish off the current context, assuming we are handling an indirect-object
 
-    def _on_indirect_ref_close(self):
-        obj = self.state.get_indobjects()
-        cur_ctx = self.state.current_context
+        Args:
+            token (TokenKeyword)
+
+        Raises:
+            BrokenFile: if the object fif not get initilized with two integers
+            InvalidKeywordPos: If the context is not an indirect object
+
+        Yields:
+            PDFObject
+        """
+        last_ctx = state.context_stack.pop()
+        if isinstance(last_ctx, IndirectObject):
+            if len(state.int_collection) > 1:
+                raise BrokenFile(f"Invalid number of integers in obj defition {token}")
+            for num in state.flush_int_collections():
+                last_ctx.pass_item(num)
+            obj = last_ctx.into_readonly_copy()
+            self.db.save_indobject(obj)
+            return obj
+        else:
+            raise InvalidKeywordPos(token)
+
+    def _on_stream(self, state: ParsingState, token: TokenKeyword):
+        """Initilize a PDFStream
+
+        Args:
+            token (TokenKeyword)
+
+        Raises:
+            ParserError: if the current context is not an indirect object
+        """
+        last_ctx = state.current_context
+        if last_ctx is not None and isinstance(last_ctx, IndirectObject):
+            self.db.save_indobject(last_ctx)
+            stream = PDFStream(token.end_loc, 0)
+            obj = self.db.get_object_from_indobj(last_ctx)
+            stream.pass_item(obj)
+            last_ctx.save_object(PDFStream(token.end_loc, 0))
+            state.context_stack.append(stream)
+            self.seek(stream.offset + stream.length)
+        else:
+            raise ParserError(f"PDFStream is missing initilization dictionary")
+
+    def _on_endstream(self, state: ParsingState, token: TokenKeyword):
+        """Finish a PDFStream
+
+        Args:
+            token (TokenKeyword)
+
+        Raises:
+            InvalidKeywordPos: if the current context is not an indirect stream
+        """
+        stream: PDFContextualObject = state.context_stack.pop()
+        if not isinstance(stream, PDFStream):
+            raise InvalidKeywordPos(token)
+
+    def _on_indirect_ref_close(self, state: ParsingState):
+        obj_num, gen_num = state.get_indobj_values()
+        obj = self.db.get_object(obj_num, gen_num)
+        cur_ctx = state.current_context
         if cur_ctx is not None:
             cur_ctx.pass_item(obj)
         else:
             yield obj
-
-    def _on_endobj(self, token: TokenKeyword):
-        last_ctx = self.state.context_stack.pop()
-        if isinstance(last_ctx, IndirectObject):
-            yield last_ctx.clone()
-        elif self.strict:
-            raise InvalidKeywordPos(token)
-
-    def _on_stream(self, token: TokenKeyword):
-        last_ctx = self.state.current_context
-        if last_ctx is not None and isinstance(last_ctx, IndirectObject):
-            stream = PDFStream(token.end_loc, 0)
-            stream.pass_item(last_ctx.get_object())
-            last_ctx.save_object(PDFStream(token.end_loc, 0))
-            self.state.context_stack.append(stream)
-            self.lexer.seek(stream.offset + stream.length)
-        else:
-            raise ParserError(f"PDFStream is missing initilization dictionary")
-
-    def _on_endstream(self, token: TokenKeyword):
-        stream: PDFContextualObject = self.state.context_stack.pop()
-        if not isinstance(stream, PDFStream):
-            raise InvalidKeywordPos(token)
