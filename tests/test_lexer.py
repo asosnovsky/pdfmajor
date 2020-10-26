@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import List
 from unittest import TestCase
 
-from pdfmajor.lexer import PDFLexer
+from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.number import parse_number
 from pdfmajor.lexer.dict_and_hex import parse_double_angled_bracket, parse_hexstring
 from pdfmajor.lexer.string import parse_string
@@ -222,14 +222,27 @@ class Basics(TestCase):
 
 class Lexer(TestCase):
     def run_test(self, raw: bytes, expected: List[Token]):
-        tokenizer = PDFLexer.from_bytes(raw)
-        for i, (etoken, token) in enumerate(zip(expected, tokenizer.iter_tokens()), 1):
-            self.assertEqual(token, etoken, f"Failed at example #{i}")
-        try:
-            next_token = next(tokenizer.iter_tokens())
-            self.assertIsNone(next_token)
-        except (EOFError, StopIteration) as e:
-            self.assertIsNotNone(e)
+        size = len(raw)
+        for buf_size in [
+            2,
+            3,
+            size // 4,
+            size // 3,
+            size // 2,
+            3 * size // 4,
+            size,
+            2 * size,
+            4 * size,
+        ]:
+            with self.subTest(raw=raw, buf_size=buf_size):
+                it = iter_tokens(make_stream_iter(raw, buf_size))
+                for i, (etoken, token) in enumerate(zip(expected, it)):
+                    self.assertEqual(token, etoken, f"Failed at example #{i}")
+                try:
+                    next_token = next(it)
+                    self.assertIsNone(next_token)
+                except (EOFError, StopIteration) as e:
+                    self.assertIsNotNone(e)
 
     def test_scase1(self):
         self.run_test(
