@@ -12,7 +12,7 @@ from pdfmajor.streambuffer import BufferStream
 from pdfmajor.parser.objects.indirect import IndirectObject
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.comment import PDFComment
-from pdfmajor.parser.objects.stream import PDFStream
+from pdfmajor.parser.stream.PDFStream import PDFStream
 
 CURRENT_FOLDER = Path(__file__).parent
 
@@ -184,7 +184,7 @@ class IndirectObjects(TestCase):
         buffer = BufferStream.from_bytes(
             br"""
             5 0 obj
-<< /Type /XRef /Length 124 /Filter /FlateDecode >>
+<< /Type /XRef /Length 123 /Filter /FlateDecode /otherfeature [10 20]>>
 stream
 "<99><A3><C1>l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567
 <80>endstream
@@ -193,18 +193,28 @@ endobj
         )
         for obj in iter_objects(buffer, XRefDB()):
             self.assertIsInstance(obj, IndirectObject)
-            self.assertIsInstance(obj.get_object(), PDFStream)
+            self.assertIsInstance(obj.get_object(), PDFDictionary)
+            self.assertIsInstance(obj.stream, PDFStream)  # type: ignore
+            self.assertDictEqual(
+                obj.stream.to_python(),  # type: ignore
+                {
+                    "offset": 99,
+                    "length": 123,
+                    "filter": ["/FlateDecode"],
+                    "decode_parms": [],
+                    "f": None,
+                    "ffilter": [],
+                    "fdecode_parms": [],
+                    "dl": None,
+                },
+            )
             self.assertDictEqual(
                 obj.get_object().to_python(),
                 {
-                    "offset": 78,
-                    "length": 0,
-                    "filter": None,
-                    "decode_parms": None,
-                    "f": None,
-                    "ffilter": None,
-                    "fdecode_parms": None,
-                    "dl": None,
+                    "Filter": "/FlateDecode",
+                    "Length": 123,
+                    "Type": "/XRef",
+                    "otherfeature": [10, 20],
                 },
             )
 

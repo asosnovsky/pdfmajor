@@ -1,7 +1,7 @@
 from typing import Optional
-from ..exceptions import InvalidIndirectObjAccess
+
+from pdfmajor.parser.stream.PDFStream import PDFStream
 from .base import PDFContextualObject, PDFObject
-from .primitives import PDFNull
 
 
 class IndirectObject(PDFContextualObject):
@@ -13,11 +13,13 @@ class IndirectObject(PDFContextualObject):
         gen_num: int,
         offset: int,
         data: Optional[PDFObject] = None,
+        stream: Optional[PDFStream] = None,
     ) -> None:
         self.offset = offset
         self.obj_num = obj_num
         self.gen_num = gen_num
         self.__data = data
+        self.stream = stream
 
     def __repr__(self) -> str:
         return f"IndirectObject(obj_num={self.obj_num}, gen_num={self.gen_num}, offset={self.offset}, data={self.get_object()})"
@@ -33,11 +35,6 @@ class IndirectObject(PDFContextualObject):
 
         """
         self.__data = obj
-
-    def into_readonly_copy(self):
-        return IndirectObject(
-            self.obj_num, self.gen_num, self.offset, self.get_object()
-        )
 
     def to_python(self):
         obj = self.get_object()

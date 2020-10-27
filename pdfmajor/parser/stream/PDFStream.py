@@ -1,11 +1,11 @@
 from pdfmajor.parser.exceptions import ParserError
 from typing import Any, Dict, List, Optional, Union
-from .base import PDFContextualObject, PDFObject
-from .primitives import PDFName
-from .collections import PDFDictionary
+
+from ..objects.base import PDFObject
+from ..objects.collections import PDFDictionary
 
 
-class PDFStream(PDFContextualObject):
+class PDFStream:
     """A class representing a PDF Stream as specified in PDF spec 1.7 section 7.3.8"""
 
     def __init__(
@@ -18,7 +18,6 @@ class PDFStream(PDFContextualObject):
         ffilter: Optional[List[str]] = None,
         fdecode_parms: Optional[List[Dict[str, Any]]] = None,
         dl: Optional[int] = None,
-        other_metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Args:
@@ -39,25 +38,23 @@ class PDFStream(PDFContextualObject):
         self.ffilter: Optional[List[str]] = ffilter
         self.fdecode_parms: Optional[List[Dict[str, Any]]] = fdecode_parms
         self.dl: Optional[int] = dl
-        self.other_metadata: Dict[str, Any] = (
-            other_metadata if other_metadata is not None else {}
-        )
 
-    def pass_item(self, item: PDFObject) -> None:
+    @classmethod
+    def from_pdfdict(cls, offset: int, item: PDFObject) -> None:
         if not isinstance(item, PDFDictionary):
             raise ParserError(f"Cannot initilize a pdfstream with {type(item)}")
         data = item.to_python()
-        self.length = data["Length"]
-        self.filter = get_single_or_list(data.get("Filter", self.filter))
-        self.decode_parms = get_single_or_list(
-            data.get("DecodeParms", self.decode_parms)
+        stream = cls(offset, data["Length"])
+        stream.filter = get_single_or_list(data.get("Filter", stream.filter))
+        stream.decode_parms = get_single_or_list(
+            data.get("DecodeParms", stream.decode_parms)
         )
-        self.f = data.get("F", self.f)
-        self.ffilter = get_single_or_list(data.get("FFilter", self.ffilter))
-        self.fdecode_parms = get_single_or_list(
-            data.get("FDecodeParms", self.fdecode_parms)
+        stream.f = data.get("F", stream.f)
+        stream.ffilter = get_single_or_list(data.get("FFilter", stream.ffilter))
+        stream.fdecode_parms = get_single_or_list(
+            data.get("FDecodeParms", stream.fdecode_parms)
         )
-        self.other_metadata = data
+        return stream
 
     def to_python(self):
         return {

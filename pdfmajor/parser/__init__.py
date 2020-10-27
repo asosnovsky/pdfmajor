@@ -1,3 +1,4 @@
+from pdfmajor.parser.stream.PDFStream import PDFStream
 from pdfmajor.parser.xref import XRefRow
 from pdfmajor.parser.xrefdb import XRefDB
 from typing import Iterator, Optional
@@ -11,9 +12,8 @@ from pdfmajor.lexer.token import (
     TokenKeyword,
 )
 from pdfmajor.lexer import iter_tokens
-from .objects.stream import PDFStream
 from .objects.indirect import IndirectObject
-from .objects.base import PDFContextualObject, PDFObject
+from .objects.base import PDFObject
 from .objects.collections import PDFArray, PDFDictionary
 from .objects.comment import PDFComment
 from .state import ParsingState
@@ -101,7 +101,7 @@ def _on_endobj(state: ParsingState, token: TokenKeyword) -> IndirectObject:
             raise BrokenFile(f"Invalid number of integers in obj defition {token}")
         for num in state.flush_int_collections():
             last_ctx.pass_item(num)
-        return last_ctx.into_readonly_copy()
+        return last_ctx
     else:
         raise ParserError(f"Recived an endobj while not procesing an indirect object")
 
@@ -120,20 +120,17 @@ def _on_stream(
     last_ctx = state.current_context
     if last_ctx is not None and isinstance(last_ctx, IndirectObject):
         xrefdb.save_indobject(last_ctx)
-        stream = PDFStream(token.end_loc + 1, 0)
+        # stream = PDFStream(token.end_loc + 1, 0)
         obj = _save_or_get_object(buffer, xrefdb, last_ctx.obj_num, last_ctx.gen_num)
-        with buffer.get_window():
-            next_token = next(iter_tokens(buffer))
+        last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc, obj)
+        buffer.seek(stream.offset + stream.length)
+        next_token = next(iter_tokens(buffer))
         if not (
             isinstance(next_token, TokenKeyword) and next_token.value == b"endstream"
         ):
             raise BrokenFile(
                 f"stream did not contain 'endstream', instead the token {next_token} was found"
             )
-        stream.pass_item(obj)
-        buffer.seek(stream.offset + stream.length)
-        last_ctx.save_object(stream)
-        state.context_stack.append(stream)
     else:
         raise ParserError(f"PDFStream is missing initilization dictionary")
 
