@@ -40,7 +40,7 @@ class PDFStream:
         self.dl: Optional[int] = dl
 
     @classmethod
-    def from_pdfdict(cls, offset: int, item: PDFObject) -> None:
+    def from_pdfdict(cls, offset: int, item: PDFObject) -> "PDFStream":
         if not isinstance(item, PDFDictionary):
             raise ParserError(f"Cannot initilize a pdfstream with {type(item)}")
         data = item.to_python()

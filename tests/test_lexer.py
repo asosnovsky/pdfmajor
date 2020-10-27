@@ -352,7 +352,7 @@ func/a/b{(c)do*}def
                 TokenDictionary(start_loc=258, end_loc=260, value=TDictValue.OPEN),
                 TokenName(start_loc=261, end_loc=265, value="foo"),
                 TokenString(start_loc=266, end_loc=271, value="bar"),
-                TokenDictionary(start_loc=272, end_loc=274, value=TDictValue.CLOSE),
+                TokenDictionary(start_loc=273, end_loc=275, value=TDictValue.CLOSE),
             ],
         )
 
