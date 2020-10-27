@@ -1,6 +1,6 @@
 # from pdfmajor.parser.objects.indirect import IndirectObjectCollection
 from pdfmajor.lexer.token import TokenInteger, TokenKeyword
-from pdfmajor.lexer import PDFLexer
+from pdfmajor.lexer import iter_tokens
 from typing import Iterator, Literal, NamedTuple, Union
 from pdfmajor.streambuffer import BufferStream
 from .exceptions import PDFNoValidXRef, BrokenFile, UnexpectedEOF
@@ -40,8 +40,7 @@ def find_start_of_xref(buffer: BufferStream, strict: bool = False) -> int:
 def iter_over_xref(buffer: BufferStream, strict: bool = False) -> Iterator[XRefRow]:
     start_offset = find_start_of_xref(buffer, strict)
     buffer.seek(start_offset)
-    lexer = PDFLexer(buffer)
-    first_token = next(lexer.iter_tokens())
+    first_token = next(iter_tokens(buffer))
     if isinstance(first_token, TokenInteger):
         raise NotImplementedError("XRefStream: PDF-1.5")
     elif isinstance(first_token, TokenKeyword):

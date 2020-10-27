@@ -1,3 +1,4 @@
+from typing import List
 from pdfmajor.lexer.token import TokenKeyword
 from pdfmajor.exceptions import PDFMajorException
 
@@ -15,10 +16,10 @@ class UnexpectedEOF(BrokenFile, EOFError):
 
 
 class InvalidKeywordPos(BrokenFile):
-    def __init__(self, token: TokenKeyword) -> None:
+    def __init__(self, token: TokenKeyword, expected_token: List[bytes]) -> None:
         self.token = token
         super().__init__(
-            f"keyword '{token.value!r}' was found at {token.start_loc}:{token.end_loc}"
+            f"keyword '{token.value!r}' was found at {token.start_loc}:{token.end_loc} when expecting {expected_token}"
         )
 
 

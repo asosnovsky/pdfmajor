@@ -1,25 +1,46 @@
 from pathlib import Path
+from pdfmajor.parser.xrefdb import XRefDB
+from pdfmajor.parser import iter_objects
 from pdfmajor.parser.objects.collections import PDFDictionary
 from pdfmajor.parser.objects.primitives import PDFHexString, PDFInteger, PDFString
 
-from typing import List
+from typing import Any, List
 from decimal import Decimal
 from unittest import TestCase
 
-from pdfmajor.streambuffer import StreamEOF
+from pdfmajor.streambuffer import BufferStream
 from pdfmajor.parser.objects.indirect import IndirectObject
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.comment import PDFComment
 from pdfmajor.parser.objects.stream import PDFStream
-from pdfmajor.parser.PDFParser import PDFParser
 
 CURRENT_FOLDER = Path(__file__).parent
 
 
 class Collections(TestCase):
+    def run_test(self, raw: bytes, expected: Any):
+        size = len(raw)
+        for buf_size in [
+            2,
+            3,
+            size // 4,
+            size // 3,
+            size // 2,
+            3 * size // 4,
+            size,
+            2 * size,
+            4 * size,
+        ]:
+            buffer = BufferStream.from_bytes(raw, buffer_size=buf_size)
+            it = iter_objects(buffer, XRefDB())
+            obj = next(it)
+            self.assertEqual(obj.to_python(), expected)
+            with self.assertRaises(StopIteration):
+                next(it)
+
     def test_parse_dict(self):
-        parser = PDFParser.from_bytes(
-            br"""<<  /Type      /Example
+        self.run_test(
+            raw=br"""<<  /Type      /Example
                          /Subtype   /DictionaryExample      
                          /Version   0.01
                          /IntegerItem  12      
@@ -30,12 +51,7 @@ class Collections(TestCase):
                             /LastItem  (  not! )      
                             /VeryLastItem  (  OK ) >>
                             >>""",
-            strict=True,
-        )
-        obj = next(parser.iter_objects())
-        self.assertDictEqual(
-            obj.to_python(),
-            {
+            expected={
                 "Type": "/Example",
                 "Subtype": "/DictionaryExample",
                 "Version": Decimal("0.01"),
@@ -51,28 +67,18 @@ class Collections(TestCase):
         )
 
     def test_parse_array(self):
-        parser = PDFParser.from_bytes(
-            br"""[ 549  3.14  false  (  Ralph )   /SomeName ]""",
-            strict=True,
-        )
-        obj = next(parser.iter_objects())
-        self.assertListEqual(
-            obj.to_python(),
-            [549, Decimal("3.14"), False, "  Ralph ", "/SomeName"],
+        self.run_test(
+            raw=br"""[ 549  3.14  false  (  Ralph )   /SomeName ]""",
+            expected=[549, Decimal("3.14"), False, "  Ralph ", "/SomeName"],
         )
 
     def test_parse_nested_array(self):
-        parser = PDFParser.from_bytes(
-            br"""[ [10 30] [22 33] [
+        self.run_test(
+            raw=br"""[ [10 30] [22 33] [
                 << /x 0 /y 5 >>
                 << /x 10 /y 5 >>
             ] ]""",
-            strict=True,
-        )
-        obj = next(parser.iter_objects())
-        self.assertListEqual(
-            obj.to_python(),
-            [
+            expected=[
                 [10, 30],
                 [22, 33],
                 [
@@ -84,9 +90,32 @@ class Collections(TestCase):
 
 
 class IndirectObjects(TestCase):
+    def run_test(self, raw: bytes, expected: List[PDFObject]) -> XRefDB:
+        db: XRefDB = XRefDB()
+        size = len(raw)
+        for buf_size in [
+            2,
+            3,
+            size // 4,
+            size // 3,
+            size // 2,
+            3 * size // 4,
+            size,
+            2 * size,
+            4 * size,
+        ]:
+            db = XRefDB()
+            buffer = BufferStream.from_bytes(raw, buffer_size=buf_size)
+            it = iter_objects(buffer, db)
+            for obj, eobj in zip(it, expected):
+                self.assertEqual(obj, eobj)
+            with self.assertRaises((StopIteration, EOFError)):
+                next(it)
+        return db
+
     def test_parse_simple_indobj(self):
-        parser = PDFParser.from_bytes(
-            br"""
+        self.run_test(
+            raw=br"""
             12 1 obj (Bring) endobj
             100 0 obj
             <33>
@@ -95,65 +124,42 @@ class IndirectObjects(TestCase):
             obj
             << /x 1 /y 3>> endobj
             """,
-            strict=True,
-        )
-        expected = [
-            IndirectObject(12, 1, 18, PDFString("Bring", 0, 0)),
-            IndirectObject(100, 0, 25, PDFHexString(b"3", 0, 0)),
-            IndirectObject(
-                13,
-                8,
-                144,
-                PDFDictionary.from_dict(
-                    {"x": PDFInteger(1, 0, 0), "y": PDFInteger(3, 0, 0)}
+            expected=[
+                IndirectObject(12, 1, 18, PDFString("Bring", 0, 0)),
+                IndirectObject(100, 0, 25, PDFHexString(b"3", 0, 0)),
+                IndirectObject(
+                    13,
+                    8,
+                    144,
+                    PDFDictionary.from_dict(
+                        {"x": PDFInteger(1, 0, 0), "y": PDFInteger(3, 0, 0)}
+                    ),
                 ),
-            ),
-        ]
-        for obj, eobj in zip(parser.iter_objects(), expected):
-            self.assertIsInstance(obj, IndirectObject)
-            self.assertEqual(obj, eobj)
-        with self.assertRaises(StreamEOF):
-            next(parser.iter_objects())
+            ],
+        )
 
     def test_parse_obj_with_references(self):
-        parser = PDFParser.from_bytes(
-            br"""
+        db = self.run_test(
+            raw=br"""
             12 1 obj (Bring) endobj
             10 2 obj << /lastone 12 1 R >> endobj
 
             """,
-            strict=True,
+            expected=[
+                IndirectObject(12, 1, 18, PDFString("Bring", 0, 0)),
+                IndirectObject(
+                    0,
+                    2,
+                    54,
+                    data=PDFDictionary.from_dict({"lastone": PDFString("Bring", 0, 0)}),
+                ),
+            ],
         )
-        expected = [
-            "Bring",
-            {"lastone": "Bring"},
-        ]
-        for obj, exp in zip(parser.iter_objects(), expected):
-            self.assertEqual(obj.to_python(), exp)
-        with self.assertRaises(StreamEOF):
-            next(parser.iter_objects())
-        sec_obj = parser.db.get_object(10, 2)
+        sec_obj = db.objs[(10, 2)]
         self.assertEqual(
             sec_obj.to_python(),
             {"lastone": "Bring"},
         )
-
-    def run_test(
-        self,
-        raw: bytes,
-        expected: List[PDFObject],
-    ):
-        parser = PDFParser.from_bytes(raw, strict=True)
-        for i, (eobj, obj) in enumerate(
-            zip(expected, parser.iter_objects()),
-            1,
-        ):
-            self.assertEqual(obj, eobj, f"Failed at example #{i}")
-        try:
-            next_obj = next(parser.iter_objects())
-            self.assertIsNone(next_obj)
-        except (EOFError, StopIteration) as e:
-            self.assertIsNotNone(e)
 
     def test_parse_comments(self):
         self.run_test(
@@ -175,7 +181,7 @@ class IndirectObjects(TestCase):
         )
 
     def test_parse_stream(self):
-        parser = PDFParser.from_bytes(
+        buffer = BufferStream.from_bytes(
             br"""
             5 0 obj
 << /Type /XRef /Length 124 /Filter /FlateDecode >>
@@ -185,7 +191,7 @@ stream
 endobj
         """
         )
-        for obj in parser.iter_objects():
+        for obj in iter_objects(buffer, XRefDB()):
             self.assertIsInstance(obj, IndirectObject)
             self.assertIsInstance(obj.get_object(), PDFStream)
             self.assertDictEqual(

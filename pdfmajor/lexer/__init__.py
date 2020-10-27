@@ -30,9 +30,7 @@ def iter_tokens(buffer: BufferStream) -> Iterator[Token]:
         else:
             j = m.start(0)
             next_char = buf[j : j + 1]
-            if next_char == b"~":
-                continue
-            elif next_char == b"%":
+            if next_char == b"%":
                 buffer.seek(bufpos + j + 1)
                 yield parse_comment(buffer)
             elif next_char == b"/":
@@ -54,10 +52,12 @@ def iter_tokens(buffer: BufferStream) -> Iterator[Token]:
                 buffer.seek(bufpos + j + 1)
                 yield parse_double_angled_bracket(buffer)
             elif next_char == b">":
-                buffer.seek(bufpos + j + 1)
-                if buf[j : j + 2] == b">>":
-                    buffer.seekd(1)
+                buffer.seek(bufpos + j)
+                bufpos, buf = buffer.read(2)
+                if buf == b">>":
                     yield TokenDictionary(bufpos + j, bufpos + j + 2, TDictValue.CLOSE)
+                else:
+                    buffer.seekd(-1)
             elif next_char == b"[":
                 buffer.seek(bufpos + j + 1)
                 yield TokenArray(bufpos + j, bufpos + j + 1, TArrayValue.OPEN)

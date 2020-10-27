@@ -1,5 +1,6 @@
 import io
 from typing import Iterator, NamedTuple, Optional
+from contextlib import contextmanager
 from pdfmajor.exceptions import PDFMajorException
 
 
@@ -27,6 +28,10 @@ class BufferStream:
         """
         self.fp = fp
         self.buffer_size = buffer_size
+
+    @classmethod
+    def from_bytes(cls, raw: bytes, buffer_size: int = 4096):
+        return cls(io.BytesIO(raw), buffer_size)
 
     def get_slice(
         self, offset: int, length: int, buffer_size: Optional[int] = None
@@ -175,3 +180,9 @@ class BufferStream:
                 buf = b""
         if len(buf) > 0 and pos == 0 and n == -1:
             yield BufferedBytes(pos=n + 1, data=buf)
+
+    @contextmanager
+    def get_window(self):
+        cur_pos = self.tell()
+        yield self
+        self.seek(cur_pos)

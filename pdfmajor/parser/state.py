@@ -9,27 +9,24 @@ from .objects.indirect import IndirectObject
 
 class ParsingState:
 
-    __slots__ = ["context_stack", "int_collection", "last_obj", "strict"]
+    __slots__ = ["context_stack", "int_collection", "last_obj"]
 
     def __init__(
         self,
         context_stack: List[PDFContextualObject],
         int_collection: List[PDFInteger],
         last_obj: Optional[PDFObject] = None,
-        strict: bool = False,
     ) -> None:
         self.context_stack = context_stack
         self.int_collection = int_collection
         self.last_obj = last_obj
-        self.strict = strict
 
     def __repr__(self) -> str:
-        return "ParsingState:[{stackc}]({cur_stack}, ints={ints}, last={lobj}, strict={strict})".format(
+        return "ParsingState:[{stackc}]({cur_stack}, ints={ints}, last={lobj})".format(
             stackc=len(self.context_stack),
             cur_stack=self.current_context,
             ints=self.int_collection,
             lobj=self.last_obj,
-            strict=self.strict,
         )
 
     @property

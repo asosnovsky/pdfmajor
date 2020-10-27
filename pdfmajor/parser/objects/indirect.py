@@ -26,10 +26,12 @@ class IndirectObject(PDFContextualObject):
         return self.__data
 
     def save_object(self, obj: PDFObject):
-        # if self.__data is not None:
-        #     raise InvalidIndirectObjAccess(
-        #         f"attempted to override an initilized reference of an object {obj}"
-        #     )
+        """This method will override the current stored object
+
+        Args:
+            obj (PDFObject)
+
+        """
         self.__data = obj
 
     def into_readonly_copy(self):
@@ -44,10 +46,11 @@ class IndirectObject(PDFContextualObject):
         return obj.to_python()
 
     def pass_item(self, item: PDFObject):
-        # if self.__read_only:
-        #     raise InvalidIndirectObjAccess(
-        #         f"attempted to add to an read-only reference of an object {item}"
-        #     )
+        """This method will either propogate the item to it's child (in case the child is a contexual object) or override it's own data with the incoming
+
+        Args:
+            item (PDFObject): [description]
+        """
         cur_obj = self.get_object()
         if isinstance(cur_obj, PDFContextualObject):
             cur_obj.pass_item(item)
