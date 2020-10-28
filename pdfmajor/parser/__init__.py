@@ -1,6 +1,4 @@
 from pdfmajor.parser.stream.PDFStream import PDFStream
-from pdfmajor.parser.xref import XRefRow
-from pdfmajor.parser.xrefdb import XRefDB
 from typing import Iterator, Optional
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.lexer.token import (
@@ -12,7 +10,7 @@ from pdfmajor.lexer.token import (
     TokenKeyword,
 )
 from pdfmajor.lexer import iter_tokens
-from .objects.indirect import IndirectObject
+from .objects.indirect import IndirectObject, ObjectRef
 from .objects.base import PDFObject
 from .objects.collections import PDFArray, PDFDictionary
 from .objects.comment import PDFComment
@@ -22,14 +20,12 @@ from .exceptions import (
     InvalidKeywordPos,
     BrokenFile,
     InvalidKeywordPos,
-    InvalidXref,
     ParserError,
 )
 
 
 def iter_objects(
     buffer: BufferStream,
-    xrefdb: XRefDB,
     state: Optional[ParsingState] = None,
 ) -> Iterator[PDFObject]:
     """Iterates over the objects in the current byte stream
@@ -51,18 +47,16 @@ def iter_objects(
             )
         elif isinstance(token, TokenKeyword):
             if token.value == b"R":
-                yield from _on_indirect_ref_close(buffer, state, xrefdb)
+                yield from _on_indirect_ref_close(state)
             elif token.value == b"obj":
                 state.initialize_indirect_obj(token.start_loc)
             elif token.value == b"endobj":
                 obj = _on_endobj(state, token)
-                xrefdb.save_indobject(obj)
                 yield obj
             elif token.value == b"stream":
                 _on_stream(
                     buffer,
                     state,
-                    xrefdb,
                     token,
                 )
             else:
@@ -106,9 +100,7 @@ def _on_endobj(state: ParsingState, token: TokenKeyword) -> IndirectObject:
         raise ParserError(f"Recived an endobj while not procesing an indirect object")
 
 
-def _on_stream(
-    buffer: BufferStream, state: ParsingState, xrefdb: XRefDB, token: TokenKeyword
-):
+def _on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):
     """Initilize a PDFStream
 
     Args:
@@ -119,10 +111,10 @@ def _on_stream(
     """
     last_ctx = state.current_context
     if last_ctx is not None and isinstance(last_ctx, IndirectObject):
-        xrefdb.save_indobject(last_ctx)
-        # stream = PDFStream(token.end_loc + 1, 0)
-        obj = _save_or_get_object(buffer, xrefdb, last_ctx.obj_num, last_ctx.gen_num)
-        last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc, obj)
+        obj = last_ctx.get_object()
+        if not isinstance(obj, PDFDictionary):
+            raise ParserError(f"Cannot initilize a pdfstream with {type(obj)}")
+        last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc + 1, obj)
         buffer.seek(stream.offset + stream.length)
         next_token = next(iter_tokens(buffer))
         if not (
@@ -135,9 +127,9 @@ def _on_stream(
         raise ParserError(f"PDFStream is missing initilization dictionary")
 
 
-def _on_indirect_ref_close(buffer: BufferStream, state: ParsingState, xrefdb: XRefDB):
+def _on_indirect_ref_close(state: ParsingState):
     obj_num, gen_num = state.get_indobj_values()
-    obj = _save_or_get_object(buffer, xrefdb, obj_num, gen_num)
+    obj = ObjectRef(obj_num, gen_num)
     cur_ctx = state.current_context
     if cur_ctx is not None:
         cur_ctx.pass_item(obj)
@@ -145,50 +137,69 @@ def _on_indirect_ref_close(buffer: BufferStream, state: ParsingState, xrefdb: XR
         yield obj
 
 
-def _save_or_get_object(
-    buffer: BufferStream, xrefdb: XRefDB, obj_num: int, gen_num: int
-) -> PDFObject:
-    """get the actual value of the reference, if the value does not exists return the Null object as specified in PDF spec 1.7 section 7.3.10
+# def _save_or_get_object(
+#     buffer: BufferStream, xrefdb: XRefDB, obj_num: int, gen_num: int
+# ) -> PDFObject:
+#     """get the actual value of the reference, if the value does not exists return the Null object as specified in PDF spec 1.7 section 7.3.10
 
-    Args:
-        obj_num (int): object number
-        gen_num (int): generation number
+#     Args:
+#         obj_num (int): object number
+#         gen_num (int): generation number
 
-    Returns:
-        PDFObject
-    """
-    indobj = xrefdb.objs.get((obj_num, gen_num), None)
-    if indobj is None:
-        xref = xrefdb.xrefs.get((obj_num, gen_num), None)
-        if xref is None:
-            raise InvalidXref(
-                f"xref not found for object retrieval {obj_num}, {gen_num}"
-            )
-        return _read_object_from_xref(xref, xrefdb, buffer)
-    else:
-        return _read_object_from_db_or_buffer(indobj, xrefdb, buffer)
-
-
-def _read_object_from_xref(
-    xref: XRefRow, xrefdb: XRefDB, buffer: BufferStream
-) -> PDFObject:
-    indobj = IndirectObject(xref.obj_num, xref.gen_num, xref.offset)
-    with buffer.get_window():
-        buffer.seek(indobj.offset)
-        obj = next(iter_objects(buffer, xrefdb))
-        indobj.save_object(obj)
-        xrefdb.save_indobject(indobj)
-        return obj
+#     Returns:
+#         PDFObject
+#     """
+#     indobj = xrefdb.objs.get((obj_num, gen_num), None)
+#     print("trying to read", obj_num, gen_num)
+#     if indobj is None:
+#         xref = xrefdb.xrefs.get((obj_num, gen_num), None)
+#         if xref is None:
+#             raise InvalidXref(
+#                 f"xref not found for object retrieval {obj_num}, {gen_num}"
+#             )
+#         return _read_object_from_xref(xref, xrefdb, buffer)
+#     else:
+#         return _read_object_from_db_or_buffer(indobj, xrefdb, buffer)
 
 
-def _read_object_from_db_or_buffer(
-    indobj: IndirectObject, xrefdb: XRefDB, buffer: BufferStream
-) -> PDFObject:
-    obj = indobj.get_object()
-    if obj is not None:
-        return obj
-    with buffer.get_window():
-        buffer.seek(indobj.offset)
-        obj = next(iter_objects(buffer, xrefdb))
-        indobj.save_object(obj)
-        return obj
+# def _read_object_from_xref(
+#     xref: XRefRow, xrefdb: XRefDB, buffer: BufferStream
+# ) -> PDFObject:
+#     with buffer.get_window():
+#         buffer.seek(xref.offset)
+#         obj = next(iter_objects(buffer, xrefdb))
+#         if (
+#             not isinstance(obj, IndirectObject)
+#             or obj.gen_num != xref.gen_num
+#             or obj.obj_num != xref.obj_num
+#         ):
+#             raise ParserError(
+#                 f"Invalid offset for indirect object, expected {xref} but got {obj}"
+#             )
+#         return obj
+
+
+# def _read_object_from_db_or_buffer(
+#     indobj: IndirectObject, xrefdb: XRefDB, buffer: BufferStream
+# ) -> PDFObject:
+#     if indobj.read:
+#         return indobj
+#     with buffer.get_window():
+#         buffer.seek(indobj.offset)
+#         next_token = next(iter_tokens(buffer))
+#         if next_token.value != b"obj":
+#             if isinstance(next_token, TokenKeyword):
+#                 raise InvalidKeywordPos(next_token, [b"obj"])
+#             else:
+#                 raise ParserError(f"expected a keyword instead got {next_token}")
+#         obj = next(
+#             iter_objects(
+#                 buffer,
+#                 xrefdb,
+#                 ParsingState([indobj], []),
+#             )
+#         )
+#         if obj != indobj:
+#             raise ParserError(f"got a different indobj {obj} != {indobj}")
+#         indobj.read = True
+#         return obj

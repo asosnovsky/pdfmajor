@@ -1,4 +1,4 @@
-from typing import Iterator, List, Optional, Tuple
+from typing import Iterator, List, Optional, Tuple, Union
 
 from .exceptions import ParserError
 from .objects.base import PDFContextualObject, PDFObject
@@ -14,7 +14,7 @@ class ParsingState:
     def __init__(
         self,
         context_stack: List[PDFContextualObject],
-        int_collection: List[PDFInteger],
+        int_collection: List[Union[PDFInteger, int]],
         last_obj: Optional[PDFObject] = None,
     ) -> None:
         self.context_stack = context_stack
@@ -68,8 +68,12 @@ class ParsingState:
         """
         if len(self.int_collection) == 2:
             gen_num = self.int_collection.pop()
+            if isinstance(gen_num, PDFInteger):
+                gen_num = gen_num.to_python()
             obj_num = self.int_collection.pop()
-            return (obj_num.to_python(), gen_num.to_python())
+            if isinstance(obj_num, PDFInteger):
+                obj_num = obj_num.to_python()
+            return (obj_num, gen_num)
         raise ParserError("missing leading tokens for object reference")
 
     def initialize_indirect_obj(self, offset: int):
@@ -92,9 +96,17 @@ class ParsingState:
         cur_ctx = self.current_context
         if cur_ctx is not None:
             for obj in self.int_collection:
+                if not isinstance(obj, PDFInteger):
+                    raise ParserError(
+                        f"Invalid int-collection contains none PDFInteger types {obj}"
+                    )
                 cur_ctx.pass_item(obj)
         else:
             for obj in self.int_collection:
+                if not isinstance(obj, PDFInteger):
+                    raise ParserError(
+                        f"Invalid int-collection contains none PDFInteger types {obj}"
+                    )
                 yield obj
         self.int_collection = []
 

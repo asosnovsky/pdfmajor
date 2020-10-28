@@ -32,10 +32,8 @@ def attempt_parse_prim(token: Token, state: ParsingState) -> ParsingAttempt:
             if len(state.int_collection) <= 1:
                 state.int_collection.append(prim_obj)
             else:
-                for last_num in state.int_collection:
-                    out.append(last_num)
-                state.int_collection = []
-                out.append(prim_obj)
+                for obj in state.flush_int_collections():
+                    out.append(obj)
         else:
             for obj in state.flush_int_collections():
                 out.append(obj)

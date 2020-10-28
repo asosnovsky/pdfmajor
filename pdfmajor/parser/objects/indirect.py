@@ -4,8 +4,19 @@ from pdfmajor.parser.stream.PDFStream import PDFStream
 from .base import PDFContextualObject, PDFObject
 
 
-class IndirectObject(PDFContextualObject):
+class ObjectRef(PDFObject):
     """A class representing a reference for other objects"""
+
+    def __init__(self, obj_num: int, gen_num: int) -> None:
+        self.obj_num = obj_num
+        self.gen_num = gen_num
+
+    def to_python(self):
+        return (self.obj_num, self.gen_num)
+
+
+class IndirectObject(PDFContextualObject):
+    """A class representing a referencable object"""
 
     def __init__(
         self,
@@ -20,6 +31,7 @@ class IndirectObject(PDFContextualObject):
         self.gen_num = gen_num
         self.__data = data
         self.stream = stream
+        self.read: bool = False
 
     def __repr__(self) -> str:
         return f"IndirectObject(obj_num={self.obj_num}, gen_num={self.gen_num}, offset={self.offset}, data={self.get_object()})"
@@ -37,10 +49,10 @@ class IndirectObject(PDFContextualObject):
         self.__data = obj
 
     def to_python(self):
-        obj = self.get_object()
-        if obj is None:
-            return None
-        return obj.to_python()
+        data = self.get_object()
+        if data is not None:
+            data = data.to_python()
+        return (self.obj_num, self.gen_num, self.offset, data)
 
     def pass_item(self, item: PDFObject):
         """This method will either propogate the item to it's child (in case the child is a contexual object) or override it's own data with the incoming

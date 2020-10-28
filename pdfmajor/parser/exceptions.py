@@ -1,21 +1,21 @@
 from typing import List
 from pdfmajor.lexer.token import TokenKeyword
-from pdfmajor.exceptions import PDFMajorException
+from pdfmajor.exceptions import PDFMajorException, BrokenFile
 
 
 class ParserError(PDFMajorException):
     pass
 
 
-class BrokenFile(ParserError):
+class BrokenFileParserError(BrokenFile):
     pass
 
 
-class UnexpectedEOF(BrokenFile, EOFError):
+class UnexpectedEOF(BrokenFileParserError, EOFError):
     pass
 
 
-class InvalidKeywordPos(BrokenFile):
+class InvalidKeywordPos(BrokenFileParserError):
     def __init__(self, token: TokenKeyword, expected_token: List[bytes]) -> None:
         self.token = token
         super().__init__(
@@ -23,21 +23,9 @@ class InvalidKeywordPos(BrokenFile):
         )
 
 
-class InvalidIndirectObjAccess(ParserError):
-    pass
-
-
-class DecodeFailed(BrokenFile):
+class DecodeFailed(BrokenFileParserError):
     pass
 
 
 class InvalidDecoderOrNotImplemented(DecodeFailed, NotImplementedError):
-    pass
-
-
-class PDFNoValidXRef(BrokenFile, EOFError):
-    pass
-
-
-class InvalidXref(ParserError, KeyError):
     pass

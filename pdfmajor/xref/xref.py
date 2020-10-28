@@ -1,8 +1,8 @@
-# from pdfmajor.parser.objects.indirect import IndirectObjectCollection
+from typing import Iterator, Literal, NamedTuple, Union
 from pdfmajor.lexer.token import TokenInteger, TokenKeyword
 from pdfmajor.lexer import iter_tokens
-from typing import Iterator, Literal, NamedTuple, Union
 from pdfmajor.streambuffer import BufferStream
+
 from .exceptions import PDFNoValidXRef, BrokenFile, UnexpectedEOF
 
 
