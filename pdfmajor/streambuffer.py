@@ -159,30 +159,37 @@ class BufferStream:
         Yields:
             BufferedBytes
         """
-        self.fp.seek(0, 2)
-        pos = self.fp.tell()
-        buf = b""
-        n = -1
-        while 0 < pos:
-            prevpos = pos
-            pos = max(0, pos - self.buffer_size)
-            self.fp.seek(pos)
-            s = self.fp.read(prevpos - pos)
-            if not s:
-                break
-            while True:
-                n = max(s.rfind(b"\r"), s.rfind(b"\n"))
-                if n == -1:
-                    buf = s + buf
+        with self.get_window():
+            self.fp.seek(0, 2)
+            pos = self.fp.tell()
+            buf = b""
+            n = -1
+            while 0 < pos:
+                prevpos = pos
+                pos = max(0, pos - self.buffer_size)
+                self.fp.seek(pos)
+                s = self.fp.read(prevpos - pos)
+                if not s:
                     break
-                yield BufferedBytes(pos=n + 1, data=(s[n + 1 :] + buf))
-                s = s[:n]
-                buf = b""
-        if len(buf) > 0 and pos == 0 and n == -1:
-            yield BufferedBytes(pos=n + 1, data=buf)
+                while True:
+                    n = max(s.rfind(b"\r"), s.rfind(b"\n"))
+                    if n == -1:
+                        buf = s + buf
+                        break
+                    yield BufferedBytes(pos=n + 1, data=(s[n + 1 :] + buf))
+                    s = s[:n]
+                    buf = b""
+            if len(buf) > 0 and pos == 0 and n == -1:
+                yield BufferedBytes(pos=n + 1, data=buf)
 
     @contextmanager
     def get_window(self):
+        """Creates a context for the buffer
+        when this context is generated we save the original position of the buffer
+        whent the context exits we revert back to the original position.
+        This ensures that we can burrow the buffer during other processing of the item.
+        *NOTE*: using this in async processes will not ensure the safety of the buffer. This method should only be used in sync operations.
+        """
         cur_pos = self.tell()
         yield self
         self.seek(cur_pos)

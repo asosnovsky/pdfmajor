@@ -1,3 +1,4 @@
+from pdfmajor.parser.objects.primitives import PDFInteger
 from pdfmajor.parser.stream.PDFStream import PDFStream
 from typing import Iterator, Optional
 from pdfmajor.streambuffer import BufferStream
@@ -17,11 +18,20 @@ from .objects.comment import PDFComment
 from .state import ParsingState
 from .parsers import attempt_parse_prim, deal_with_collection_object
 from .exceptions import (
+    EarlyStop,
     InvalidKeywordPos,
     BrokenFile,
     InvalidKeywordPos,
     ParserError,
 )
+
+
+def get_first_object(
+    buffer: BufferStream, offset: int, state: Optional[ParsingState] = None
+) -> PDFObject:
+    with buffer.get_window():
+        buffer.seek(offset)
+        return next(iter_objects(buffer, state))
 
 
 def iter_objects(
@@ -54,7 +64,7 @@ def iter_objects(
                 obj = _on_endobj(state, token)
                 yield obj
             elif token.value == b"stream":
-                _on_stream(
+                yield from _on_stream(
                     buffer,
                     state,
                     token,
@@ -115,13 +125,20 @@ def _on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):
         if not isinstance(obj, PDFDictionary):
             raise ParserError(f"Cannot initilize a pdfstream with {type(obj)}")
         last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc + 1, obj)
-        buffer.seek(stream.offset + stream.length)
-        next_token = next(iter_tokens(buffer))
-        if not (
-            isinstance(next_token, TokenKeyword) and next_token.value == b"endstream"
-        ):
-            raise BrokenFile(
-                f"stream did not contain 'endstream', instead the token {next_token} was found"
+        if isinstance(stream.length, PDFInteger):
+            buffer.seek(stream.offset + stream.length.to_python())
+            next_token = next(iter_tokens(buffer))
+            if not (
+                isinstance(next_token, TokenKeyword)
+                and next_token.value == b"endstream"
+            ):
+                raise BrokenFile(
+                    f"stream did not contain 'endstream', instead the token {next_token} was found"
+                )
+        elif isinstance(stream.length, ObjectRef):
+            yield last_ctx
+            raise EarlyStop(
+                "cannot proceed parsing as the stream.length object is an indirect object"
             )
     else:
         raise ParserError(f"PDFStream is missing initilization dictionary")

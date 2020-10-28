@@ -7,6 +7,10 @@ class ParserError(PDFMajorException):
     pass
 
 
+class EarlyStop(ParserError, StopIteration):
+    pass
+
+
 class BrokenFileParserError(BrokenFile):
     pass
 
