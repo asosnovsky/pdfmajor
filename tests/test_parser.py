@@ -216,3 +216,41 @@ endobj
                     "otherfeature": [10, 20],
                 },
             )
+
+    def test_parse_bad_len_stream(self):
+        buffer = BufferStream.from_bytes(
+            br"""
+            5 0 obj
+<< /Type /XRef /Length 123 /Filter /FlateDecode /otherfeature [10 20]>>
+stream
+"<99><A3><C1>l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567
+<80>]]]]]endstream
+endobj
+        """
+        )
+        for obj in iter_objects(buffer):
+            self.assertIsInstance(obj, IndirectObject)
+            self.assertIsInstance(obj.get_object(), PDFDictionary)
+            self.assertIsInstance(obj.stream, PDFStream)  # type: ignore
+            self.assertDictEqual(
+                obj.stream.to_python(),  # type: ignore
+                {
+                    "offset": 100,
+                    "length": 123 + 5,
+                    "filter": ["/FlateDecode"],
+                    "decode_parms": [],
+                    "f": None,
+                    "ffilter": [],
+                    "fdecode_parms": [],
+                    "dl": None,
+                },
+            )
+            self.assertDictEqual(
+                obj.get_object().to_python(),
+                {
+                    "Filter": "/FlateDecode",
+                    "Length": 123 + 5,
+                    "Type": "/XRef",
+                    "otherfeature": [10, 20],
+                },
+            )

@@ -29,9 +29,8 @@ from .exceptions import (
 def get_first_object(
     buffer: BufferStream, offset: int, state: Optional[ParsingState] = None
 ) -> PDFObject:
-    with buffer.get_window():
-        buffer.seek(offset)
-        return next(iter_objects(buffer, state))
+    buffer.seek(offset)
+    return next(iter_objects(buffer, state))
 
 
 def iter_objects(
@@ -127,7 +126,15 @@ def _on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):
         last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc + 1, obj)
         if isinstance(stream.length, PDFInteger):
             buffer.seek(stream.offset + stream.length.to_python())
-            next_token = next(iter_tokens(buffer))
+            next_token = None
+            for i, next_token in enumerate(iter_tokens(buffer)):
+                if (
+                    isinstance(next_token, TokenKeyword)
+                    and next_token.value == b"endstream"
+                ):
+                    if i > 0:
+                        stream.length.value = next_token.start_loc - stream.offset
+                    break
             if not (
                 isinstance(next_token, TokenKeyword)
                 and next_token.value == b"endstream"
