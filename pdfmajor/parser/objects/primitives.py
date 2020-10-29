@@ -38,7 +38,7 @@ class PDFPrimitiveObject(PDFObject, Generic[T]):
         )
 
 
-class PDFString(PDFPrimitiveObject[str]):
+class PDFString(PDFPrimitiveObject[bytes]):
     pass
 
 

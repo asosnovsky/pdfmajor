@@ -50,7 +50,7 @@ def parse_string(buffer: BufferStream) -> TokenString:
                         return TokenString(
                             initialpos,
                             buffer.tell(),
-                            state.curtoken.decode(),
+                            state.curtoken,
                         )
     raise LexerEOF
 

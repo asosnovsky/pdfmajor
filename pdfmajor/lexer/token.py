@@ -77,7 +77,7 @@ class TokenNull(Token[None]):
     pass
 
 
-class TokenString(Token[str]):
+class TokenString(Token[bytes]):
     """Token representing PDF literal string
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.4.2
     """

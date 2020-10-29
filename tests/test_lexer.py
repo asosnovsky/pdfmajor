@@ -132,7 +132,7 @@ class Basics(TestCase):
                 token = parse_string(buffer)
                 self.assertIsInstance(token, TokenString)
                 self.assertEqual(token.start_loc, -1)
-                self.assertEqual(token.value, "this % is not a comment.")
+                self.assertEqual(token.value, b"this % is not a comment.")
                 self.assertEqual(token.end_loc, 25)
 
     def test_parse_string_nest_brackets(self):
@@ -142,7 +142,7 @@ class Basics(TestCase):
                 token = parse_string(buffer)
                 self.assertIsInstance(token, TokenString)
                 self.assertEqual(token.start_loc, -1)
-                self.assertEqual(token.value, "x - (y*2-z-(2+3))")
+                self.assertEqual(token.value, b"x - (y*2-z-(2+3))")
                 self.assertEqual(token.end_loc, 18)
 
     def test_parse_string_hex_chars(self):
@@ -154,7 +154,7 @@ class Basics(TestCase):
                 token = parse_string(buffer)
                 self.assertIsInstance(token, TokenString)
                 self.assertEqual(token.start_loc, -1)
-                self.assertEqual(token.value, "def  4ghi")
+                self.assertEqual(token.value, b"def  4ghi")
                 self.assertEqual(token.end_loc, 18)
 
     def test_parse_string_escape_char(self):
@@ -164,7 +164,7 @@ class Basics(TestCase):
                 token = parse_string(buffer)
                 self.assertIsInstance(token, TokenString)
                 self.assertEqual(token.start_loc, -1)
-                self.assertEqual(token.value, r"bach\slask")
+                self.assertEqual(token.value, br"bach\slask")
                 self.assertEqual(token.end_loc, 12)
 
     def test_parse_hex_string(self):
@@ -319,17 +319,17 @@ func/a/b{(c)do*}def
                 TokenInteger(start_loc=59, end_loc=61, value=-2),
                 TokenReal(start_loc=62, end_loc=64, value=Decimal("0.5")),
                 TokenReal(start_loc=65, end_loc=70, value=Decimal("1.234")),
-                TokenString(start_loc=71, end_loc=76, value="abc"),
-                TokenString(start_loc=77, end_loc=79, value=""),
-                TokenString(start_loc=80, end_loc=97, value="abc ( def ) ghi"),
-                TokenString(start_loc=98, end_loc=117, value="def  4ghi"),
-                TokenString(start_loc=118, end_loc=131, value=r"bach\slask"),
-                TokenString(start_loc=132, end_loc=142, value="foo\nbaa"),
+                TokenString(start_loc=71, end_loc=76, value=b"abc"),
+                TokenString(start_loc=77, end_loc=79, value=b""),
+                TokenString(start_loc=80, end_loc=97, value=b"abc ( def ) ghi"),
+                TokenString(start_loc=98, end_loc=117, value=b"def  4ghi"),
+                TokenString(start_loc=118, end_loc=131, value=br"bach\slask"),
+                TokenString(start_loc=132, end_loc=142, value=b"foo\nbaa"),
                 TokenString(
-                    start_loc=143, end_loc=169, value="this % is not a comment."
+                    start_loc=143, end_loc=169, value=b"this % is not a comment."
                 ),
-                TokenString(start_loc=170, end_loc=179, value="foo\nbaa"),
-                TokenString(start_loc=180, end_loc=190, value="foobaa"),
+                TokenString(start_loc=170, end_loc=179, value=b"foo\nbaa"),
+                TokenString(start_loc=180, end_loc=190, value=b"foobaa"),
                 TokenHexString(start_loc=191, end_loc=193, value=b""),
                 TokenHexString(start_loc=194, end_loc=198, value=b" "),
                 TokenHexString(start_loc=199, end_loc=210, value=b"@@ "),
@@ -340,18 +340,18 @@ func/a/b{(c)do*}def
                 TokenName(start_loc=230, end_loc=232, value="a"),
                 TokenName(start_loc=232, end_loc=234, value="b"),
                 TokenKeyword(start_loc=234, end_loc=235, value=b"{"),
-                TokenString(start_loc=235, end_loc=238, value="c"),
+                TokenString(start_loc=235, end_loc=238, value=b"c"),
                 TokenKeyword(start_loc=238, end_loc=241, value=b"do*"),
                 TokenKeyword(start_loc=241, end_loc=242, value=b"}"),
                 TokenKeyword(start_loc=242, end_loc=245, value=b"def"),
                 TokenArray(start_loc=246, end_loc=247, value=TArrayValue.OPEN),
                 TokenInteger(start_loc=248, end_loc=249, value=1),
-                TokenString(start_loc=250, end_loc=253, value="z"),
+                TokenString(start_loc=250, end_loc=253, value=b"z"),
                 TokenKeyword(start_loc=254, end_loc=255, value=b"!"),
                 TokenArray(start_loc=256, end_loc=257, value=TArrayValue.CLOSE),
                 TokenDictionary(start_loc=258, end_loc=260, value=TDictValue.OPEN),
                 TokenName(start_loc=261, end_loc=265, value="foo"),
-                TokenString(start_loc=266, end_loc=271, value="bar"),
+                TokenString(start_loc=266, end_loc=271, value=b"bar"),
                 TokenDictionary(start_loc=273, end_loc=275, value=TDictValue.CLOSE),
             ],
         )

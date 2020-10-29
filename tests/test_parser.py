@@ -55,12 +55,12 @@ class Collections(TestCase):
                 "Subtype": "/DictionaryExample",
                 "Version": Decimal("0.01"),
                 "IntegerItem": 12,
-                "StringItem": " a string ",
+                "StringItem": b" a string ",
                 "Subdictionary": {
                     "Item1": Decimal("0.4"),
                     "Item2": True,
-                    "LastItem": "  not! ",
-                    "VeryLastItem": "  OK ",
+                    "LastItem": b"  not! ",
+                    "VeryLastItem": b"  OK ",
                 },
             },
         )
@@ -68,7 +68,7 @@ class Collections(TestCase):
     def test_parse_array(self):
         self.run_test(
             raw=br"""[ 549  3.14  false  (  Ralph )   /SomeName ]""",
-            expected=[549, Decimal("3.14"), False, "  Ralph ", "/SomeName"],
+            expected=[549, Decimal("3.14"), False, b"  Ralph ", "/SomeName"],
         )
 
     def test_parse_nested_array(self):
@@ -129,7 +129,7 @@ class IndirectObjects(TestCase):
             << /x 1 /y 3>> endobj
             """,
             expected=[
-                IndirectObject(12, 1, 18, PDFString("Bring", 0, 0)),
+                IndirectObject(12, 1, 18, PDFString(b"Bring", 0, 0)),
                 IndirectObject(100, 0, 55, PDFHexString(b"3", 0, 0)),
                 IndirectObject(
                     13,
@@ -150,7 +150,7 @@ class IndirectObjects(TestCase):
 
             """,
             expected=[
-                IndirectObject(12, 1, 18, PDFString("Bring", 0, 0)),
+                IndirectObject(12, 1, 18, PDFString(b"Bring", 0, 0)),
                 IndirectObject(
                     10,
                     2,
@@ -173,7 +173,7 @@ class IndirectObjects(TestCase):
                 PDFComment(b" object references", (22, 41)),
                 PDFComment(b" start of object", (62, 79)),
                 PDFComment(b" object content", (110, 126)),
-                IndirectObject(10, 0, 58, PDFString("testing", 0, 0)),
+                IndirectObject(10, 0, 58, PDFString(b"testing", 0, 0)),
                 PDFComment(b"closing the object", (150, 169)),
                 IndirectObject(11, 1, 191, PDFInteger(2, 0, 0)),
             ],
