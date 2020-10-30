@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, TypeVar, Union
+from typing import Any, List, Optional
 
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.util import get_single_or_list, to_python, to_python_list

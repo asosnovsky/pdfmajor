@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional
 
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.regex import END_KEYWORD

@@ -1,24 +1,14 @@
-from typing import Iterator, List, NamedTuple, Type, Union
+from typing import Iterator, Type, Union
 
 from pdfmajor.lexer import iter_tokens
-from pdfmajor.lexer.token import (
-    Token,
-    TokenComplexType,
-    TokenComplexTypeVal,
-    TokenKeyword,
-)
+from pdfmajor.lexer.token import TokenComplexType, TokenComplexTypeVal, TokenKeyword
 from pdfmajor.streambuffer import BufferStream
 
 from .exceptions import BrokenFile, EarlyStop, ParserError
 from .objects.base import PDFContextualObject, PDFObject
 from .objects.collections import PDFDictionary
 from .objects.indirect import IndirectObject, ObjectRef
-from .objects.primitives import (
-    PDFInteger,
-    PDFNull,
-    PDFPrimitiveObject,
-    get_obj_from_token_primitive,
-)
+from .objects.primitives import PDFInteger, PDFNull, PDFPrimitiveObject
 from .state import ParsingState
 from .stream.PDFStream import PDFStream
 

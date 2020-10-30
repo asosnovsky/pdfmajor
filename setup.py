@@ -21,6 +21,7 @@ with open("README.md") as readme_file:
                 "black==20.8b1",
                 "bandit==1.6.2",
                 "isort==5.6.4",
+                "autoflake==1.4",
             ]
         },
         "description": "PDF parser",

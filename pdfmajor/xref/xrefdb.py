@@ -1,7 +1,6 @@
 from typing import Dict, Iterator, List, Optional, Tuple
 
 from pdfmajor.parser import get_first_object
-from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.collections import PDFDictionary
 from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
 from pdfmajor.parser.objects.primitives import PDFInteger

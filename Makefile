@@ -10,13 +10,15 @@ clean:
 	rm -rf *.egg-info
 
 lint:
+	autoflake --remove-all-unused-imports -r -i pdfmajor 
+	autoflake --remove-all-unused-imports -r -i tests 
 	isort pdfmajor
 	black pdfmajor
-	bandit -r pdfmajor
-	mypy pdfmajor
 	isort tests
 	black tests
+	mypy pdfmajor
 	mypy tests
+	bandit -r pdfmajor
 
 test:
 	./venv/bin/python -m unittest discover tests 

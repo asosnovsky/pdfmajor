@@ -1,4 +1,4 @@
-from typing import Any, Callable, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, List, Optional, Type, TypeVar, Union
 
 from pdfmajor.parser.objects.base import PDFObject
 

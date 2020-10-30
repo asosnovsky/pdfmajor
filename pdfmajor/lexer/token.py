@@ -1,6 +1,6 @@
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Generic, NamedTuple, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -42,15 +42,11 @@ class TokenComment(Token[bytes]):
     Detection of this type of token can be found in PDF 1.7 spec section 7.2.3
     """
 
-    pass
-
 
 class TokenKeyword(Token[bytes]):
     """Token representing PDF comments
     Detection of this type of token can be found in PDF 1.7 spec
     """
-
-    pass
 
 
 class TokenName(Token[str]):
@@ -58,15 +54,11 @@ class TokenName(Token[str]):
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.5
     """
 
-    pass
-
 
 class TokenBoolean(Token[bool]):
     """Token representing PDF booleans
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.2
     """
-
-    pass
 
 
 class TokenNull(Token[None]):
@@ -74,15 +66,11 @@ class TokenNull(Token[None]):
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.9
     """
 
-    pass
-
 
 class TokenString(Token[bytes]):
     """Token representing PDF literal string
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.4.2
     """
-
-    pass
 
 
 class TokenHexString(Token[bytes]):
@@ -90,23 +78,17 @@ class TokenHexString(Token[bytes]):
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.4.3
     """
 
-    pass
-
 
 class TokenInteger(Token[int]):
     """Token representing PDF integers
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.3
     """
 
-    pass
-
 
 class TokenReal(Token[Decimal]):
     """Token representing PDF decimals
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.3
     """
-
-    pass
 
 
 TokenNumber = Union[TokenInteger, TokenReal]
@@ -153,8 +135,6 @@ class TokenDictionary(Token[TDictValue]):
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.7
     """
 
-    pass
-
 
 class TArrayValue(Enum):
     OPEN = "["
@@ -165,8 +145,6 @@ class TokenArray(Token[TArrayValue]):
     """Token representing the brackets of an array
     Detection of this type of token can be found in PDF 1.7 spec section 7.3.6
     """
-
-    pass
 
 
 TokenComplexType = Union[TokenDictionary, TokenArray]

@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest import TestCase
 
 from pdfmajor.document.catalog import PDFDocumentCatalog
@@ -10,7 +9,6 @@ from pdfmajor.parser.objects.primitives import (
     PDFName,
     PDFString,
 )
-
 from tests.util import all_pdf_files
 
 

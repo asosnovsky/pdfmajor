@@ -1,11 +1,8 @@
-from pathlib import Path
 from typing import Dict, Tuple
 from unittest import TestCase
 
-from pdfmajor.streambuffer import BufferStream
 from pdfmajor.xref.xref import XRefRow
 from pdfmajor.xref.xrefdb import XRefDB
-
 from tests.util import all_pdf_files
 
 

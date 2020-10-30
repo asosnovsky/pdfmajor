@@ -1,6 +1,6 @@
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Callable, List, Optional
+from typing import Any, List
 from unittest import TestCase
 
 from pdfmajor.parser import iter_objects
