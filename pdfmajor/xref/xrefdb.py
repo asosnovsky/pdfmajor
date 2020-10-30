@@ -94,8 +94,9 @@ class XRefDB:
             else:
                 found_obj_type = "{{PDFPrimitive}}"
         else:
-            obj = self.objs.get(raw_ref, None)
-            if obj is None:
+            try:
+                obj = self.objs[raw_ref]
+            except KeyError:
                 raise XRefError(f"Missing valid obj for {xref}")
         if found_obj_type is None:
             raise XRefError("WARN: Failed to find a valid type for", xref)
@@ -106,15 +107,17 @@ class XRefDB:
         obj_num: ObjNum,
         gen_num: GenNum,
         buffer: BufferStream,
-    ) -> PDFObject:
+    ) -> IndirectObject:
         raw_ref, xref = (obj_num, gen_num), self.xrefs[(obj_num, gen_num)]
         obj = self.objs.get(raw_ref, None)
         if obj is None:
             with buffer.get_window():
-                obj = get_first_object(buffer, xref.offset)
-            if not isinstance(obj, IndirectObject):
-                raise InvalidXref(f"Offset for {xref} returned an invalid object {obj}")
-            self.objs[raw_ref] = obj
+                parsed_obj = get_first_object(buffer, xref.offset)
+            if not isinstance(parsed_obj, IndirectObject):
+                raise InvalidXref(
+                    f"Offset for {xref} returned an invalid object {parsed_obj}"
+                )
+            self.objs[raw_ref] = parsed_obj
         return self.objs[raw_ref]
 
     def has_xref(self, obj_num: ObjNum, gen_num: GenNum) -> bool:

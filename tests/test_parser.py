@@ -1,17 +1,16 @@
-from pathlib import Path
-from pdfmajor.parser import iter_objects
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
-from pdfmajor.parser.objects.primitives import PDFHexString, PDFInteger, PDFString
-
-from typing import Any, Callable, List, Optional
 from decimal import Decimal
+from pathlib import Path
+from typing import Any, Callable, List, Optional
 from unittest import TestCase
 
-from pdfmajor.streambuffer import BufferStream
-from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
+from pdfmajor.parser import iter_objects
 from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.comment import PDFComment
+from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
+from pdfmajor.parser.objects.primitives import PDFHexString, PDFInteger, PDFString
 from pdfmajor.parser.stream.PDFStream import PDFStream
+from pdfmajor.streambuffer import BufferStream
 
 CURRENT_FOLDER = Path(__file__).parent
 

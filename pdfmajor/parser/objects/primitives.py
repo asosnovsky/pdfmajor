@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Dict, Generic, Optional, Type, TypeVar
+from typing import Dict, Generic, Optional, Type, TypeVar, Union
 
 from pdfmajor.lexer.token import (
     Token,
@@ -80,7 +80,9 @@ _token_to_obj_map: Dict[Type[Token], Type[PDFPrimitiveObject]] = {
 }
 
 
-def get_obj_from_token_primitive(token: Token) -> Optional[PDFPrimitiveObject]:
+def get_obj_from_token_primitive(
+    token: Token,
+) -> Optional[Union[PDFPrimitiveObject, PDFNull]]:
     """converts tokens to their primitive object counterparts
 
     Args:
@@ -91,7 +93,7 @@ def get_obj_from_token_primitive(token: Token) -> Optional[PDFPrimitiveObject]:
     """
     obj_const = _token_to_obj_map.get(type(token), None)
     if obj_const:
-        return obj_const.from_token(token)
+        return obj_const.from_token(token)  # type: ignore
     elif isinstance(token, TokenNull):
         return PDFNull()
     else:

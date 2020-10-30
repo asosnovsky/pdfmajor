@@ -45,7 +45,7 @@ class PDFFileTrailer(NamedTuple):
             prev=pdfdict.get("Prev", None),
             info=pdfdict.get("Info", None),
             encrypt=encrypt,
-            encrypt_id=encrypt_id,
+            encrypt_id=encrypt_id,  # type: ignore
         )
 
     @classmethod

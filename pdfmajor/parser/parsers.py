@@ -1,4 +1,4 @@
-from typing import Iterator, List, NamedTuple, Type
+from typing import Iterator, List, NamedTuple, Type, Union
 
 from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.token import (
@@ -10,19 +10,22 @@ from pdfmajor.lexer.token import (
 from pdfmajor.streambuffer import BufferStream
 
 from .exceptions import BrokenFile, EarlyStop, ParserError
-from .stream.PDFStream import PDFStream
 from .objects.base import PDFContextualObject, PDFObject
 from .objects.collections import PDFDictionary
 from .objects.indirect import IndirectObject, ObjectRef
 from .objects.primitives import (
     PDFInteger,
+    PDFNull,
     PDFPrimitiveObject,
     get_obj_from_token_primitive,
 )
 from .state import ParsingState
+from .stream.PDFStream import PDFStream
 
 
-def on_primitive(pobj: PDFPrimitiveObject, state: ParsingState) -> Iterator[PDFObject]:
+def on_primitive(
+    pobj: Union[PDFPrimitiveObject, PDFNull], state: ParsingState
+) -> Iterator[PDFObject]:
     """Parses out a primitive value from the token
 
     Args:

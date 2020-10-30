@@ -1,33 +1,32 @@
 import io
-
 from decimal import Decimal
 from typing import List
 from unittest import TestCase
 
 from pdfmajor.lexer import iter_tokens
-from pdfmajor.lexer.number import parse_number
+from pdfmajor.lexer.comment import parse_comment
 from pdfmajor.lexer.dict_and_hex import parse_double_angled_bracket, parse_hexstring
-from pdfmajor.lexer.string import parse_string
-from pdfmajor.lexer.name import parse_name
 from pdfmajor.lexer.keyword import parse_keyword
-from pdfmajor.streambuffer import BufferStream
+from pdfmajor.lexer.name import parse_name
+from pdfmajor.lexer.number import parse_number
+from pdfmajor.lexer.string import parse_string
 from pdfmajor.lexer.token import (
-    TDictValue,
     TArrayValue,
+    TDictValue,
     Token,
+    TokenArray,
     TokenBoolean,
     TokenComment,
-    TokenNull,
-    TokenReal,
     TokenDictionary,
     TokenHexString,
     TokenInteger,
     TokenKeyword,
     TokenName,
-    TokenArray,
+    TokenNull,
+    TokenReal,
     TokenString,
 )
-from pdfmajor.lexer.comment import parse_comment
+from pdfmajor.streambuffer import BufferStream
 
 
 def make_stream_iter(data: bytes, buf_size: int):

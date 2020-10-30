@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Dict, Tuple
-from pdfmajor.xref.xrefdb import XRefDB
 from unittest import TestCase
 
 from pdfmajor.streambuffer import BufferStream
-from pdfmajor.xref.xref import XRefRow, iter_over_xref
+from pdfmajor.xref.xref import XRefRow
+from pdfmajor.xref.xrefdb import XRefDB
 
 CURRENT_FOLDER = Path(__file__).parent
 
@@ -689,6 +689,41 @@ class Standard(TestCase):
             },
         )
 
+    def test_colors(self):
+        self.run_test(
+            file_path=CURRENT_FOLDER / "samples" / "pdf" / "colors.pdf",
+            expected_xrefs={
+                (1, 0): XRefRow(offset=7435, obj_num=1, gen_num=0, use=b"n"),
+                (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
+                (3, 0): XRefRow(offset=316, obj_num=3, gen_num=0, use=b"n"),
+                (4, 0): XRefRow(offset=7578, obj_num=4, gen_num=0, use=b"n"),
+                (5, 0): XRefRow(offset=336, obj_num=5, gen_num=0, use=b"n"),
+                (6, 0): XRefRow(offset=6576, obj_num=6, gen_num=0, use=b"n"),
+                (7, 0): XRefRow(offset=6597, obj_num=7, gen_num=0, use=b"n"),
+                (8, 0): XRefRow(offset=6792, obj_num=8, gen_num=0, use=b"n"),
+                (9, 0): XRefRow(offset=7140, obj_num=9, gen_num=0, use=b"n"),
+                (10, 0): XRefRow(offset=7348, obj_num=10, gen_num=0, use=b"n"),
+                (11, 0): XRefRow(offset=7380, obj_num=11, gen_num=0, use=b"n"),
+                (12, 0): XRefRow(offset=7677, obj_num=12, gen_num=0, use=b"n"),
+                (13, 0): XRefRow(offset=7774, obj_num=13, gen_num=0, use=b"n"),
+            },
+            expected_types={
+                (1, 0): "/Page",
+                (2, 0): "{{PDFUnknownComplexType}}",
+                (3, 0): "{{PDFPrimitive}}",
+                (4, 0): "/Pages",
+                (5, 0): "{{PDFUnknownComplexType}}",
+                (6, 0): "{{PDFPrimitive}}",
+                (7, 0): "/FontDescriptor",
+                (8, 0): "{{PDFUnknownComplexType}}",
+                (9, 0): "/Font",
+                (10, 0): "{{PDFUnknownComplexType}}",
+                (11, 0): "{{PDFUnknownComplexType}}",
+                (12, 0): "/Catalog",
+                (13, 0): "{{PDFUnknownComplexType}}",
+            },
+        )
+
     def test_other_docs(self):
         for doc_path in (CURRENT_FOLDER / "samples" / "pdf").iterdir():
             with self.subTest(doc_path):
@@ -704,9 +739,9 @@ class Standard(TestCase):
                         }
                     )
                     print("=======", doc_path.name, "===== END")
-    
+
     def test_bad_unicode(self):
-        doc_path =  (CURRENT_FOLDER / "samples" / "pdf" / "bad-unicode.pdf")
+        doc_path = CURRENT_FOLDER / "samples" / "pdf" / "bad-unicode.pdf"
         with doc_path.open("rb") as fp:
             buffer = BufferStream(fp)
             db = XRefDB(buffer)

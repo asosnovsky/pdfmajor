@@ -1,4 +1,3 @@
-from pdfmajor.parser.objects.primitives import get_obj_from_token_primitive
 from typing import Iterator, Optional
 
 from pdfmajor.lexer import iter_tokens
@@ -10,6 +9,7 @@ from pdfmajor.lexer.token import (
     TokenDictionary,
     TokenKeyword,
 )
+from pdfmajor.parser.objects.primitives import get_obj_from_token_primitive
 from pdfmajor.streambuffer import BufferStream
 
 from .exceptions import InvalidKeywordPos

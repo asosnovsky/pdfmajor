@@ -1,6 +1,6 @@
 import io
 from contextlib import contextmanager
-from typing import Iterator, NamedTuple, Optional
+from typing import BinaryIO, Iterator, NamedTuple, Optional
 
 from pdfmajor.exceptions import PDFMajorException
 
@@ -20,7 +20,7 @@ class BufferStream:
 
     __slots__ = ["fp", "buffer_size"]
 
-    def __init__(self, fp: io.BufferedIOBase, buffer_size: int = 4096) -> None:
+    def __init__(self, fp: BinaryIO, buffer_size: int = 4096) -> None:
         """[summary]
 
         Args:

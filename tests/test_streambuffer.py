@@ -1,6 +1,7 @@
 import io
 from unittest import TestCase
-from pdfmajor.streambuffer import StreamEOF, BufferStream
+
+from pdfmajor.streambuffer import BufferStream, StreamEOF
 
 
 class UseCase(TestCase):
