@@ -38,10 +38,6 @@ class PDFPrimitiveObject(PDFObject, Generic[T]):
         )
 
 
-class PDFString(PDFPrimitiveObject[bytes]):
-    pass
-
-
 class PDFName(PDFPrimitiveObject[str]):
     def to_python(self):
         return "/" + self.value
@@ -51,7 +47,7 @@ class PDFBoolean(PDFPrimitiveObject[bool]):
     pass
 
 
-class PDFHexString(PDFPrimitiveObject[bytes]):
+class PDFString(PDFPrimitiveObject[bytes]):
     pass
 
 
@@ -74,7 +70,7 @@ _token_to_obj_map: Dict[Type[Token], Type[PDFPrimitiveObject]] = {
     TokenName: PDFName,
     TokenString: PDFString,
     TokenBoolean: PDFBoolean,
-    TokenHexString: PDFHexString,
+    TokenHexString: PDFString,
     TokenInteger: PDFInteger,
     TokenReal: PDFReal,
 }

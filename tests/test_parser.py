@@ -8,7 +8,7 @@ from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.comment import PDFComment
 from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFHexString, PDFInteger, PDFString
+from pdfmajor.parser.objects.primitives import PDFInteger, PDFString
 from pdfmajor.parser.stream.PDFStream import PDFStream
 from pdfmajor.streambuffer import BufferStream
 
@@ -146,7 +146,7 @@ class IndirectObjects(TestCase):
             """,
             expected=[
                 IndirectObject(12, 1, 18, PDFString(b"Bring", 0, 0)),
-                IndirectObject(100, 0, 55, PDFHexString(b"3", 0, 0)),
+                IndirectObject(100, 0, 55, PDFString(b"3", 0, 0)),
                 IndirectObject(
                     13,
                     8,

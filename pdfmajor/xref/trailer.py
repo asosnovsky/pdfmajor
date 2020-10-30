@@ -8,6 +8,7 @@ from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.indirect import ObjectRef
 from pdfmajor.parser.objects.primitives import PDFInteger
 from pdfmajor.streambuffer import BufferStream
+from pdfmajor.util import validate_object_or_none
 
 from .exceptions import BrokenFile, InvalidNumberOfRoots, NotRootElement
 
@@ -42,8 +43,8 @@ class PDFFileTrailer(NamedTuple):
 
     size: PDFInteger
     root: Optional[ObjectRef]
-    prev: Optional[PDFObject]
-    info: Optional[PDFObject]
+    prev: Optional[PDFInteger]
+    info: Optional[ObjectRef]
     encrypt: Optional[PDFObject]
     encrypt_id: Optional[PDFArray]
 
@@ -71,8 +72,8 @@ class PDFFileTrailer(NamedTuple):
         return cls(
             size=size,
             root=root,
-            prev=pdfdict.get("Prev", None),
-            info=pdfdict.get("Info", None),
+            prev=validate_object_or_none(pdfdict.get("Prev", None), PDFInteger),
+            info=validate_object_or_none(pdfdict.get("Info", None), ObjectRef),
             encrypt=encrypt,
             encrypt_id=encrypt_id,  # type: ignore
         )

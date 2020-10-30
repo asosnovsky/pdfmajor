@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pdfmajor.document.catalog import PDFDocumentCatalog
+from pdfmajor.document.PDFDocumentCatalog import PDFDocumentCatalog
 from pdfmajor.document.PDFParsingContext import PDFParsingContext
 from pdfmajor.parser.objects.indirect import ObjectRef
 from pdfmajor.parser.objects.primitives import (
@@ -76,3 +76,4 @@ class Catalog(TestCase):
                 parser = PDFParsingContext(buffer)
                 parser.get_catalog()
                 self.assertEqual(len(parser.health_report), 0)
+                parser.get_info()

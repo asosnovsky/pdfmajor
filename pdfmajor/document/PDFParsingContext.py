@@ -1,8 +1,6 @@
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Tuple, Type, TypeVar
+from typing import Any, BinaryIO, Dict, Optional, Set, Tuple, Type, TypeVar
 
-from pdfmajor.document.catalog import PDFDocumentCatalog
-from pdfmajor.document.exceptions import InvalidCatalogObj, MissingCatalogObj
 from pdfmajor.healthlog import PDFHealthReport
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
@@ -13,6 +11,9 @@ from pdfmajor.util import validate_object_or_none
 from pdfmajor.xref.exceptions import InvalidNumberOfRoots, NotRootElement
 from pdfmajor.xref.trailer import get_root_obj
 from pdfmajor.xref.xrefdb import XRefDB
+
+from .exceptions import InvalidCatalogObj, MissingCatalogObj, TooManyInfoObj
+from .PDFDocumentCatalog import PDFDocumentCatalog
 
 
 class PDFParsingContext:
@@ -85,6 +86,17 @@ class PDFParsingContext:
                 self.health_report.write_error(err)
         return out
 
+    def get_info(self) -> Optional[PDFObject]:
+        """get a Parsed version of the PDF Info object if it exists (see PDF spec 1.7 section 14.3.3 for more detail)"""
+        with self.buffer.get_window():
+            info_obj = _find_indirect_obj_for_info(
+                self.xrefdb, self.buffer, self.health_report
+            )
+            if info_obj is None:
+                return None
+            else:
+                return info_obj.get_object()
+
     def get_catalog(self) -> PDFDocumentCatalog:
         """Gets the catalog for a document
 
@@ -155,3 +167,18 @@ def _find_indirect_obj_for_root(
         except StopIteration:
             raise MissingCatalogObj()
     return root_element
+
+
+def _find_indirect_obj_for_info(
+    xrefdb: XRefDB, buffer: BufferStream, health_report: PDFHealthReport
+) -> Optional[IndirectObject]:
+    elements: Set[ObjectRef] = set()
+    for trailer in xrefdb.trailers:
+        if trailer.info is not None:
+            elements.add(trailer.info)
+    if len(elements) > 1:
+        health_report.write_error(TooManyInfoObj(elements))
+    elif len(elements) == 0:
+        return None
+    ref = next(iter(elements))
+    return xrefdb.get_obj(ref.obj_num, ref.gen_num, buffer)

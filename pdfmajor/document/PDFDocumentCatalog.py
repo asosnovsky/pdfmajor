@@ -16,11 +16,3 @@ class PDFDocumentCatalog(NamedTuple):
     metadata: Optional[PDFDictionary]
 
     raw: Dict[str, Any]  # for other properties
-
-
-# def _get_version(buffer: BufferStream) -> Optional[str]:
-#     with buffer.get_window():
-#         token = next(iter_tokens(buffer))
-#         if isinstance(token, TokenComment):
-#             return token.value.decode()
-#     return None
