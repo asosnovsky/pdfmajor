@@ -74,7 +74,7 @@ class Catalog(TestCase):
 
     def test_all(self):
         for file_path, buffer in all_pdf_files.items():
-            with self.subTest(file_path):
+            with self.subTest(file_path), buffer.get_window():
                 parser = PDFParsingContext(buffer)
                 parser.get_catalog()
                 self.assertEqual(len(parser.health_report), 0)
