@@ -1,5 +1,6 @@
-from pdfmajor.parser.objects.base import PDFObject
 from typing import Any, List, Optional, TypeVar, Union
+
+from pdfmajor.parser.objects.base import PDFObject
 
 from ..objects.collections import PDFDictionary
 from ..objects.primitives import PDFNull

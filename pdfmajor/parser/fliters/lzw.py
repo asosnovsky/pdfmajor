@@ -1,6 +1,8 @@
 from io import BytesIO
 from typing import List, Optional
+
 from ..exceptions import DecodeFailed
+
 
 ##  LZWDecoder
 ##

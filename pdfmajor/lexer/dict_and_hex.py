@@ -1,8 +1,9 @@
-from pdfmajor.streambuffer import BufferStream
+from typing import Union
+
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.regex import END_HEX_STRING, HEX_PAIR, SPC
 from pdfmajor.lexer.token import TDictValue, TokenDictionary, TokenHexString
-from typing import Union
+from pdfmajor.streambuffer import BufferStream
 
 
 def parse_double_angled_bracket(

@@ -1,16 +1,10 @@
 from dataclasses import dataclass
-from pdfmajor.lexer.exceptions import (
-    InvalidHexToken,
-    LexerEOF,
-    LexerError,
-)
-
-from pdfmajor.streambuffer import BufferStream
-from pdfmajor.lexer.token import TokenName
-from pdfmajor.lexer.regex import HEX, END_LITERAL
-
-
 from typing import Optional
+
+from pdfmajor.lexer.exceptions import InvalidHexToken, LexerEOF, LexerError
+from pdfmajor.lexer.regex import END_LITERAL, HEX
+from pdfmajor.lexer.token import TokenName
+from pdfmajor.streambuffer import BufferStream
 
 
 @dataclass

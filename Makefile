@@ -10,9 +10,14 @@ clean:
 	rm -rf *.egg-info
 
 lint:
+	isort pdfmajor
 	black pdfmajor
 	bandit -r pdfmajor
 	mypy pdfmajor
+	isort tests
+	black tests
+	bandit -r tests
+	mypy tests
 
 test:
 	./venv/bin/python -m unittest discover tests 

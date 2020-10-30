@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+
 from ..exceptions import ParserError
 from .base import PDFContextualObject, PDFObject
 from .primitives import PDFName
@@ -12,6 +13,13 @@ class PDFArray(List[PDFObject], PDFContextualObject):
 
     def to_python(self) -> List[Any]:
         return [x.to_python() for x in self]
+
+    @classmethod
+    def from_list(cls, data: List[PDFObject]):
+        out = cls()
+        for item in data:
+            out.pass_item(item)
+        return out
 
 
 class PDFDictionary(Dict[str, PDFObject], PDFContextualObject):

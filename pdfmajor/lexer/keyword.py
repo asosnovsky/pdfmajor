@@ -1,13 +1,9 @@
-from pdfmajor.streambuffer import BufferStream
-from pdfmajor.lexer.exceptions import LexerEOF
-from pdfmajor.lexer.token import (
-    Token,
-    TokenBoolean,
-    TokenKeyword,
-    TokenNull,
-)
-from pdfmajor.lexer.regex import END_KEYWORD
 from typing import Optional, Union
+
+from pdfmajor.lexer.exceptions import LexerEOF
+from pdfmajor.lexer.regex import END_KEYWORD
+from pdfmajor.lexer.token import Token, TokenBoolean, TokenKeyword, TokenNull
+from pdfmajor.streambuffer import BufferStream
 
 
 def parse_keyword(buffer: BufferStream, initialpos: Optional[int] = None) -> Token:

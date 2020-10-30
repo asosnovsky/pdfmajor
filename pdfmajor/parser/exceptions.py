@@ -1,6 +1,7 @@
 from typing import List
+
+from pdfmajor.exceptions import BrokenFile, PDFMajorException
 from pdfmajor.lexer.token import TokenKeyword
-from pdfmajor.exceptions import PDFMajorException, BrokenFile
 
 
 class ParserError(PDFMajorException):

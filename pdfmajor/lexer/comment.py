@@ -1,8 +1,6 @@
 from pdfmajor.lexer.exceptions import LexerEOF
 from pdfmajor.lexer.regex import EOL
-from pdfmajor.lexer.token import (
-    TokenComment,
-)
+from pdfmajor.lexer.token import TokenComment
 from pdfmajor.streambuffer import BufferStream
 
 

@@ -1,18 +1,19 @@
 from typing import Iterator
-from pdfmajor.lexer.dict_and_hex import parse_double_angled_bracket
-from pdfmajor.lexer.string import parse_string
-from pdfmajor.lexer.keyword import parse_keyword
-from pdfmajor.lexer.number import parse_number
-from pdfmajor.lexer.name import parse_name
+
 from pdfmajor.lexer.comment import parse_comment
+from pdfmajor.lexer.dict_and_hex import parse_double_angled_bracket
+from pdfmajor.lexer.keyword import parse_keyword
+from pdfmajor.lexer.name import parse_name
+from pdfmajor.lexer.number import parse_number
 from pdfmajor.lexer.regex import NONSPC
+from pdfmajor.lexer.string import parse_string
 from pdfmajor.lexer.token import (
     TArrayValue,
     TDictValue,
     Token,
-    TokenDictionary,
-    TokenKeyword,
     TokenArray,
+    TokenDictionary,
+    TokenKeyword
 )
 from pdfmajor.streambuffer import BufferStream
 

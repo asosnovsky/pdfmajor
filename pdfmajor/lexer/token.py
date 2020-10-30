@@ -1,6 +1,6 @@
+from decimal import Decimal
 from enum import Enum
 from typing import Any, Generic, NamedTuple, TypeVar, Union
-from decimal import Decimal
 
 T = TypeVar("T")
 

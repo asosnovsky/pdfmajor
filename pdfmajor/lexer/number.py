@@ -1,15 +1,10 @@
 from decimal import Decimal
 from typing import Optional
-from pdfmajor.streambuffer import BufferStream
+
 from pdfmajor.lexer.exceptions import InvalidToken, LexerEOF, LexerError
-from pdfmajor.lexer.token import (
-    TokenReal,
-    TokenNumber,
-    TokenInteger,
-)
-from pdfmajor.lexer.regex import (
-    END_NUMBER,
-)
+from pdfmajor.lexer.regex import END_NUMBER
+from pdfmajor.lexer.token import TokenInteger, TokenNumber, TokenReal
+from pdfmajor.streambuffer import BufferStream
 
 
 def parse_number(

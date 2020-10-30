@@ -10,7 +10,6 @@
 
 
 import array
-
 from typing import Optional
 
 from ..exceptions import DecodeFailed

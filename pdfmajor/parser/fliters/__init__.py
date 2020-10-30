@@ -1,16 +1,13 @@
 import zlib
-
-from typing import Any, Dict, List, Optional
 from base64 import a85decode
 from binascii import a2b_hex
-from ..exceptions import InvalidDecoderOrNotImplemented
+from typing import Any, Dict, List, Optional
 
-from .types import FilterType
+from ..exceptions import InvalidDecoderOrNotImplemented
+from .ccit import ccittfaxdecode
 from .lzw import lzwdecode
 from .rld import rldecode
-from .ccit import ccittfaxdecode
-from ..exceptions import InvalidDecoderOrNotImplemented
-
+from .types import FilterType
 
 _filter_type_name_mapping: Dict[str, FilterType] = {
     "FlateDecode": FilterType.FlateDecode,

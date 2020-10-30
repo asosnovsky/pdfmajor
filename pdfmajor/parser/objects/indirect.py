@@ -1,6 +1,7 @@
 from typing import Optional
 
 from pdfmajor.parser.stream.PDFStream import PDFStream
+
 from .base import PDFContextualObject, PDFObject
 
 
