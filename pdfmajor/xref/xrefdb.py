@@ -1,11 +1,15 @@
-from pdfmajor.parser.objects.collections import PDFDictionary
-from pdfmajor.streambuffer import BufferStream
 from typing import Dict, Iterator, List, Optional, Tuple
 
-from pdfmajor.parser.objects.indirect import IndirectObject
 from pdfmajor.parser import get_first_object
-from .xref import XRefRow, iter_over_xref
-from .exceptions import InvalidIndirectObjAccess, InvalidXref, XRefError
+from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.parser.objects.collections import PDFDictionary
+from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
+from pdfmajor.parser.objects.primitives import PDFInteger
+from pdfmajor.streambuffer import BufferStream
+
+from .exceptions import BrokenFile, InvalidXref, XRefError
+from .trailer import PDFFileTrailer
+from .xref import XRefRow, find_start_of_xref, iter_over_xref
 
 # simple type aliases for better readability
 ObjNum = int
@@ -21,11 +25,35 @@ class XRefDB:
         self.objs: Dict[RawRef, IndirectObject] = {}
         self.types: Dict[RawRef, ObjType] = {}
         self.xrefs: Dict[RawRef, XRefRow] = {}
+        self.trailers: List[PDFFileTrailer] = []
 
         with buffer.get_window():
-            for xref in iter_over_xref(buffer):
-                if xref.use == b"n":
-                    self.xrefs[(xref.obj_num, xref.gen_num)] = xref
+            start_offset = find_start_of_xref(buffer, True)
+            while True:
+                for xref in iter_over_xref(buffer, start_offset, True):
+                    if xref.use == b"n":
+                        self.xrefs[(xref.obj_num, xref.gen_num)] = xref
+                trailer = PDFFileTrailer.from_buffer(buffer)
+                self.trailers.append(trailer)
+                if trailer.prev is not None:
+                    if isinstance(trailer.prev, PDFInteger):
+                        start_offset = trailer.prev.to_python()
+                    elif isinstance(trailer.prev, ObjectRef):
+                        obj = self.get_obj(
+                            trailer.prev.obj_num, trailer.prev.gen_num, buffer=buffer
+                        )
+                        if not isinstance(obj, PDFInteger):
+                            raise BrokenFile(
+                                f"trailer had an invalid prev options {trailer.prev}"
+                            )
+                        else:
+                            start_offset = obj.to_python()
+                    else:
+                        raise BrokenFile(
+                            f"trailer had an invalid prev options {trailer.prev}"
+                        )
+                else:
+                    break
 
     def get_obj_by_type(
         self, buffer: BufferStream, obj_type: ObjType
@@ -55,13 +83,7 @@ class XRefDB:
         raw_ref, xref = (obj_num, gen_num), self.xrefs[(obj_num, gen_num)]
         found_obj_type: Optional[str] = self.types.get(raw_ref, None)
         if found_obj_type is None:
-            obj = self.objs.get(raw_ref, None)
-            if obj is None:
-                obj = get_first_object(buffer, xref.offset)
-                if not isinstance(obj, IndirectObject):
-                    raise InvalidXref(
-                        f"Offset for {xref} returned an invalid object {obj}"
-                    )
+            obj = self.get_obj(*raw_ref, buffer=buffer)
             obj_dict = obj.get_object()
             if isinstance(obj_dict, PDFDictionary):
                 type_name = obj_dict.get("Type", None)
@@ -78,6 +100,22 @@ class XRefDB:
         if found_obj_type is None:
             raise XRefError("WARN: Failed to find a valid type for", xref)
         return found_obj_type
+
+    def get_obj(
+        self,
+        obj_num: ObjNum,
+        gen_num: GenNum,
+        buffer: BufferStream,
+    ) -> PDFObject:
+        raw_ref, xref = (obj_num, gen_num), self.xrefs[(obj_num, gen_num)]
+        obj = self.objs.get(raw_ref, None)
+        if obj is None:
+            with buffer.get_window():
+                obj = get_first_object(buffer, xref.offset)
+            if not isinstance(obj, IndirectObject):
+                raise InvalidXref(f"Offset for {xref} returned an invalid object {obj}")
+            self.objs[raw_ref] = obj
+        return self.objs[raw_ref]
 
     def has_xref(self, obj_num: ObjNum, gen_num: GenNum) -> bool:
         return (obj_num, gen_num) in self.xrefs.keys()

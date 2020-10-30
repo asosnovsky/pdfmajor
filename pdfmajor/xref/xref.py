@@ -1,9 +1,10 @@
 from typing import Iterator, Literal, NamedTuple, Union
-from pdfmajor.lexer.token import TokenInteger, TokenKeyword
+
 from pdfmajor.lexer import iter_tokens
+from pdfmajor.lexer.token import TokenInteger, TokenKeyword
 from pdfmajor.streambuffer import BufferStream
 
-from .exceptions import PDFNoValidXRef, BrokenFile, UnexpectedEOF
+from .exceptions import BrokenFile, PDFNoValidXRef, UnexpectedEOF
 
 
 class XRefRow(NamedTuple):
@@ -37,16 +38,18 @@ def find_start_of_xref(buffer: BufferStream, strict: bool = False) -> int:
     return int(prev)
 
 
-def iter_over_xref(buffer: BufferStream, strict: bool = False) -> Iterator[XRefRow]:
-    start_offset = find_start_of_xref(buffer, strict)
+def iter_over_xref(
+    buffer: BufferStream, start_offset: int, strict: bool = False
+) -> Iterator[XRefRow]:
     buffer.seek(start_offset)
     first_token = next(iter_tokens(buffer))
     if isinstance(first_token, TokenInteger):
         raise NotImplementedError("XRefStream: PDF-1.5")
     elif isinstance(first_token, TokenKeyword):
         if first_token.value == b"xref":
-            return iter_over_standard_xref(buffer, strict)
-    raise BrokenFile("Missing a valid XRef table")
+            yield from iter_over_standard_xref(buffer, strict)
+    else:
+        raise BrokenFile("Missing a valid XRef table")
 
 
 #     # read xref table

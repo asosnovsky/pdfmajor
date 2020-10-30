@@ -1,4 +1,4 @@
-from pdfmajor.exceptions import PDFMajorException, BrokenFile
+from pdfmajor.exceptions import BrokenFile, PDFMajorException
 
 
 class XRefError(PDFMajorException):
