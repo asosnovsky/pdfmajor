@@ -1,9 +1,8 @@
 from pathlib import Path
+from pdfmajor.document.PDFParsingContext import PDFParsingContext
 from typing import BinaryIO
 
-from pdfmajor.healthlog import PDFHealthReport
 from pdfmajor.streambuffer import BufferStream
-from pdfmajor.xref.xrefdb import XRefDB
 
 
 class PDFDocument:
@@ -22,7 +21,11 @@ class PDFDocument:
         return cls(BufferStream(path.open("rb"), buffer_size))
 
     def __init__(self, buffer: BufferStream) -> None:
-        self.buffer = buffer
-        self.health_report = PDFHealthReport()
-        with self.buffer.get_window():
-            self.xref_db = XRefDB(buffer)
+        self.__parser = PDFParsingContext(buffer)
+        self.catalog = self.__parser.get_catalog()
+        self.info = self.__parser.get_info()
+
+    @property
+    def health_report(self):
+        """A log of errors that occured in the document during the processing of the file"""
+        return self.__parser.health_report
