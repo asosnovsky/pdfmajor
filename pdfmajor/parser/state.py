@@ -1,25 +1,31 @@
 from typing import Iterator, List, Optional, Tuple, Union
 
+from pdfmajor.healthlog import PDFHealthReport
+
 from .exceptions import ParserError
 from .objects.base import PDFContextualObject, PDFObject
-from .objects.primitives import PDFInteger
 from .objects.comment import PDFComment
 from .objects.indirect import IndirectObject
+from .objects.primitives import PDFInteger
 
 
 class ParsingState:
 
-    __slots__ = ["context_stack", "int_collection", "last_obj"]
+    __slots__ = ["context_stack", "int_collection", "last_obj", "health_report"]
 
     def __init__(
         self,
         context_stack: List[PDFContextualObject],
         int_collection: List[Union[PDFInteger, int]],
         last_obj: Optional[PDFObject] = None,
+        health_report: Optional[PDFHealthReport] = None,
     ) -> None:
         self.context_stack = context_stack
         self.int_collection = int_collection
         self.last_obj = last_obj
+        self.health_report = (
+            health_report if health_report is not None else PDFHealthReport()
+        )
 
     def __repr__(self) -> str:
         return "ParsingState:[{stackc}]({cur_stack}, ints={ints}, last={lobj})".format(
@@ -87,7 +93,7 @@ class ParsingState:
             IndirectObject(obj_num=obj_num, gen_num=gen_num, offset=offset)
         )
 
-    def flush_int_collections(self) -> Iterator[PDFObject]:
+    def flush_int_collections(self, up_to: int = 0) -> Iterator[PDFObject]:
         """clear out the int-collection
 
         Yields:
@@ -95,20 +101,21 @@ class ParsingState:
         """
         cur_ctx = self.current_context
         if cur_ctx is not None:
-            for obj in self.int_collection:
+            while len(self.int_collection) > up_to:
+                obj = self.int_collection.pop(0)
                 if not isinstance(obj, PDFInteger):
                     raise ParserError(
                         f"Invalid int-collection contains none PDFInteger types {obj}"
                     )
                 cur_ctx.pass_item(obj)
         else:
-            for obj in self.int_collection:
+            while len(self.int_collection) > up_to:
+                obj = self.int_collection.pop(0)
                 if not isinstance(obj, PDFInteger):
                     raise ParserError(
                         f"Invalid int-collection contains none PDFInteger types {obj}"
                     )
                 yield obj
-        self.int_collection = []
 
     def feed_or_yield_objs(self, next_objs: List[PDFObject]) -> Iterator[PDFObject]:
         """If there context, then feed the objects into it, otherwise yield them

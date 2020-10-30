@@ -1,45 +1,50 @@
 from typing import Iterator, List, NamedTuple, Type
 
-from pdfmajor.lexer.token import Token, TokenComplexType, TokenComplexTypeVal
+from pdfmajor.lexer import iter_tokens
+from pdfmajor.lexer.token import (
+    Token,
+    TokenComplexType,
+    TokenComplexTypeVal,
+    TokenKeyword,
+)
+from pdfmajor.streambuffer import BufferStream
 
-from .state import ParsingState
-from .exceptions import ParserError
-from .objects.base import PDFObject
+from .exceptions import BrokenFile, EarlyStop, ParserError
+from .stream.PDFStream import PDFStream
 from .objects.base import PDFContextualObject, PDFObject
-from .objects.primitives import PDFInteger, get_obj_from_token_primitive
+from .objects.collections import PDFDictionary
+from .objects.indirect import IndirectObject, ObjectRef
+from .objects.primitives import (
+    PDFInteger,
+    PDFPrimitiveObject,
+    get_obj_from_token_primitive,
+)
+from .state import ParsingState
 
 
-class ParsingAttempt(NamedTuple):
-    success: bool
-    next_objs: List[PDFObject]
-
-
-def attempt_parse_prim(token: Token, state: ParsingState) -> ParsingAttempt:
-    """Attempt to parse out a primitive value from the token
+def on_primitive(pobj: PDFPrimitiveObject, state: ParsingState) -> Iterator[PDFObject]:
+    """Parses out a primitive value from the token
 
     Args:
-        token (Token): [description]
-        state (ParsingState): [description]
+        pobj (PDFPrimitiveObject)
+        state (ParsingState)
 
-    Returns:
-        ParsingAttempt
+    Yields:
+        Iterator[PDFObject]
     """
-    prim_obj = get_obj_from_token_primitive(token)
-    if prim_obj is not None:
-        out: List[PDFObject] = []
-        state.set_last_obj(prim_obj)
-        if isinstance(prim_obj, PDFInteger):
-            if len(state.int_collection) <= 1:
-                state.int_collection.append(prim_obj)
-            else:
-                for obj in state.flush_int_collections():
-                    out.append(obj)
+    state.set_last_obj(pobj)
+    if isinstance(pobj, PDFInteger):
+        for obj in state.flush_int_collections(1):
+            yield obj
+        state.int_collection.append(pobj)
+    else:
+        for obj in state.flush_int_collections():
+            yield obj
+        cur_ctx = state.current_context
+        if cur_ctx is not None:
+            cur_ctx.pass_item(pobj)
         else:
-            for obj in state.flush_int_collections():
-                out.append(obj)
-            out.append(prim_obj)
-        return ParsingAttempt(True, out)
-    return ParsingAttempt(False, [])
+            yield pobj
 
 
 def deal_with_collection_object(
@@ -75,3 +80,87 @@ def deal_with_collection_object(
         raise ParserError(
             f"Invalid end of {cls_const} specified at {token} with no start"
         )
+
+
+def on_endobj(state: ParsingState, token: TokenKeyword) -> IndirectObject:
+    """finish off the current context, assuming we are handling an indirect-object
+
+    Args:
+        token (TokenKeyword)
+
+    Raises:
+        BrokenFile: if the object fif not get initilized with two integers
+        InvalidKeywordPos: If the context is not an indirect object
+
+    Yields:
+        PDFObject
+    """
+    last_ctx = state.context_stack.pop()
+    if isinstance(last_ctx, IndirectObject):
+        if len(state.int_collection) > 1:
+            raise BrokenFile(f"Invalid number of integers in obj defition {token}")
+        for num in state.flush_int_collections():
+            last_ctx.pass_item(num)
+        return last_ctx
+    else:
+        raise ParserError(f"Recived an endobj while not procesing an indirect object")
+
+
+def on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):
+    """Initilize a PDFStream
+
+    Args:
+        token (TokenKeyword)
+
+    Raises:
+        ParserError: if the current context is not an indirect object
+    """
+    last_ctx = state.current_context
+    if last_ctx is not None and isinstance(last_ctx, IndirectObject):
+        obj = last_ctx.get_object()
+        if not isinstance(obj, PDFDictionary):
+            raise ParserError(f"Cannot initilize a pdfstream with {type(obj)}")
+        last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc + 1, obj)
+        if isinstance(stream.length, PDFInteger):
+            buffer.seek(stream.offset + stream.length.to_python())
+            next_token = None
+            for i, next_token in enumerate(iter_tokens(buffer)):
+                if (
+                    isinstance(next_token, TokenKeyword)
+                    and next_token.value == b"endstream"
+                ):
+                    if i > 0:
+                        stream.length.value = next_token.start_loc - stream.offset
+                        state.health_report.write(
+                            issue_name="InvalidPDFStreamLength",
+                            additional_info=f"""
+                            start_token={token}
+                            end_token={next_token}
+                            object_dictionary={obj}
+                        """,
+                        )
+                    break
+            if not (
+                isinstance(next_token, TokenKeyword)
+                and next_token.value == b"endstream"
+            ):
+                raise BrokenFile(
+                    f"stream did not contain 'endstream', instead the token {next_token} was found"
+                )
+        elif isinstance(stream.length, ObjectRef):
+            yield last_ctx
+            raise EarlyStop(
+                "cannot proceed parsing as the stream.length object is an indirect object"
+            )
+    else:
+        raise ParserError(f"PDFStream is missing initilization dictionary")
+
+
+def on_indirect_ref_close(state: ParsingState):
+    obj_num, gen_num = state.get_indobj_values()
+    obj = ObjectRef(obj_num, gen_num)
+    cur_ctx = state.current_context
+    if cur_ctx is not None:
+        cur_ctx.pass_item(obj)
+    else:
+        yield obj

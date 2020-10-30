@@ -1,6 +1,6 @@
 from pathlib import Path
 from pdfmajor.parser import iter_objects
-from pdfmajor.parser.objects.collections import PDFDictionary
+from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.primitives import PDFHexString, PDFInteger, PDFString
 
 from typing import Any, Callable, List, Optional
@@ -116,6 +116,23 @@ class IndirectObjects(TestCase):
                 )
             with self.assertRaises((StopIteration, EOFError)):
                 next(it)
+
+    def test_array_ofindirects(self):
+        self.run_test(
+            raw=br"""[0 1 3 R 2 3 23 4 R 31 2 R]""",
+            expected=[
+                PDFArray.from_list(
+                    [
+                        PDFInteger(0, 0, 0),
+                        ObjectRef(1, 3),
+                        PDFInteger(2, 0, 0),
+                        PDFInteger(3, 0, 0),
+                        ObjectRef(23, 4),
+                        ObjectRef(31, 2),
+                    ]
+                )
+            ],
+        )
 
     def test_parse_simple_indobj(self):
         self.run_test(
