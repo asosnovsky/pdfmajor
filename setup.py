@@ -20,6 +20,7 @@ with open("README.md") as readme_file:
                 "mypy==0.790",
                 "black==20.8b1",
                 "bandit==1.6.2",
+                "isort==5.6.4",
             ]
         },
         "description": "PDF parser",

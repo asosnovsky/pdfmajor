@@ -1,0 +1,15 @@
+{
+	"python.pythonPath": "venv/bin/python",
+	"python.formatting.provider": "black",
+	"editor.tabSize": 2,
+	"python.testing.unittestArgs": [
+		"-v",
+		"-s",
+		"./tests",
+		"-p",
+		"test_*.py"
+	],
+	"python.testing.pytestEnabled": false,
+	"python.testing.nosetestsEnabled": false,
+	"python.testing.unittestEnabled": true
+}

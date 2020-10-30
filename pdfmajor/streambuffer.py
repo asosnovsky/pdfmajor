@@ -1,6 +1,7 @@
 import io
-from typing import Iterator, NamedTuple, Optional
 from contextlib import contextmanager
+from typing import Iterator, NamedTuple, Optional
+
 from pdfmajor.exceptions import PDFMajorException
 
 

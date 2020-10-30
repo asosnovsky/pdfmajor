@@ -1,8 +1,8 @@
 from datetime import datetime
-from pdfmajor.lexer.token import TokenComment
 from typing import Any, Dict, NamedTuple, Optional, Tuple
 
 from pdfmajor.lexer import iter_tokens
+from pdfmajor.lexer.token import TokenComment
 from pdfmajor.streambuffer import BufferStream
 
 
