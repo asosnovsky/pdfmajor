@@ -6,18 +6,17 @@ from pdfmajor.streambuffer import BufferStream
 from pdfmajor.xref.xref import XRefRow
 from pdfmajor.xref.xrefdb import XRefDB
 
-CURRENT_FOLDER = Path(__file__).parent
+from tests.util import all_pdf_files
 
 
 class Standard(TestCase):
     def run_test(
         self,
-        file_path: Path,
+        file_name: str,
         expected_xrefs: Dict[Tuple[int, int], XRefRow],
         expected_types: Dict[Tuple[int, int], str],
     ):
-        with file_path.open("rb") as fp:
-            buffer = BufferStream(fp)
+        with all_pdf_files[file_name].get_window() as buffer:
             db = XRefDB(buffer)
             self.assertDictEqual(
                 db.xrefs,
@@ -33,7 +32,7 @@ class Standard(TestCase):
 
     def test_char_doc(self):
         self.run_test(
-            file_path=(CURRENT_FOLDER / "samples" / "pdf" / "chars.pdf"),
+            file_name="chars.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=27259, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -104,7 +103,7 @@ class Standard(TestCase):
 
     def test_bar_charts(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "bar-charts.pdf",
+            file_name="bar-charts.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=17, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=169, obj_num=2, gen_num=0, use=b"n"),
@@ -691,7 +690,7 @@ class Standard(TestCase):
 
     def test_colors(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "colors.pdf",
+            file_name="colors.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=7435, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -726,7 +725,7 @@ class Standard(TestCase):
 
     def test_line_chart(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "line-charts.pdf",
+            file_name="line-charts.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=17, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=168, obj_num=2, gen_num=0, use=b"n"),
@@ -847,7 +846,7 @@ class Standard(TestCase):
 
     def test_tables(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "tables.pdf",
+            file_name="tables.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=17, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=168, obj_num=2, gen_num=0, use=b"n"),
@@ -928,7 +927,7 @@ class Standard(TestCase):
 
     def test_looseless(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "looseless.pdf",
+            file_name="looseless.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=1311539, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -979,7 +978,7 @@ class Standard(TestCase):
 
     def test_shapes(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "shapes.pdf",
+            file_name="shapes.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=6001, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -1014,7 +1013,7 @@ class Standard(TestCase):
 
     def test_fonts(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "fonts.pdf",
+            file_name="fonts.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=15601, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -1069,7 +1068,7 @@ class Standard(TestCase):
 
     def test_jpg(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "jpg.pdf",
+            file_name="jpg.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=612894, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -1116,7 +1115,7 @@ class Standard(TestCase):
 
     def test_bad_chars(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "bad-chars.pdf",
+            file_name="bad-chars.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=14026, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -1161,7 +1160,7 @@ class Standard(TestCase):
 
     def test_font_color(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "font-color.pdf",
+            file_name="font-color.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=6019, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -1196,7 +1195,7 @@ class Standard(TestCase):
 
     def test_chars(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "chars.pdf",
+            file_name="chars.pdf",
             expected_xrefs={
                 (1, 0): XRefRow(offset=27259, obj_num=1, gen_num=0, use=b"n"),
                 (2, 0): XRefRow(offset=19, obj_num=2, gen_num=0, use=b"n"),
@@ -1267,7 +1266,7 @@ class Standard(TestCase):
 
     def test_bad_unicode(self):
         self.run_test(
-            file_path=CURRENT_FOLDER / "samples" / "pdf" / "bad-unicode.pdf",
+            file_name="bad-unicode.pdf",
             expected_xrefs={
                 (149, 0): XRefRow(offset=16, obj_num=149, gen_num=0, use=b"n"),
                 (150, 0): XRefRow(offset=1286, obj_num=150, gen_num=0, use=b"n"),

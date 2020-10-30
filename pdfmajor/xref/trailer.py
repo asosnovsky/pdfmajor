@@ -1,21 +1,47 @@
-from typing import NamedTuple, Optional
+from typing import List, NamedTuple, Optional, Set
 
 from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.token import TokenKeyword
 from pdfmajor.parser import get_first_object
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
+from pdfmajor.parser.objects.indirect import ObjectRef
 from pdfmajor.parser.objects.primitives import PDFInteger
 from pdfmajor.streambuffer import BufferStream
 
-from .exceptions import BrokenFile
+from .exceptions import BrokenFile, InvalidNumberOfRoots, NotRootElement
+
+
+def get_root_obj(trailers: List["PDFFileTrailer"]) -> ObjectRef:
+    """attempts to find the root element of the pdf
+
+    Args:
+        trailers (List[)
+
+    Raises:
+        InvalidNumberOfRoots
+        NotRootElement
+
+    Returns:
+        ObjectRef
+    """
+    root_elements: Set[ObjectRef] = set()
+    for trailer in trailers:
+        if trailer.root is not None:
+            root_elements.add(trailer.root)
+    if len(root_elements) == 1:
+        return root_elements.pop()
+    elif len(root_elements) > 1:
+        raise InvalidNumberOfRoots(root_elements)
+    else:
+        raise NotRootElement
 
 
 class PDFFileTrailer(NamedTuple):
     """an object representing a PDF file trailer as is specified in PDF spec 1.7 section 7.5.5"""
 
     size: PDFInteger
-    root: Optional[PDFObject]
+    root: Optional[ObjectRef]
     prev: Optional[PDFObject]
     info: Optional[PDFObject]
     encrypt: Optional[PDFObject]
@@ -32,6 +58,9 @@ class PDFFileTrailer(NamedTuple):
             raise BrokenFile(f"Size of trailer should be an integer instead got {size}")
 
         root = pdfdict.get("Root", None)
+        if root is not None and not isinstance(root, ObjectRef):
+            raise BrokenFile(f"Root element is not specified as an indirect obj {root}")
+
         encrypt = pdfdict.get("Encrypt", None)
         encrypt_id = pdfdict.get("ID", None)
         if encrypt is not None:

@@ -16,7 +16,6 @@ lint:
 	mypy pdfmajor
 	isort tests
 	black tests
-	bandit -r tests
 	mypy tests
 
 test:

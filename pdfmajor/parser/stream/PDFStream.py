@@ -1,6 +1,7 @@
 from typing import Any, List, Optional, TypeVar, Union
 
 from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.util import get_single_or_list, to_python, to_python_list
 
 from ..objects.collections import PDFDictionary
 from ..objects.primitives import PDFNull
@@ -65,27 +66,3 @@ class PDFStream:
             "fdecode_parms": to_python_list(self.fdecode_parms),
             "dl": to_python(self.dl),
         }
-
-
-T = TypeVar("T")
-
-
-def get_single_or_list(obj: Optional[Union[List[T], T]]) -> List[T]:
-    if obj is None:
-        return []
-    elif isinstance(obj, list):
-        return obj
-    else:
-        return [obj]
-
-
-def to_python(obj: Optional[PDFObject]) -> Any:
-    if obj is None:
-        return None
-    return obj.to_python()
-
-
-def to_python_list(obj: Optional[List[PDFObject]]) -> List[Any]:
-    if obj is None:
-        return []
-    return [x.to_python() for x in obj]
