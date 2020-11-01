@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import BinaryIO, List
 
 from pdfmajor.document.pages import PDFPageTreeNode
+from pdfmajor.document.parsers.root import get_catalog, get_info
 from pdfmajor.document.PDFParsingContext import PDFParsingContext
 from pdfmajor.streambuffer import BufferStream
 
@@ -23,8 +24,8 @@ class PDFDocument:
 
     def __init__(self, buffer: BufferStream) -> None:
         self.__parser = PDFParsingContext(buffer)
-        self.catalog = self.__parser.get_catalog()
-        self.info = self.__parser.get_info()
+        self.catalog = get_catalog(self.__parser)
+        self.info = get_info(self.__parser)
         self.pages: List[PDFPageTreeNode] = []
 
     @property

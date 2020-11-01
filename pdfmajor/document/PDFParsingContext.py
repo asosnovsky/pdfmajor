@@ -1,20 +1,13 @@
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, Set, Tuple, Type, TypeVar
+from typing import BinaryIO, Dict, Iterator, Optional, Tuple, Type, TypeVar
 
-from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.healthlog import PDFHealthReport
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.collections import PDFDictionary
 from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFName
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.util import validate_object_or_none
-from pdfmajor.xref.exceptions import InvalidNumberOfRoots, NotRootElement
-from pdfmajor.xref.trailer import get_root_obj
-from pdfmajor.xref.xrefdb import XRefDB
-
-from .exceptions import InvalidCatalogObj, MissingCatalogObj, TooManyInfoObj
-from .PDFDocumentCatalog import PDFDocumentCatalog
+from pdfmajor.xref.xrefdb import GenNum, ObjNum, XRefDB
 
 
 class PDFParsingContext:
@@ -95,97 +88,40 @@ class PDFParsingContext:
                 self.health_report.write_error(err)
         return out
 
-    def get_info(self) -> Optional[PDFObject]:
-        """get a Parsed version of the PDF Info object if it exists (see PDF spec 1.7 section 14.3.3 for more detail)"""
-        with self.buffer.get_window():
-            info_obj = _find_indirect_obj_for_info(
-                self.xrefdb, self.buffer, self.health_report
-            )
-            if info_obj is None:
-                return None
-            else:
-                return info_obj.get_object()
+    def get_obj_by_type(self, obj_type: str) -> Iterator[IndirectObject]:
+        """Iterates over the objects in memeory and filters out for the ones that match the requested type
+        If the object is not loaded into memory this function will load it.
 
-    def get_catalog(self) -> PDFDocumentCatalog:
-        """Gets the catalog for a document
+        Args:
+            obj_type (ObjType)
 
         Raises:
-            InvalidCatalogObj: if something is not correctly set in the catalog
+            InvalidXref: if the object could not be found in memory or the buffer
+            XRefError: if the object type if found but the object was never loaded into memory
+
+        Yields:
+            Iterator[IndirectObject]
+        """
+        with self.buffer.get_window() as buffer:
+            return self.xrefdb.get_obj_by_type(buffer, obj_type)
+
+    def get_obj(
+        self,
+        obj_num: ObjNum,
+        gen_num: GenNum,
+    ) -> IndirectObject:
+        """Get's an indirect object from either the pdf stream or a cached version in memeory
+
+        Args:
+            obj_num (ObjNum)
+            gen_num (GenNum)
+            buffer (BufferStream)
+
+        Raises:
+            InvalidXref: if the reference returned was not an indirect object
 
         Returns:
-            PDFDocumentCatalog
+            IndirectObject
         """
-        with self.buffer.get_window():
-            cat_obj = _find_indirect_obj_for_root(
-                self.xrefdb, self.buffer, self.health_report
-            ).get_object()
-        if not isinstance(cat_obj, PDFDictionary):
-            raise InvalidCatalogObj("not a dictionary")
-        validated_fields: Any = self.convert_pdfdict_to_validated_pythondict(
-            cat_obj,
-            {
-                "Version": ("version", PDFName),
-                "PageLabels": ("page_labels", PDFDictionary),
-                "PageLayout": ("page_layout", PDFName),
-                "PageMode": ("page_mode", PDFName),
-                "Metadata": ("metadata", PDFDictionary),
-            },
-        )
-        try:
-            pages_obj = cat_obj["Pages"]
-        except KeyError:
-            raise InvalidCatalogObj(f"Missing Pages entry {cat_obj}")
-        if isinstance(pages_obj, ObjectRef):
-            pages = self.get_object_from_ref(pages_obj).get_object()
-            if not isinstance(pages, PDFDictionary):
-                raise InvalidCatalogObj(
-                    f"Invalid pages ref entry {pages} from {pages_obj}"
-                )
-        elif isinstance(pages_obj, PDFDictionary):
-            pages = pages_obj
-        else:
-            raise InvalidCatalogObj(f"Invalid pages entry {pages_obj}")
-
-        validated_fields["pages"] = PDFPageTreeNode.from_pdfdict(pages)
-        validated_fields["raw"] = cat_obj
-        return PDFDocumentCatalog(**validated_fields)
-
-
-def _find_indirect_obj_for_root(
-    xrefdb: XRefDB, buffer: BufferStream, health_report: PDFHealthReport
-) -> IndirectObject:
-    try:
-        obj_ref = get_root_obj(xrefdb.trailers)
-        with buffer.get_window():
-            root_element = xrefdb.get_obj(
-                obj_num=obj_ref.obj_num, gen_num=obj_ref.gen_num, buffer=buffer
-            )
-    except InvalidNumberOfRoots as e:
-        health_report.write_error(e)
-        obj_ref = next(iter(e.roots))
-        with buffer.get_window():
-            root_element = xrefdb.get_obj(
-                obj_num=obj_ref.obj_num, gen_num=obj_ref.gen_num, buffer=buffer
-            )
-    except NotRootElement as e:
-        health_report.write_error(e)
-        try:
-            root_element = next(xrefdb.get_obj_by_type(buffer, "/Catalog"))
-        except StopIteration:
-            raise MissingCatalogObj()
-    return root_element
-
-
-def _find_indirect_obj_for_info(
-    xrefdb: XRefDB, buffer: BufferStream, health_report: PDFHealthReport
-) -> Optional[IndirectObject]:
-    elements: Set[ObjectRef] = set()
-    for trailer in xrefdb.trailers:
-        if trailer.info is not None:
-            elements.add(trailer.info)
-    if len(elements) > 1:
-        health_report.write_error(TooManyInfoObj(elements))
-    elif len(elements) == 0:
-        return None
-    ref = next(iter(elements))
-    return xrefdb.get_obj(ref.obj_num, ref.gen_num, buffer)
+        with self.buffer.get_window() as buffer:
+            return self.xrefdb.get_obj(obj_num, gen_num, buffer)

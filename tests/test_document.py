@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import List
 from unittest import TestCase
 
+from pdfmajor.document.parsers.root import get_catalog, get_info
 from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
 from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.document.PDFDocumentCatalog import PDFDocumentCatalog
@@ -25,7 +26,7 @@ class ParsingState(TestCase):
         with all_pdf_files[file_name].get_window() as buffer:
             pdf = PDFParsingContext(buffer)
             self.assertEqual(len(pdf.health_report), 0)
-            cat = pdf.get_catalog()
+            cat = get_catalog(pdf)
             self.assertEqual(
                 cat,
                 expcat,
@@ -127,9 +128,9 @@ class ParsingState(TestCase):
         for file_path, buffer in all_pdf_files.items():
             with self.subTest(file_path), buffer.get_window():
                 parser = PDFParsingContext(buffer)
-                parser.get_catalog()
+                get_catalog(parser)
                 self.assertEqual(len(parser.health_report), 0)
-                parser.get_info()
+                get_info(parser)
 
 
 class Structures(TestCase):
