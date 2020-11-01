@@ -1,7 +1,8 @@
 from pathlib import Path
-from pdfmajor.document.PDFParsingContext import PDFParsingContext
-from typing import BinaryIO
+from typing import BinaryIO, List
 
+from pdfmajor.document.pages import PDFPageTreeNode
+from pdfmajor.document.PDFParsingContext import PDFParsingContext
 from pdfmajor.streambuffer import BufferStream
 
 
@@ -24,6 +25,7 @@ class PDFDocument:
         self.__parser = PDFParsingContext(buffer)
         self.catalog = self.__parser.get_catalog()
         self.info = self.__parser.get_info()
+        self.pages: List[PDFPageTreeNode] = []
 
     @property
     def health_report(self):

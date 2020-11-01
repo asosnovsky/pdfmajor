@@ -31,6 +31,9 @@ class PDFDictionary(Dict[str, PDFObject], PDFContextualObject):
         self.last_name: Optional[PDFName] = None
         self.strict = strict
 
+    def __repr__(self) -> str:
+        return f"PDFDictionary({self.to_python()})"
+
     @classmethod
     def from_dict(cls, d: Dict[str, PDFObject]):
         new_obj = cls()

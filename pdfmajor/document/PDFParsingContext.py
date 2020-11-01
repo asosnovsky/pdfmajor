@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Set, Tuple, Type, TypeVar
 
+from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.healthlog import PDFHealthReport
 from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
+from pdfmajor.parser.objects.collections import PDFDictionary
 from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
 from pdfmajor.parser.objects.primitives import PDFName
 from pdfmajor.streambuffer import BufferStream
@@ -34,6 +35,14 @@ class PDFParsingContext:
             self.xrefdb = XRefDB(buffer)
 
     def get_object_from_ref(self, objref: ObjectRef) -> IndirectObject:
+        """Get an indirect object from it's object reference
+
+        Args:
+            objref (ObjectRef)
+
+        Returns:
+            IndirectObject
+        """
         with self.buffer.get_window():
             return self.xrefdb.get_obj(
                 objref.obj_num, objref.gen_num, buffer=self.buffer
@@ -126,20 +135,18 @@ class PDFParsingContext:
             pages_obj = cat_obj["Pages"]
         except KeyError:
             raise InvalidCatalogObj(f"Missing Pages entry {cat_obj}")
-        pages = []
         if isinstance(pages_obj, ObjectRef):
-            pages = [pages_obj]
-        elif not isinstance(pages_obj, PDFArray):
-            raise InvalidCatalogObj(f"Invalid pages entry {pages_obj}")
+            pages = self.get_object_from_ref(pages_obj).get_object()
+            if not isinstance(pages, PDFDictionary):
+                raise InvalidCatalogObj(
+                    f"Invalid pages ref entry {pages} from {pages_obj}"
+                )
+        elif isinstance(pages_obj, PDFDictionary):
+            pages = pages_obj
         else:
-            for page in pages_obj:
-                if isinstance(page, ObjectRef):
-                    pages.append(page)
-                else:
-                    self.health_report.write(
-                        "InvalidPageRef", f"The page {page} has an invalid value"
-                    )
-        validated_fields["pages"] = pages
+            raise InvalidCatalogObj(f"Invalid pages entry {pages_obj}")
+
+        validated_fields["pages"] = PDFPageTreeNode.from_pdfdict(pages)
         validated_fields["raw"] = cat_obj
         return PDFDocumentCatalog(**validated_fields)
 

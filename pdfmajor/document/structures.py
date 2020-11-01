@@ -1,8 +1,9 @@
 from decimal import Decimal
-from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
-from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
 from typing import List, NamedTuple
+
+from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
 from pdfmajor.parser.objects.collections import PDFArray
+from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
 
 
 class PDFRectangle(NamedTuple):

@@ -1,13 +1,14 @@
 from decimal import Decimal
-from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
 from typing import List
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray
-from pdfmajor.document.structures import PDFRectangle
 from unittest import TestCase
 
+from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
+from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.document.PDFDocumentCatalog import PDFDocumentCatalog
 from pdfmajor.document.PDFParsingContext import PDFParsingContext
+from pdfmajor.document.structures import PDFRectangle
+from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.indirect import ObjectRef
 from pdfmajor.parser.objects.primitives import (
     PDFBoolean,
@@ -23,8 +24,10 @@ class ParsingState(TestCase):
     def run_test(self, file_name: str, expcat: PDFDocumentCatalog):
         with all_pdf_files[file_name].get_window() as buffer:
             pdf = PDFParsingContext(buffer)
+            self.assertEqual(len(pdf.health_report), 0)
+            cat = pdf.get_catalog()
             self.assertEqual(
-                pdf.get_catalog(),
+                cat,
                 expcat,
             )
 
@@ -33,21 +36,41 @@ class ParsingState(TestCase):
             "bad-unicode.pdf",
             PDFDocumentCatalog(
                 version=None,
-                pages=[ObjectRef(141, 0)],
+                pages=PDFPageTreeNode.from_pdfdict(
+                    PDFDictionary.from_dict(
+                        {
+                            "Count": PDFInteger(47, 0, 0),
+                            "Type": PDFName("Pages", 0, 0),
+                            "Kids": PDFArray.from_list(
+                                [
+                                    ObjectRef(142, 0),
+                                    ObjectRef(143, 0),
+                                    ObjectRef(144, 0),
+                                    ObjectRef(145, 0),
+                                    ObjectRef(146, 0),
+                                ]
+                            ),
+                        }
+                    )
+                ),
                 page_labels={"Nums": [PDFInteger(0, 0, 0), ObjectRef(140, 0)]},
                 page_layout=None,
                 page_mode=None,
-                metadata={
-                    "Subtype": PDFName("XML", 0, 0),
-                    "Length": PDFInteger(3529, 0, 0),
-                    "Type": PDFName("Metadata", 0, 0),
-                },
-                raw={
-                    "Metadata": ObjectRef(147, 0),
-                    "Pages": ObjectRef(141, 0),
-                    "Type": PDFName("Catalog", 0, 0),
-                    "PageLabels": ObjectRef(139, 0),
-                },
+                metadata=PDFDictionary.from_dict(
+                    {
+                        "Subtype": PDFName("XML", 0, 0),
+                        "Length": PDFInteger(3529, 0, 0),
+                        "Type": PDFName("Metadata", 0, 0),
+                    }
+                ),
+                raw=PDFDictionary.from_dict(
+                    {
+                        "Metadata": ObjectRef(147, 0),
+                        "Pages": ObjectRef(141, 0),
+                        "Type": PDFName("Catalog", 0, 0),
+                        "PageLabels": ObjectRef(139, 0),
+                    }
+                ),
             ),
         )
 
@@ -56,24 +79,47 @@ class ParsingState(TestCase):
             "bar-charts.pdf",
             PDFDocumentCatalog(
                 version=None,
-                pages=[ObjectRef(2, 0)],
+                pages=PDFPageTreeNode.from_pdfdict(
+                    PDFDictionary.from_dict(
+                        {
+                            "Count": PDFInteger(6, 0, 0),
+                            "Type": PDFName("Pages", 0, 0),
+                            "Kids": PDFArray(
+                                [
+                                    ObjectRef(3, 0),
+                                    ObjectRef(9, 0),
+                                    ObjectRef(13, 0),
+                                    ObjectRef(36, 0),
+                                    ObjectRef(66, 0),
+                                    ObjectRef(188, 0),
+                                ]
+                            ),
+                        }
+                    )
+                ),
                 page_labels=None,
                 page_layout=None,
                 page_mode=None,
-                metadata={
-                    "Type": PDFName("Metadata", 0, 0),
-                    "Subtype": PDFName("XML", 0, 0),
-                    "Length": PDFInteger(3065, 0, 0),
-                },
-                raw={
-                    "Type": PDFName("Catalog", 0, 0),
-                    "Pages": ObjectRef(2, 0),
-                    "Lang": PDFString(b"en-US", 0, 0),
-                    "StructTreeRoot": ObjectRef(283, 0),
-                    "MarkInfo": {"Marked": PDFBoolean(True, 0, 0)},
-                    "Metadata": ObjectRef(646, 0),
-                    "ViewerPreferences": ObjectRef(647, 0),
-                },
+                metadata=PDFDictionary.from_dict(
+                    {
+                        "Type": PDFName("Metadata", 0, 0),
+                        "Subtype": PDFName("XML", 0, 0),
+                        "Length": PDFInteger(3065, 0, 0),
+                    }
+                ),
+                raw=PDFDictionary.from_dict(
+                    {
+                        "Type": PDFName("Catalog", 0, 0),
+                        "Pages": ObjectRef(2, 0),
+                        "Lang": PDFString(b"en-US", 0, 0),
+                        "StructTreeRoot": ObjectRef(283, 0),
+                        "MarkInfo": PDFDictionary.from_dict(
+                            {"Marked": PDFBoolean(True, 0, 0)}
+                        ),
+                        "Metadata": ObjectRef(646, 0),
+                        "ViewerPreferences": ObjectRef(647, 0),
+                    }
+                ),
             ),
         )
 

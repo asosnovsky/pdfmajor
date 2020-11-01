@@ -31,3 +31,7 @@ class TooManyRectField(BrokenFilePDF):
     def __init__(self, values: List[Decimal]) -> None:
         super().__init__(f"Too many elements found for rectangle | values={values}")
         self.values = values
+
+
+class InvalidPagesNodeKids(BrokenFilePDF):
+    pass

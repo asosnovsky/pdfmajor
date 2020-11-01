@@ -107,6 +107,19 @@ class XRefDB:
         gen_num: GenNum,
         buffer: BufferStream,
     ) -> IndirectObject:
+        """Get's an indirect object from either the pdf stream or a cached version in memeory
+
+        Args:
+            obj_num (ObjNum)
+            gen_num (GenNum)
+            buffer (BufferStream)
+
+        Raises:
+            InvalidXref: if the reference returned was not an indirect object
+
+        Returns:
+            IndirectObject
+        """
         raw_ref, xref = (obj_num, gen_num), self.xrefs[(obj_num, gen_num)]
         obj = self.objs.get(raw_ref, None)
         if obj is None:
