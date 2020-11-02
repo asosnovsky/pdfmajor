@@ -134,10 +134,15 @@ class ParsingState(TestCase):
                 self.assertEqual(len(parser.health_report), 0)
                 get_info(parser)
                 list(iter_all_page_leafs(parser, catalog.pages))
+                parser = PDFDocument(buffer)
+                actual_pages = len(list(parser.iter_pages()))
+                self.assertEqual(actual_pages, parser.num_pages)
 
     def test_doc(self):
         with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
             parser = PDFDocument(buffer)
+            actual_pages = len(list(parser.iter_pages()))
+            self.assertEqual(actual_pages, parser.num_pages)
 
 
 class Structures(TestCase):
