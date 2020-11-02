@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from pdfmajor.document.exceptions import BrokenFilePDF
 from pdfmajor.parser.objects.base import PDFObject
@@ -16,10 +16,18 @@ from ..utils import iter_single_ref_as_array_ref
 PDFRawFields = Dict[str, Any]
 
 
-def get_all_page_leafs(
+def iter_all_page_leafs(
     pctx: PDFParsingContext, root_node: PDFPageTreeNode
-) -> List[PDFPage]:
-    all_leafs: List[PDFPage] = []
+) -> Iterator[PDFPage]:
+    """Iterate over every page in the pdf
+
+    Args:
+        pctx (PDFParsingContext)
+        root_node (PDFPageTreeNode)
+
+    Yields:
+        Iterator[PDFPage]
+    """
     current_root: List[PDFPageTreeNode] = [root_node]
     current_root_aspage: List[Dict[str, Optional[PDFObject]]] = [
         parse_pdfpage_fields(pctx, root_node.raw, allow_missing=True)
@@ -53,7 +61,7 @@ def get_all_page_leafs(
                 current_child_idx.append(0)
                 continue
             elif obj["Type"].to_python() == "/Page":
-                all_leafs.append(make_pdfpage(croot_pagedata, pctx, obj))
+                yield make_pdfpage(croot_pagedata, pctx, obj)
                 current_child_idx[-1] += 1
                 continue
         # catch all other cases (the above expression will issue a 'continue')
@@ -62,7 +70,6 @@ def get_all_page_leafs(
             f"Expecting page ref {page_ref} to be a dictionary with type 'Pages' or 'Page', but got a {obj}",
         )
         current_child_idx[-1] += 1
-    return all_leafs
 
 
 def make_pdfpage(

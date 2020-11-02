@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
 from pdfmajor.document.pages import PDFPageTreeNode
-from pdfmajor.document.parsers.pages import get_all_page_leafs
+from pdfmajor.document.parsers.pages import iter_all_page_leafs
 from pdfmajor.document.parsers.root import get_catalog, get_info
 from pdfmajor.document.PDFDocument import PDFDocument
 from pdfmajor.document.PDFDocumentCatalog import PDFDocumentCatalog
@@ -133,7 +133,7 @@ class ParsingState(TestCase):
                 catalog = get_catalog(parser)
                 self.assertEqual(len(parser.health_report), 0)
                 get_info(parser)
-                get_all_page_leafs(parser, catalog.pages)
+                list(iter_all_page_leafs(parser, catalog.pages))
 
     def test_doc(self):
         with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
