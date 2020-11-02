@@ -1,6 +1,7 @@
 from typing import Any, List, Optional, Type, TypeVar, Union
 
 from pdfmajor.parser.objects.base import PDFObject
+from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
 
 T = TypeVar("T")
 
@@ -50,3 +51,25 @@ def validate_object_or_none(
         return obj
     else:
         raise AssertionError(f"obj {obj} is not of expected type {objtype}")
+
+
+def validate_number_or_none(
+    obj: Optional[PDFObject],
+) -> Optional[Union[PDFReal, PDFInteger]]:
+    """Validates the object's type is some numeric type
+
+    Args:
+        obj (Optional[PDFObject])
+
+    Raises:
+        AssertionError: is raised if the object has an invalid type
+
+    Returns:
+        Optional[Union[PDFReal, PDFInteger]]
+    """
+    if obj is None:
+        return None
+    if isinstance(obj, PDFInteger) or isinstance(obj, PDFReal):
+        return obj
+    else:
+        raise AssertionError(f"obj {obj} is not of numeric type")

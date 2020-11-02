@@ -1,12 +1,14 @@
 from pathlib import Path
-from typing import BinaryIO, Dict, Iterator, Optional, Tuple, Type, TypeVar
+from typing import Any, BinaryIO, Dict, Iterator, Optional, Tuple, Type, TypeVar, Union
 
+from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.healthlog import PDFHealthReport
 from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFDictionary
+from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
+from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
 from pdfmajor.streambuffer import BufferStream
-from pdfmajor.util import validate_object_or_none
+from pdfmajor.util import validate_number_or_none, validate_object_or_none
 from pdfmajor.xref.xrefdb import GenNum, ObjNum, XRefDB
 
 
@@ -64,6 +66,24 @@ class PDFParsingContext:
             )
         return validate_object_or_none(obj, exptype)
 
+    def get_validate_numeric(
+        self, obj: Optional[PDFObject]
+    ) -> Optional[Union[PDFInteger, PDFReal]]:
+        """Validates the object is numeric, if its not None
+
+        Args:
+            obj (Optional[PDFObject])
+
+        Raises:
+            AssertionError: is raised if the object has an invalid type
+
+        Returns:
+            Optional[Union[PDFInteger, PDFReal]]
+        """
+        if isinstance(obj, ObjectRef):
+            return validate_number_or_none(self.get_object_from_ref(obj).get_object())
+        return validate_number_or_none(obj)
+
     def convert_pdfdict_to_validated_pythondict(
         self,
         pdfdict: PDFDictionary,
@@ -73,7 +93,7 @@ class PDFParsingContext:
 
         Args:
             pdfdict (PDFDictionary)
-            field_mapping (Dict[str, Tuple[Type[PDFObject]]])
+            field_mapping (Dict[str, Tuple[Type[PDFObject]]]): mapping of the name as it in the pdf to a tuple with a (new name, expected objcet type)
 
         Returns:
             dict
@@ -87,6 +107,30 @@ class PDFParsingContext:
             except AssertionError as err:
                 self.health_report.write_error(err)
         return out
+
+    def extract_and_validate_pdf_rectangles(
+        self, pdfdict: PDFDictionary, field_mapping: Dict[str, str]
+    ) -> Dict[str, Optional[PDFRectangle]]:
+        """Takes a pdf-dictionary and extracts the specified fields. Next it will validate and convert the fields into PDFRectangles
+
+        Args:
+            pdfdict (PDFDictionary)
+            field_mapping (Dict[str, str]): a mapping of names as they appear in the pdf to requested names
+
+        Returns:
+            Dict[str, Optional[PDFRectangle]]
+        """
+        vetted_values: Any = self.convert_pdfdict_to_validated_pythondict(
+            pdfdict,
+            {
+                pdfname: (newname, PDFArray)
+                for pdfname, newname in field_mapping.items()
+            },
+        )
+        return {
+            newname: PDFRectangle.from_pdfarray(value) if value is not None else value
+            for newname, value in vetted_values.items()
+        }
 
     def get_obj_by_type(self, obj_type: str) -> Iterator[IndirectObject]:
         """Iterates over the objects in memeory and filters out for the ones that match the requested type

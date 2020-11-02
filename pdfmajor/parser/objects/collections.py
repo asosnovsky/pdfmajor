@@ -8,6 +8,9 @@ from .primitives import PDFName
 class PDFArray(List[PDFObject], PDFContextualObject):
     """A class representing a PDF Array as specified in PDF spec 1.7 section 7.3.6"""
 
+    def __repr__(self) -> str:
+        return f"PDFDictionary({self.to_python()})"
+
     def pass_item(self, item: PDFObject):
         self.append(item)
 
