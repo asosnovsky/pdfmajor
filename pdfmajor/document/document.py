@@ -3,18 +3,14 @@ from pathlib import Path
 from typing import BinaryIO, Iterator, List, Optional
 
 from pdfmajor.document.pages import PDFPage
+from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.document.parsers.pages import iter_all_page_leafs
 from pdfmajor.document.parsers.root import get_catalog, get_info
-from pdfmajor.document.PDFParsingContext import PDFParsingContext
 from pdfmajor.streambuffer import BufferStream
 
 
 class PDFDocument:
-    """A class encapsulating all of the access behavior to the document
-
-    Returns:
-        [type]: [description]
-    """
+    """A class encapsulating all of the access behavior to the document"""
 
     @classmethod
     def from_io(cls, fp: BinaryIO, buffer_size=4096):

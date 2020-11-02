@@ -3,13 +3,13 @@ from decimal import Decimal
 from typing import List
 from unittest import TestCase
 
+from pdfmajor.document import PDFDocument
+from pdfmajor.document.catalog import PDFDocumentCatalog
 from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
 from pdfmajor.document.pages import PDFPageTreeNode
+from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.document.parsers.pages import iter_all_page_leafs
 from pdfmajor.document.parsers.root import get_catalog, get_info
-from pdfmajor.document.PDFDocument import PDFDocument
-from pdfmajor.document.PDFDocumentCatalog import PDFDocumentCatalog
-from pdfmajor.document.PDFParsingContext import PDFParsingContext
 from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.parser.objects.base import PDFObject
 from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary

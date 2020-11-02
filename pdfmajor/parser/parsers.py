@@ -96,7 +96,7 @@ def on_endobj(state: ParsingState, token: TokenKeyword) -> IndirectObject:
             last_ctx.pass_item(num)
         return last_ctx
     else:
-        raise ParserError(f"Recived an endobj while not procesing an indirect object")
+        raise ParserError("Recived an endobj while not procesing an indirect object")
 
 
 def on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):

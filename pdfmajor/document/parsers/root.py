@@ -8,9 +8,9 @@ from pdfmajor.parser.objects.primitives import PDFName
 from pdfmajor.xref.exceptions import InvalidNumberOfRoots, NotRootElement
 from pdfmajor.xref.trailer import get_root_obj
 
+from ..catalog import PDFDocumentCatalog
 from ..exceptions import InvalidCatalogObj, MissingCatalogObj, TooManyInfoObj
-from ..PDFDocumentCatalog import PDFDocumentCatalog
-from ..PDFParsingContext import PDFParsingContext
+from ..parse_context import PDFParsingContext
 
 
 def get_info(pctx: PDFParsingContext) -> Optional[PDFObject]:

@@ -10,7 +10,7 @@ from pdfmajor.parser.stream.PDFStream import PDFStream
 from pdfmajor.util import validate_object_or_none
 
 from ..pages import PDFPage, PDFPageTreeNode
-from ..PDFParsingContext import PDFParsingContext
+from ..parse_context import PDFParsingContext
 from ..utils import iter_single_ref_as_array_ref
 
 PDFRawFields = Dict[str, Any]
