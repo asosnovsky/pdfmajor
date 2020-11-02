@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import BinaryIO, Iterator, List, Optional
 
@@ -60,8 +61,8 @@ class PDFDocument:
                 yield page
             self.__processed_pages_done = True
             if len(self.__processed_pages) != self.num_pages:
-                print(
-                    "WARN! number of pages proceseed with iter_pages did not match number of pages specified by the document's metadata!"
+                warnings.warn(
+                    "Number of pages proceseed with iter_pages did not match number of pages specified by the document's metadata!"
                     f"\n --> expected pages = {self.num_pages}"
                     f"\n --> found pages = {len(self.__processed_pages)}"
                 )

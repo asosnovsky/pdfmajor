@@ -1,3 +1,4 @@
+import warnings
 from decimal import Decimal
 from typing import List
 from unittest import TestCase
@@ -20,7 +21,7 @@ from pdfmajor.parser.objects.primitives import (
     PDFReal,
     PDFString,
 )
-from tests.util import all_pdf_files
+from tests.util import all_corrupt_pdf_files, all_pdf_files
 
 
 class ParsingState(TestCase):
@@ -138,11 +139,19 @@ class ParsingState(TestCase):
                 actual_pages = len(list(parser.iter_pages()))
                 self.assertEqual(actual_pages, parser.num_pages)
 
-    def test_doc(self):
-        with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
+    # def test_doc(self):
+    #     with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
+    #         parser = PDFDocument(buffer)
+    #         actual_pages = len(list(parser.iter_pages()))
+    #         self.assertEqual(actual_pages, parser.num_pages)
+
+    def test_warning_pagecount(self):
+        with all_corrupt_pdf_files["bad-page-count.pdf"].get_window() as buffer:
             parser = PDFDocument(buffer)
-            actual_pages = len(list(parser.iter_pages()))
-            self.assertEqual(actual_pages, parser.num_pages)
+            with warnings.catch_warnings(record=True) as w:
+                actual_pages = len(list(parser.iter_pages()))
+                self.assertEqual(len(w), 1)
+            self.assertNotEqual(actual_pages, parser.num_pages)
 
 
 class Structures(TestCase):
