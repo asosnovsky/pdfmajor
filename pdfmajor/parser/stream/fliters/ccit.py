@@ -12,7 +12,7 @@
 import array
 from typing import Optional
 
-from ..exceptions import DecodeFailed
+from ...exceptions import DecodeFailed
 
 
 class CCITEOFB(DecodeFailed):

@@ -9,7 +9,7 @@ from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
 from pdfmajor.parser.objects.comment import PDFComment
 from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
 from pdfmajor.parser.objects.primitives import PDFInteger, PDFString
-from pdfmajor.parser.stream.PDFStream import PDFStream
+from pdfmajor.parser.stream import PDFStream
 from pdfmajor.streambuffer import BufferStream
 
 CURRENT_FOLDER = Path(__file__).parent

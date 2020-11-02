@@ -41,13 +41,13 @@ def get_catalog(pctx: PDFParsingContext) -> PDFDocumentCatalog:
             "PageLabels": ("page_labels", PDFDictionary),
             "PageLayout": ("page_layout", PDFName),
             "PageMode": ("page_mode", PDFName),
-            "Metadata": ("metadata", PDFDictionary),
         },
     )
     try:
         pages_obj = cat_obj["Pages"]
     except KeyError:
         raise InvalidCatalogObj(f"Missing Pages entry {cat_obj}")
+    metadata = pctx.convert_pdfdict_to_validated_pythondict
     if isinstance(pages_obj, ObjectRef):
         pages = pctx.get_object_from_ref(pages_obj).get_object()
         if not isinstance(pages, PDFDictionary):

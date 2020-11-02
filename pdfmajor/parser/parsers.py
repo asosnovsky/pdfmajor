@@ -10,7 +10,7 @@ from .objects.collections import PDFDictionary
 from .objects.indirect import IndirectObject, ObjectRef
 from .objects.primitives import PDFInteger, PDFNull, PDFPrimitiveObject
 from .state import ParsingState
-from .stream.PDFStream import PDFStream
+from .stream import PDFStream
 
 
 def on_primitive(

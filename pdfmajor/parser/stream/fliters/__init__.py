@@ -3,7 +3,7 @@ from base64 import a85decode
 from binascii import a2b_hex
 from typing import Any, Dict, List, Optional
 
-from ..exceptions import InvalidDecoderOrNotImplemented
+from ...exceptions import InvalidDecoderOrNotImplemented
 from .ccit import ccittfaxdecode
 from .lzw import lzwdecode
 from .rld import rldecode

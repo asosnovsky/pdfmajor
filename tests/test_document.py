@@ -127,6 +127,60 @@ class ParsingState(TestCase):
             ),
         )
 
+    def test_bad_unicode(self):
+        self.run_test(
+            "bad-unicode.pdf",
+            PDFDocumentCatalog(
+                version=None,
+                pages=PDFPageTreeNode(
+                    kids=[
+                        ObjectRef(142, 0),
+                        ObjectRef(143, 0),
+                        ObjectRef(144, 0),
+                        ObjectRef(145, 0),
+                        ObjectRef(146, 0),
+                    ],
+                    parent=None,
+                    leaft_count=PDFInteger(47, 0, 0),
+                    raw=PDFDictionary.from_dict(
+                        {
+                            "Count": PDFInteger(47, 0, 0),
+                            "Type": PDFName("Pages", 0, 0),
+                            "Kids": PDFArray.from_list(
+                                [
+                                    ObjectRef(142, 0),
+                                    ObjectRef(143, 0),
+                                    ObjectRef(144, 0),
+                                    ObjectRef(145, 0),
+                                    ObjectRef(146, 0),
+                                ]
+                            ),
+                        }
+                    ),
+                ),
+                page_labels=PDFDictionary.from_dict(
+                    {"Nums": [PDFInteger(0, 0, 0), ObjectRef(140, 0)]}
+                ),
+                page_layout=None,
+                page_mode=None,
+                metadata=PDFDictionary.from_dict(
+                    {
+                        "Subtype": PDFName("XML", 0, 0),
+                        "Length": PDFInteger(3529, 0, 0),
+                        "Type": PDFName("Metadata", 0, 0),
+                    }
+                ),
+                raw=PDFDictionary.from_dict(
+                    {
+                        "Metadata": ObjectRef(147, 0),
+                        "Pages": ObjectRef(141, 0),
+                        "Type": PDFName("Catalog", 0, 0),
+                        "PageLabels": ObjectRef(139, 0),
+                    }
+                ),
+            ),
+        )
+
     def test_all(self):
         for file_path, buffer in all_pdf_files.items():
             with self.subTest(file_path), buffer.get_window():
@@ -139,11 +193,10 @@ class ParsingState(TestCase):
                 actual_pages = len(list(parser.iter_pages()))
                 self.assertEqual(actual_pages, parser.num_pages)
 
-    # def test_doc(self):
-    #     with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
-    #         parser = PDFDocument(buffer)
-    #         actual_pages = len(list(parser.iter_pages()))
-    #         self.assertEqual(actual_pages, parser.num_pages)
+    def test_doc(self):
+        with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
+            parser = PDFDocument(buffer)
+            print(parser.info)
 
     def test_warning_pagecount(self):
         with all_corrupt_pdf_files["bad-page-count.pdf"].get_window() as buffer:

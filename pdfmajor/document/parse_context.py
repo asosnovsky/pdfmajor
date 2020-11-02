@@ -1,4 +1,6 @@
 from pathlib import Path
+from pdfmajor.document.exceptions import BrokenFilePDF
+from pdfmajor.parser.stream import PDFStream
 from typing import Any, BinaryIO, Dict, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from pdfmajor.document.structures import PDFRectangle
@@ -169,3 +171,16 @@ class PDFParsingContext:
         """
         with self.buffer.get_window() as buffer:
             return self.xrefdb.get_obj(obj_num, gen_num, buffer)
+
+    def validated_and_iter_stream(self, obj_ref: PDFObject) -> PDFStream:
+        if isinstance(obj_ref, ObjectRef):
+            obj = self.get_object_from_ref(obj_ref)
+        elif isinstance(obj_ref, IndirectObject):
+            obj = obj_ref
+        else:
+            raise BrokenFilePDF(f"Expected a pdf-stream, instead found {obj_ref}")
+
+        if obj.stream is None:
+            raise BrokenFilePDF(f"Expected a pdf-stream, instead found {obj}")
+        else:
+            obj.stream
