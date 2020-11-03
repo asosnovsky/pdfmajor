@@ -2,8 +2,8 @@ from itertools import chain
 from typing import Any, Dict, List
 
 from pdfmajor.filters import process_filters_on_data
-from pdfmajor.parser.exceptions import IncompleteStream
-from pdfmajor.parser.objects import PDFDictionary, PDFName, PDFStream
+from pdfmajor.pdf_parser.exceptions import IncompleteStream
+from pdfmajor.pdf_parser.objects import PDFDictionary, PDFName, PDFStream
 from pdfmajor.streambuffer import BufferStream
 
 

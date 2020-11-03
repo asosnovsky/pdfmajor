@@ -2,8 +2,8 @@ from typing import List, NamedTuple, Optional, Set
 
 from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.token import TokenKeyword
-from pdfmajor.parser import get_first_object
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser import get_first_object
+from pdfmajor.pdf_parser.objects import (
     ObjectRef,
     PDFArray,
     PDFDictionary,

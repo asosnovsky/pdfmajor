@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Any, List
 from unittest import TestCase
 
-from pdfmajor.parser import iter_objects
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser import iter_objects
+from pdfmajor.pdf_parser.objects import (
     IndirectObject,
     ObjectRef,
     PDFArray,

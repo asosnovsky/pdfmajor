@@ -5,7 +5,7 @@ from pdfmajor.document.exceptions import BrokenFilePDF
 from pdfmajor.document.parsers.stream import decode_stream
 from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.healthlog import PDFHealthReport
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser.objects import (
     IndirectObject,
     ObjectRef,
     PDFArray,
@@ -16,6 +16,7 @@ from pdfmajor.parser.objects import (
     validate_number_or_none,
     validate_object_or_none,
 )
+from pdfmajor.pdf_parser.objects.stream import PDFStream
 from pdfmajor.streambuffer import BufferStream
 from pdfmajor.xref.xrefdb import GenNum, ObjNum, XRefDB
 
@@ -181,6 +182,18 @@ class PDFParsingContext:
     def validated_and_iter_stream(
         self, obj_ref: PDFObject
     ) -> Tuple[PDFDictionary, bytes]:
+        """Validates that an object is either an ObjectRef or IndirectObject and then checks that it has a stream.
+        Once those checks are passed, this method will decode the stream and return it's contents witht the indirect objects dictionary
+
+        Args:
+            obj_ref (PDFObject)
+
+        Raises:
+            BrokenFilePDF: if a validation fails
+
+        Returns:
+            Tuple[PDFDictionary, bytes]: (metadata, stream data)
+        """
         if isinstance(obj_ref, ObjectRef):
             obj = self.get_object_from_ref(obj_ref)
         elif isinstance(obj_ref, IndirectObject):
@@ -200,3 +213,14 @@ class PDFParsingContext:
                 )
                 obj_def = PDFDictionary()
             return obj_def, decode_stream(obj.stream, self.buffer)
+
+    def decode_stream(self, stream: PDFStream) -> bytes:
+        """Decode the bytes associated with the PDF-Stream
+
+        Args:
+            stream (PDFStream)
+
+        Returns:
+            bytes
+        """
+        return decode_stream(stream, self.buffer)

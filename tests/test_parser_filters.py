@@ -4,7 +4,7 @@ from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.filters.ccit import CCITTG4Parser
 from pdfmajor.filters.lzw import lzwdecode
 from pdfmajor.filters.rld import rldecode
-from pdfmajor.parser.objects.ref import ObjectRef
+from pdfmajor.pdf_parser.objects.ref import ObjectRef
 from tests.util import all_pdf_files
 
 

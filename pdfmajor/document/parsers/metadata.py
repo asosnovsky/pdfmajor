@@ -1,5 +1,5 @@
 from pdfmajor.document.metadata import PDFMetadata
-from pdfmajor.parser.objects import PDFName, PDFObject
+from pdfmajor.pdf_parser.objects import PDFName, PDFObject
 
 from ..exceptions import BrokenFilePDF
 from ..parse_context import PDFParsingContext

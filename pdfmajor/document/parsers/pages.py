@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Any, Dict, Iterator, List, Optional
 
 from pdfmajor.document.exceptions import BrokenFilePDF
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser.objects import (
     IndirectObject,
     ObjectRef,
     PDFArray,
@@ -14,7 +14,7 @@ from pdfmajor.parser.objects import (
     validate_object_or_none,
 )
 
-from ..pages import PDFPage, PDFPageTreeNode
+from ..pages import PDFDataPage, PDFPage, PDFPageTreeNode
 from ..parse_context import PDFParsingContext
 from ..utils import iter_single_ref_as_array_ref
 
@@ -109,7 +109,7 @@ def make_pdfpage(
     vetted_fields["contents"] = content_streams
     vetted_fields["raw"] = pdfdict
     vetted_fields["metadata"] = _parse_metadata(pdfdict.get("Metadata", None), pctx)
-    return PDFPage(**vetted_fields)
+    return PDFPage(pctx, PDFDataPage(**vetted_fields))
 
 
 def parse_pdfpage_fields(

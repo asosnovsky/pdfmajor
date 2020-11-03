@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Union
 
-from pdfmajor.parser.exceptions import IncompleteStream
+from pdfmajor.pdf_parser.exceptions import IncompleteStream
 from pdfmajor.util import get_single_or_list
 
 from .base import PDFObject
@@ -43,6 +43,9 @@ class PDFStream:
         self.ffilter = ffilter
         self.fdecode_parms = fdecode_parms
         self.dl = dl
+
+    def __repr__(self) -> str:
+        return f"PDFStream({self.to_python()})"
 
     @classmethod
     def from_pdfdict(cls, offset: int, item: PDFDictionary) -> "PDFStream":

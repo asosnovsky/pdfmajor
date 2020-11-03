@@ -1,9 +1,10 @@
 from typing import List, NamedTuple, Optional
 
 from pdfmajor.document.exceptions import InvalidPagesNodeKids
+from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.exceptions import PDFMajorException
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser.objects import (
     ObjectRef,
     PDFDictionary,
     PDFInteger,
@@ -43,8 +44,8 @@ class PDFPageTreeNode(NamedTuple):
         )
 
 
-class PDFPage(NamedTuple):
-    """A PDF Page representation as it confirms with PDF Spec 1.7 section 7.7.3.3"""
+class PDFDataPage(NamedTuple):
+    """The data of a PDF Page as it confirms with PDF Spec 1.7 section 7.7.3.3"""
 
     parent: ObjectRef
     resources: PDFDictionary
@@ -60,3 +61,14 @@ class PDFPage(NamedTuple):
     user_unit: PDFReal
 
     raw: PDFDictionary
+
+
+class PDFPage:
+    """A class encapsulating interactions with a PDF Page"""
+
+    def __init__(self, pctx: PDFParsingContext, data: PDFDataPage) -> None:
+        self.__pctx = pctx
+        self.data = data
+
+    def __repr__(self) -> str:
+        return f"PDFPage(data={repr(self.data)})"

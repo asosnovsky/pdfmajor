@@ -14,7 +14,7 @@ from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.document.parsers.pages import iter_all_page_leafs
 from pdfmajor.document.parsers.root import get_catalog, get_info
 from pdfmajor.document.structures import PDFRectangle
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser.objects import (
     ObjectRef,
     PDFArray,
     PDFBoolean,
@@ -25,7 +25,7 @@ from pdfmajor.parser.objects import (
     PDFReal,
     PDFString,
 )
-from pdfmajor.parser.objects.primitives import PDFNull
+from pdfmajor.pdf_parser.objects.primitives import PDFNull
 from tests.util import all_corrupt_pdf_files, all_pdf_files
 
 
@@ -323,3 +323,11 @@ class Structures(TestCase):
                     ]
                 )
             )
+
+
+class Pages(TestCase):
+    def test_bad_unicode_page(self):
+        with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
+            pdf = PDFDocument(buffer)
+            page1 = next(pdf.iter_pages())
+            print(page1)

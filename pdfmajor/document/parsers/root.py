@@ -2,7 +2,7 @@ from typing import Any, Optional, Set
 
 from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.document.parsers.metadata import get_metadata
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser.objects import (
     IndirectObject,
     ObjectRef,
     PDFDictionary,

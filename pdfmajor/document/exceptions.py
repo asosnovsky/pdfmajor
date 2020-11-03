@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import List, Set
 
 from pdfmajor.exceptions import BrokenFile, PDFMajorException
-from pdfmajor.parser.objects import ObjectRef
+from pdfmajor.pdf_parser.objects import ObjectRef
 
 
 class PDFDocumentError(PDFMajorException):

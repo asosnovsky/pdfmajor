@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from pdfmajor.parser.objects import (
+from pdfmajor.pdf_parser.objects import (
     ObjectRef,
     PDFArray,
     PDFObject,

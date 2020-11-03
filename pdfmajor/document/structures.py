@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import List, NamedTuple
 
 from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
-from pdfmajor.parser.objects import PDFArray, PDFInteger, PDFReal
+from pdfmajor.pdf_parser.objects import PDFArray, PDFInteger, PDFReal
 
 
 class PDFRectangle(NamedTuple):
