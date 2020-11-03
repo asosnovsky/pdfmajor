@@ -207,7 +207,8 @@ class IndirectObjects(TestCase):
 << /Type /XRef /Length 123 /Filter /FlateDecode /otherfeature [10 20]>>
 stream
 "<99><A3><C1>l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567890l01234567
-<80>endstream
+<80>
+endstream
 endobj
         """
         )
@@ -218,10 +219,10 @@ endobj
             self.assertDictEqual(
                 obj.stream.to_python(),  # type: ignore
                 {
-                    "offset": 100,
+                    "offset": 101,
                     "length": 123,
                     "filter": ["/FlateDecode"],
-                    "decode_parms": [],
+                    "decode_parms": [None],
                     "f": None,
                     "ffilter": [],
                     "fdecode_parms": [],
@@ -256,10 +257,10 @@ endobj
             self.assertDictEqual(
                 obj.stream.to_python(),  # type: ignore
                 {
-                    "offset": 100,
-                    "length": 123 + 5,
+                    "offset": 101,
+                    "length": 123 + 4,
                     "filter": ["/FlateDecode"],
-                    "decode_parms": [],
+                    "decode_parms": [None],
                     "f": None,
                     "ffilter": [],
                     "fdecode_parms": [],
@@ -270,7 +271,7 @@ endobj
                 obj.get_object().to_python(),
                 {
                     "Filter": "/FlateDecode",
-                    "Length": 123 + 5,
+                    "Length": 123 + 4,
                     "Type": "/XRef",
                     "otherfeature": [10, 20],
                 },

@@ -13,7 +13,7 @@ from pdfmajor.lexer.token import (
     Token,
     TokenArray,
     TokenDictionary,
-    TokenKeyword,
+    TokenKeyword
 )
 from pdfmajor.streambuffer import BufferStream
 

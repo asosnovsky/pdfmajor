@@ -7,7 +7,7 @@ from pdfmajor.lexer.token import (
     TokenArray,
     TokenComment,
     TokenDictionary,
-    TokenKeyword,
+    TokenKeyword
 )
 from pdfmajor.streambuffer import BufferStream
 
@@ -17,14 +17,14 @@ from .objects import (
     PDFComment,
     PDFDictionary,
     PDFObject,
-    get_obj_from_token_primitive,
+    get_obj_from_token_primitive
 )
 from .parsers import (
     deal_with_collection_object,
     on_endobj,
     on_indirect_ref_close,
     on_primitive,
-    on_stream,
+    on_stream
 )
 from .state import ParsingState
 

@@ -6,7 +6,7 @@ from .decoders import (
     CCITTFaxDecode,
     FlateDecode,
     LZWDecode,
-    RunLengthDecode,
+    RunLengthDecode
 )
 from .types import PDFFilterDecoder
 
@@ -47,13 +47,10 @@ def process_filters_on_data(
         bytes
     """
     if filters is not None:
-        decode_parms = []
-        if decode_params is not None:
-            decode_parms = decode_params
-        for f in filters:
-            params = {}
-            if len(decode_parms) > 0:
-                params = decode_parms.pop()
+        if decode_params is None:
+            decode_params = [{}] * len(filters)
+        for i, f in enumerate(filters):
+            params = decode_params[i]
             decoder = detect_decoder_type(f)
             data = decoder.decode(data, **params)
     return data

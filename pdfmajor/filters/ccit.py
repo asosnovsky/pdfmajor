@@ -10,7 +10,6 @@
 
 
 import array
-from typing import Optional
 
 from .exceptions import CCITEOFB, CCITByteSkip, CCITInvalidData
 
@@ -337,20 +336,20 @@ class CCITTG4Parser(BitParser):
                 break
         return
 
-    def _parse_mode(self, mode):
+    def _parse_mode(self, mode: str):
         if mode == "p":
             self._do_pass()
             self._flush_line()
             return self.MODE
         elif mode == "h":
             self._n1 = 0
-            self._accept = self._parse_horiz1
+            self._accept = self._parse_horiz1  # type: ignore
             if self._color:
                 return self.WHITE
             else:
                 return self.BLACK
         elif mode == "u":
-            self._accept = self._parse_uncompressed
+            self._accept = self._parse_uncompressed  # type: ignore
             return self.UNCOMPRESSED
         elif mode == "e":
             raise CCITEOFB
@@ -552,10 +551,14 @@ class CCITTFaxDecoder(CCITTG4Parser):
 
 def ccittfaxdecode(
     data: bytes,
-    Columns: int,
+    # arguments for algo, with defaults based on PDF spec 1.7 section 7.4.6
+    Columns: int = 1728,
     EncodedByteAlign: bool = False,
     BlackIs1: bool = False,
-    K: Optional[int] = None,
+    K: int = 0,
+    EndOfLine: bool = False,
+    Rows: int = 0,
+    DamagedRowsBeforeError: int = 0,
 ) -> bytes:
     if K == -1:
         parser = CCITTFaxDecoder(Columns, bytealign=EncodedByteAlign, reversed=BlackIs1)

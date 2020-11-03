@@ -5,7 +5,7 @@ from pdfmajor.util import get_single_or_list
 
 from .base import PDFObject
 from .collections import PDFDictionary
-from .primitives import PDFInteger
+from .primitives import PDFInteger, PDFNull
 from .ref import ObjectRef
 from .util import to_python, to_python_list
 
@@ -52,13 +52,21 @@ class PDFStream:
             raise IncompleteStream(
                 f"Invalid length property {item} {type(item['Length'])}"
             )
+        filters = get_single_or_list(item.get("Filter", None))
+        decode_parms = get_single_or_list(item.get("DecodeParms", None))
+        if len(decode_parms) == 0:
+            decode_parms = [PDFNull()] * len(filters)
+        ffilter = get_single_or_list(item.get("FFilter", None))
+        fdecode_parms = get_single_or_list(item.get("FDecodeParms", None))
+        if len(fdecode_parms) == 0:
+            fdecode_parms = [PDFNull()] * len(ffilter)
         stream = cls(
             offset,
             item["Length"],
-            filter=get_single_or_list(item.get("Filter", None)),
-            decode_parms=get_single_or_list(item.get("DecodeParms", None)),
-            ffilter=get_single_or_list(item.get("FFilter", None)),
-            fdecode_parms=get_single_or_list(item.get("FDecodeParms", None)),
+            filter=filters,
+            decode_parms=decode_parms,
+            ffilter=ffilter,
+            fdecode_parms=fdecode_parms,
             f=item.get("F", None),
             dl=item.get("DL", None),
         )

@@ -119,7 +119,7 @@ def on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):
         obj = last_ctx.get_object()
         if not isinstance(obj, PDFDictionary):
             raise ParserError(f"Cannot initilize a pdfstream with {type(obj)}")
-        last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc + 1, obj)
+        last_ctx.stream = stream = PDFStream.from_pdfdict(token.end_loc + 2, obj)
         if isinstance(stream.length, PDFInteger):
             buffer.seek(stream.offset + stream.length.to_python())
             next_token = None

@@ -25,6 +25,7 @@ from pdfmajor.parser.objects import (
     PDFReal,
     PDFString,
 )
+from pdfmajor.parser.objects.primitives import PDFNull
 from tests.util import all_corrupt_pdf_files, all_pdf_files
 
 
@@ -63,6 +64,85 @@ class ParsingState(TestCase):
                 cat.raw,
                 expcat.raw,
             )
+
+    def test_pdf_spec(self):
+        self.run_test(
+            "PDF_spec.1.7.pdf",
+            PDFDocumentCatalog(
+                version=None,
+                pages=PDFPageTreeNode(
+                    kids=[
+                        ObjectRef(20, 0),
+                        ObjectRef(21, 0),
+                        ObjectRef(22, 0),
+                        ObjectRef(23, 0),
+                        ObjectRef(24, 0),
+                        ObjectRef(25, 0),
+                        ObjectRef(26, 0),
+                        ObjectRef(27, 0),
+                    ],
+                    parent=None,
+                    leaft_count=756,
+                    raw=PDFDictionary.from_dict(
+                        {
+                            "Count": PDFInteger(756, 0, 0),
+                            "Kids": PDFArray.from_list(
+                                [
+                                    ObjectRef(20, 0),
+                                    ObjectRef(21, 0),
+                                    ObjectRef(22, 0),
+                                    ObjectRef(23, 0),
+                                    ObjectRef(24, 0),
+                                    ObjectRef(25, 0),
+                                    ObjectRef(26, 0),
+                                    ObjectRef(27, 0),
+                                ]
+                            ),
+                            "Type": PDFName("Pages", 0, 0),
+                        }
+                    ),
+                ),
+                page_labels=PDFDictionary.from_dict(
+                    {
+                        "Nums": PDFArray.from_list(
+                            [
+                                PDFInteger(0, 0, 0),
+                                ObjectRef(18, 0),
+                                PDFInteger(8, 0, 0),
+                                ObjectRef(19, 0),
+                            ]
+                        )
+                    }
+                ),
+                page_layout=None,
+                page_mode=PDFName("UseOutlines", 0, 0),
+                metadata=PDFMetadata(sub_type="XML", stream_data=b""),
+                raw=PDFDictionary.from_dict(
+                    {
+                        "MarkInfo": PDFDictionary.from_dict(
+                            {"Marked": PDFBoolean(True, 0, 0)}
+                        ),
+                        "Metadata": ObjectRef(2, 0),
+                        "Names": ObjectRef(3, 0),
+                        "OpenAction": PDFArray.from_list(
+                            [
+                                ObjectRef(4, 0),
+                                PDFName("XYZ", 0, 0),
+                                PDFNull(),
+                                PDFNull(),
+                                PDFNull(),
+                            ]
+                        ),
+                        "Outlines": ObjectRef(5, 0),
+                        "PageLabels": ObjectRef(6, 0),
+                        "PageMode": PDFName("UseOutlines", 0, 0),
+                        "Pages": ObjectRef(7, 0),
+                        "StructTreeRoot": ObjectRef(8, 0),
+                        "Type": PDFName("Catalog", 0, 0),
+                    }
+                ),
+            ),
+        )
 
     def test_bad_unicode(self):
         self.run_test(
@@ -152,15 +232,16 @@ class ParsingState(TestCase):
 
     def test_all(self):
         for file_path, buffer in all_pdf_files.items():
-            with self.subTest(file_path), buffer.get_window():
-                parser = PDFParsingContext(buffer)
-                catalog = get_catalog(parser)
-                self.assertEqual(len(parser.health_report), 0)
-                get_info(parser)
-                list(iter_all_page_leafs(parser, catalog.pages))
-                parser = PDFDocument(buffer)
-                actual_pages = len(list(parser.iter_pages()))
-                self.assertEqual(actual_pages, parser.num_pages)
+            if file_path != "PDF_spec.1.7.pdf":
+                with self.subTest(file_path), buffer.get_window():
+                    parser = PDFParsingContext(buffer)
+                    catalog = get_catalog(parser)
+                    self.assertEqual(len(parser.health_report), 0)
+                    get_info(parser)
+                    list(iter_all_page_leafs(parser, catalog.pages))
+                    parser = PDFDocument(buffer)
+                    actual_pages = len(list(parser.iter_pages()))
+                    self.assertEqual(actual_pages, parser.num_pages)
 
     def test_metadata(self):
         with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:

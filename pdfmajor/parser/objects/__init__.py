@@ -10,7 +10,7 @@ from .primitives import (
     PDFPrimitiveObject,
     PDFReal,
     PDFString,
-    get_obj_from_token_primitive,
+    get_obj_from_token_primitive
 )
 from .ref import ObjectRef
 from .stream import PDFStream
