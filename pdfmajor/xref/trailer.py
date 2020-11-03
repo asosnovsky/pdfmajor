@@ -3,12 +3,15 @@ from typing import List, NamedTuple, Optional, Set
 from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.token import TokenKeyword
 from pdfmajor.parser import get_first_object
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
-from pdfmajor.parser.objects.indirect import ObjectRef
-from pdfmajor.parser.objects.primitives import PDFInteger
+from pdfmajor.parser.objects import (
+    ObjectRef,
+    PDFArray,
+    PDFDictionary,
+    PDFInteger,
+    PDFObject,
+    validate_object_or_none,
+)
 from pdfmajor.streambuffer import BufferStream
-from pdfmajor.util import validate_object_or_none
 
 from .exceptions import BrokenFile, InvalidNumberOfRoots, NotRootElement
 

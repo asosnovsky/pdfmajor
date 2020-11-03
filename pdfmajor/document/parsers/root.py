@@ -1,10 +1,13 @@
 from typing import Any, Optional, Set
 
 from pdfmajor.document.pages import PDFPageTreeNode
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFDictionary
-from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFName
+from pdfmajor.parser.objects import (
+    IndirectObject,
+    ObjectRef,
+    PDFDictionary,
+    PDFName,
+    PDFObject,
+)
 from pdfmajor.xref.exceptions import InvalidNumberOfRoots, NotRootElement
 from pdfmajor.xref.trailer import get_root_obj
 
@@ -47,7 +50,7 @@ def get_catalog(pctx: PDFParsingContext) -> PDFDocumentCatalog:
         pages_obj = cat_obj["Pages"]
     except KeyError:
         raise InvalidCatalogObj(f"Missing Pages entry {cat_obj}")
-    metadata = pctx.convert_pdfdict_to_validated_pythondict
+    pctx.convert_pdfdict_to_validated_pythondict
     if isinstance(pages_obj, ObjectRef):
         pages = pctx.get_object_from_ref(pages_obj).get_object()
         if not isinstance(pages, PDFDictionary):

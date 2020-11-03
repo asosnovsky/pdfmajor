@@ -1,16 +1,23 @@
 from pathlib import Path
-from pdfmajor.document.exceptions import BrokenFilePDF
-from pdfmajor.parser.stream import PDFStream
 from typing import Any, BinaryIO, Dict, Iterator, Optional, Tuple, Type, TypeVar, Union
 
+from pdfmajor.document.exceptions import BrokenFilePDF
+from pdfmajor.document.parsers.stream import decode_stream
 from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.healthlog import PDFHealthReport
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
-from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
+from pdfmajor.parser.objects import (
+    IndirectObject,
+    ObjectRef,
+    PDFArray,
+    PDFDictionary,
+    PDFInteger,
+    PDFObject,
+    PDFReal,
+    PDFStream,
+    validate_number_or_none,
+    validate_object_or_none,
+)
 from pdfmajor.streambuffer import BufferStream
-from pdfmajor.util import validate_number_or_none, validate_object_or_none
 from pdfmajor.xref.xrefdb import GenNum, ObjNum, XRefDB
 
 
@@ -183,4 +190,7 @@ class PDFParsingContext:
         if obj.stream is None:
             raise BrokenFilePDF(f"Expected a pdf-stream, instead found {obj}")
         else:
-            obj.stream
+            stream_buffer = BufferStream.from_bytes(
+                decode_stream(obj.stream, self.buffer)
+            )
+            return stream_buffer

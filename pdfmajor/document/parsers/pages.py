@@ -2,12 +2,17 @@ from decimal import Decimal
 from typing import Any, Dict, Iterator, List, Optional
 
 from pdfmajor.document.exceptions import BrokenFilePDF
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
-from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
-from pdfmajor.parser.stream import PDFStream
-from pdfmajor.util import validate_object_or_none
+from pdfmajor.parser.objects import (
+    IndirectObject,
+    ObjectRef,
+    PDFArray,
+    PDFDictionary,
+    PDFInteger,
+    PDFObject,
+    PDFReal,
+    PDFStream,
+    validate_object_or_none,
+)
 
 from ..pages import PDFPage, PDFPageTreeNode
 from ..parse_context import PDFParsingContext

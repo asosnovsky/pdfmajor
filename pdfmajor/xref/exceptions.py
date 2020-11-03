@@ -1,7 +1,7 @@
 from typing import Set
 
 from pdfmajor.exceptions import BrokenFile, PDFMajorException
-from pdfmajor.parser.objects.indirect import ObjectRef
+from pdfmajor.parser.objects import ObjectRef
 
 
 class XRefError(PDFMajorException):

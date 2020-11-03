@@ -9,13 +9,16 @@ from pdfmajor.lexer.token import (
     TokenDictionary,
     TokenKeyword,
 )
-from pdfmajor.parser.objects.primitives import get_obj_from_token_primitive
 from pdfmajor.streambuffer import BufferStream
 
 from .exceptions import InvalidKeywordPos
-from .objects.base import PDFObject
-from .objects.collections import PDFArray, PDFDictionary
-from .objects.comment import PDFComment
+from .objects import (
+    PDFArray,
+    PDFComment,
+    PDFDictionary,
+    PDFObject,
+    get_obj_from_token_primitive,
+)
 from .parsers import (
     deal_with_collection_object,
     on_endobj,

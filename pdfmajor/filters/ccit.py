@@ -12,19 +12,7 @@
 import array
 from typing import Optional
 
-from ...exceptions import DecodeFailed
-
-
-class CCITEOFB(DecodeFailed):
-    pass
-
-
-class CCITInvalidData(DecodeFailed):
-    pass
-
-
-class CCITByteSkip(DecodeFailed):
-    pass
+from .exceptions import CCITEOFB, CCITByteSkip, CCITInvalidData
 
 
 def get_bytes(data):

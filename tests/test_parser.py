@@ -4,12 +4,17 @@ from typing import Any, List
 from unittest import TestCase
 
 from pdfmajor.parser import iter_objects
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
-from pdfmajor.parser.objects.comment import PDFComment
-from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFInteger, PDFString
-from pdfmajor.parser.stream import PDFStream
+from pdfmajor.parser.objects import (
+    IndirectObject,
+    ObjectRef,
+    PDFArray,
+    PDFComment,
+    PDFDictionary,
+    PDFInteger,
+    PDFObject,
+    PDFStream,
+    PDFString,
+)
 from pdfmajor.streambuffer import BufferStream
 
 CURRENT_FOLDER = Path(__file__).parent

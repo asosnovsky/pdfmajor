@@ -1,1 +1,1 @@
-from .document import PDFDocument  # noqa
+from .document import PDFDocument

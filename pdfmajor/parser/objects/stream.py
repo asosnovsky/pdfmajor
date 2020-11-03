@@ -1,10 +1,13 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.util import get_single_or_list, to_python, to_python_list
+from pdfmajor.parser.exceptions import IncompleteStream
+from pdfmajor.util import get_single_or_list
 
-from ..objects.collections import PDFDictionary
-from ..objects.primitives import PDFNull
+from .base import PDFObject
+from .collections import PDFDictionary
+from .primitives import PDFInteger
+from .ref import ObjectRef
+from .util import to_python, to_python_list
 
 
 class PDFStream:
@@ -12,14 +15,14 @@ class PDFStream:
 
     def __init__(
         self,
-        offset: int = 0,
-        length: PDFObject = PDFNull(),
-        filter: Optional[List[PDFObject]] = None,
-        decode_parms: Optional[List[PDFObject]] = None,
-        f: Optional[Any] = None,  # TODO: file-specifications
-        ffilter: Optional[List[PDFObject]] = None,
-        fdecode_parms: Optional[List[PDFObject]] = None,
+        offset: int,
+        length: Union[PDFInteger, ObjectRef],
+        filter: List[PDFObject],
+        decode_parms: List[PDFObject],
+        ffilter: List[PDFObject],
+        fdecode_parms: List[PDFObject],
         dl: Optional[PDFObject] = None,
+        f: Optional[Any] = None,  # TODO: file-specifications
     ) -> None:
         """
         Args:
@@ -43,15 +46,21 @@ class PDFStream:
 
     @classmethod
     def from_pdfdict(cls, offset: int, item: PDFDictionary) -> "PDFStream":
-        stream = cls(offset, item["Length"])
-        stream.filter = get_single_or_list(item.get("Filter", stream.filter))
-        stream.decode_parms = get_single_or_list(
-            item.get("DecodeParms", stream.decode_parms)
-        )
-        stream.f = item.get("F", stream.f)
-        stream.ffilter = get_single_or_list(item.get("FFilter", stream.ffilter))
-        stream.fdecode_parms = get_single_or_list(
-            item.get("FDecodeParms", stream.fdecode_parms)
+        if not isinstance(item["Length"], PDFInteger) and not isinstance(
+            item["Length"], ObjectRef
+        ):
+            raise IncompleteStream(
+                f"Invalid length property {item} {type(item['Length'])}"
+            )
+        stream = cls(
+            offset,
+            item["Length"],
+            filter=get_single_or_list(item.get("Filter", None)),
+            decode_parms=get_single_or_list(item.get("DecodeParms", None)),
+            ffilter=get_single_or_list(item.get("FFilter", None)),
+            fdecode_parms=get_single_or_list(item.get("FDecodeParms", None)),
+            f=item.get("F", None),
+            dl=item.get("DL", None),
         )
         return stream
 

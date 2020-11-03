@@ -1,8 +1,7 @@
 from typing import Any, Dict, NamedTuple, Optional
 
 from pdfmajor.document.pages import PDFPageTreeNode
-from pdfmajor.parser.objects.collections import PDFDictionary
-from pdfmajor.parser.objects.primitives import PDFName
+from pdfmajor.parser.objects import PDFDictionary, PDFName
 
 
 class PDFDocumentCatalog(NamedTuple):

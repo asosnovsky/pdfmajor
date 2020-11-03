@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from pdfmajor.parser.stream.fliters.ccit import CCITTG4Parser
-from pdfmajor.parser.stream.fliters.lzw import lzwdecode
-from pdfmajor.parser.stream.fliters.rld import rldecode
+from pdfmajor.filters.ccit import CCITTG4Parser
+from pdfmajor.filters.lzw import lzwdecode
+from pdfmajor.filters.rld import rldecode
 
 
 class Filters(TestCase):

@@ -5,12 +5,18 @@ from pdfmajor.lexer.token import TokenComplexType, TokenComplexTypeVal, TokenKey
 from pdfmajor.streambuffer import BufferStream
 
 from .exceptions import BrokenFile, EarlyStop, ParserError
-from .objects.base import PDFContextualObject, PDFObject
-from .objects.collections import PDFDictionary
-from .objects.indirect import IndirectObject, ObjectRef
-from .objects.primitives import PDFInteger, PDFNull, PDFPrimitiveObject
+from .objects import (
+    IndirectObject,
+    ObjectRef,
+    PDFContextualObject,
+    PDFDictionary,
+    PDFInteger,
+    PDFNull,
+    PDFObject,
+    PDFPrimitiveObject,
+    PDFStream,
+)
 from .state import ParsingState
-from .stream import PDFStream
 
 
 def on_primitive(

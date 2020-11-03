@@ -10,8 +10,8 @@ clean:
 	rm -rf *.egg-info
 
 lint:
-	autoflake --remove-all-unused-imports -r -i pdfmajor 
-	autoflake --remove-all-unused-imports -r -i tests 
+	autoflake --remove-all-unused-imports --ignore-init-module-imports --remove-duplicate-keys --remove-unused-variables -r -i pdfmajor 
+	autoflake --remove-all-unused-imports --ignore-init-module-imports --remove-duplicate-keys --remove-unused-variables -r -i tests 
 	isort pdfmajor
 	black pdfmajor
 	isort tests

@@ -1,9 +1,7 @@
 from typing import Dict, Iterator, List, Optional, Tuple
 
 from pdfmajor.parser import get_first_object
-from pdfmajor.parser.objects.collections import PDFDictionary
-from pdfmajor.parser.objects.indirect import IndirectObject, ObjectRef
-from pdfmajor.parser.objects.primitives import PDFInteger
+from pdfmajor.parser.objects import IndirectObject, ObjectRef, PDFDictionary, PDFInteger
 from pdfmajor.streambuffer import BufferStream
 
 from .exceptions import BrokenFile, InvalidXref, XRefError

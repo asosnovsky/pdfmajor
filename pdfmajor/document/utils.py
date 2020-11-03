@@ -1,9 +1,11 @@
 from typing import Iterator
 
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray
-from pdfmajor.parser.objects.indirect import ObjectRef
-from pdfmajor.util import validate_object_or_none
+from pdfmajor.parser.objects import (
+    ObjectRef,
+    PDFArray,
+    PDFObject,
+    validate_object_or_none,
+)
 
 from .exceptions import BrokenFilePDF
 

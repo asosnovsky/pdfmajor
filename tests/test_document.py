@@ -11,13 +11,14 @@ from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.document.parsers.pages import iter_all_page_leafs
 from pdfmajor.document.parsers.root import get_catalog, get_info
 from pdfmajor.document.structures import PDFRectangle
-from pdfmajor.parser.objects.base import PDFObject
-from pdfmajor.parser.objects.collections import PDFArray, PDFDictionary
-from pdfmajor.parser.objects.indirect import ObjectRef
-from pdfmajor.parser.objects.primitives import (
+from pdfmajor.parser.objects import (
+    ObjectRef,
+    PDFArray,
     PDFBoolean,
+    PDFDictionary,
     PDFInteger,
     PDFName,
+    PDFObject,
     PDFReal,
     PDFString,
 )
@@ -122,60 +123,6 @@ class ParsingState(TestCase):
                         ),
                         "Metadata": ObjectRef(646, 0),
                         "ViewerPreferences": ObjectRef(647, 0),
-                    }
-                ),
-            ),
-        )
-
-    def test_bad_unicode(self):
-        self.run_test(
-            "bad-unicode.pdf",
-            PDFDocumentCatalog(
-                version=None,
-                pages=PDFPageTreeNode(
-                    kids=[
-                        ObjectRef(142, 0),
-                        ObjectRef(143, 0),
-                        ObjectRef(144, 0),
-                        ObjectRef(145, 0),
-                        ObjectRef(146, 0),
-                    ],
-                    parent=None,
-                    leaft_count=PDFInteger(47, 0, 0),
-                    raw=PDFDictionary.from_dict(
-                        {
-                            "Count": PDFInteger(47, 0, 0),
-                            "Type": PDFName("Pages", 0, 0),
-                            "Kids": PDFArray.from_list(
-                                [
-                                    ObjectRef(142, 0),
-                                    ObjectRef(143, 0),
-                                    ObjectRef(144, 0),
-                                    ObjectRef(145, 0),
-                                    ObjectRef(146, 0),
-                                ]
-                            ),
-                        }
-                    ),
-                ),
-                page_labels=PDFDictionary.from_dict(
-                    {"Nums": [PDFInteger(0, 0, 0), ObjectRef(140, 0)]}
-                ),
-                page_layout=None,
-                page_mode=None,
-                metadata=PDFDictionary.from_dict(
-                    {
-                        "Subtype": PDFName("XML", 0, 0),
-                        "Length": PDFInteger(3529, 0, 0),
-                        "Type": PDFName("Metadata", 0, 0),
-                    }
-                ),
-                raw=PDFDictionary.from_dict(
-                    {
-                        "Metadata": ObjectRef(147, 0),
-                        "Pages": ObjectRef(141, 0),
-                        "Type": PDFName("Catalog", 0, 0),
-                        "PageLabels": ObjectRef(139, 0),
                     }
                 ),
             ),

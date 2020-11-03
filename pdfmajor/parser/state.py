@@ -3,10 +3,13 @@ from typing import Iterator, List, Optional, Tuple, Union
 from pdfmajor.healthlog import PDFHealthReport
 
 from .exceptions import ParserError
-from .objects.base import PDFContextualObject, PDFObject
-from .objects.comment import PDFComment
-from .objects.indirect import IndirectObject
-from .objects.primitives import PDFInteger
+from .objects import (
+    IndirectObject,
+    PDFComment,
+    PDFContextualObject,
+    PDFInteger,
+    PDFObject,
+)
 
 
 class ParsingState:

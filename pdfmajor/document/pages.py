@@ -3,11 +3,14 @@ from typing import List, NamedTuple, Optional
 from pdfmajor.document.exceptions import InvalidPagesNodeKids
 from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.exceptions import PDFMajorException
-from pdfmajor.parser.objects.collections import PDFDictionary
-from pdfmajor.parser.objects.indirect import ObjectRef
-from pdfmajor.parser.objects.primitives import PDFInteger, PDFReal
-from pdfmajor.parser.stream import PDFStream
-from pdfmajor.util import validate_object_or_none
+from pdfmajor.parser.objects import (
+    ObjectRef,
+    PDFDictionary,
+    PDFInteger,
+    PDFReal,
+    PDFStream,
+    validate_object_or_none,
+)
 
 from .utils import iter_single_ref_as_array_ref
 

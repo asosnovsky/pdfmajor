@@ -28,9 +28,5 @@ class InvalidKeywordPos(BrokenFileParserError):
         )
 
 
-class DecodeFailed(BrokenFileParserError):
-    pass
-
-
-class InvalidDecoderOrNotImplemented(DecodeFailed, NotImplementedError):
+class IncompleteStream(BrokenFileParserError):
     pass
