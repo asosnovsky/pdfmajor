@@ -16,3 +16,6 @@ tests/samples/output
 venv
 oldpdfmajor
 .tmp*
+_*py
+*.profile
+*.calltree
