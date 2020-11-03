@@ -22,6 +22,7 @@ with open("README.md") as readme_file:
                 "bandit==1.6.2",
                 "isort==5.6.4",
                 "autoflake==1.4",
+                "defusedxml==0.6.0",
             ]
         },
         "description": "PDF parser",

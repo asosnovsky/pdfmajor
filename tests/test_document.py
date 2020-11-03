@@ -3,9 +3,12 @@ from decimal import Decimal
 from typing import List
 from unittest import TestCase
 
+from defusedxml.ElementTree import fromstring as xml_parse  # type: ignore
+
 from pdfmajor.document import PDFDocument
 from pdfmajor.document.catalog import PDFDocumentCatalog
 from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
+from pdfmajor.document.metadata import PDFMetadata
 from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.document.parse_context import PDFParsingContext
 from pdfmajor.document.parsers.pages import iter_all_page_leafs
@@ -32,8 +35,33 @@ class ParsingState(TestCase):
             self.assertEqual(len(pdf.health_report), 0)
             cat = get_catalog(pdf)
             self.assertEqual(
-                cat,
-                expcat,
+                cat.version,
+                expcat.version,
+            )
+            self.assertEqual(
+                cat.pages,
+                expcat.pages,
+            )
+            self.assertEqual(
+                cat.page_labels,
+                expcat.page_labels,
+            )
+            self.assertEqual(
+                cat.page_layout,
+                expcat.page_layout,
+            )
+            self.assertEqual(
+                cat.page_mode,
+                expcat.page_mode,
+            )
+            # TODO
+            # self.assertEqual(
+            #     cat.metadata,
+            #     expcat.metadata,
+            # )
+            self.assertEqual(
+                cat.raw,
+                expcat.raw,
             )
 
     def test_bad_unicode(self):
@@ -61,12 +89,9 @@ class ParsingState(TestCase):
                 page_labels={"Nums": [PDFInteger(0, 0, 0), ObjectRef(140, 0)]},
                 page_layout=None,
                 page_mode=None,
-                metadata=PDFDictionary.from_dict(
-                    {
-                        "Subtype": PDFName("XML", 0, 0),
-                        "Length": PDFInteger(3529, 0, 0),
-                        "Type": PDFName("Metadata", 0, 0),
-                    }
+                metadata=PDFMetadata(
+                    "XML",
+                    b"",
                 ),
                 raw=PDFDictionary.from_dict(
                     {
@@ -105,12 +130,9 @@ class ParsingState(TestCase):
                 page_labels=None,
                 page_layout=None,
                 page_mode=None,
-                metadata=PDFDictionary.from_dict(
-                    {
-                        "Type": PDFName("Metadata", 0, 0),
-                        "Subtype": PDFName("XML", 0, 0),
-                        "Length": PDFInteger(3065, 0, 0),
-                    }
+                metadata=PDFMetadata(
+                    "XML",
+                    b"",
                 ),
                 raw=PDFDictionary.from_dict(
                     {
@@ -140,10 +162,15 @@ class ParsingState(TestCase):
                 actual_pages = len(list(parser.iter_pages()))
                 self.assertEqual(actual_pages, parser.num_pages)
 
-    def test_doc(self):
+    def test_metadata(self):
         with all_pdf_files["bad-unicode.pdf"].get_window() as buffer:
             parser = PDFDocument(buffer)
-            print(parser.info)
+            self.assertIsNotNone(parser.catalog.metadata)
+            xml_tree = xml_parse(parser.catalog.metadata.stream_data.decode("utf-8"))
+            self.assertEqual(xml_tree[0][0][0].text, "Acrobat Distiller 7.0 (Windows)")
+            self.assertEqual(xml_tree[0][1][0].text, "PScript5.dll Version 5.2.2")
+            self.assertEqual(xml_tree[0][1][1].text, "2009-01-15T08:49:42-07:00")
+            self.assertEqual(xml_tree[0][1][2].text, "2009-01-15T08:49:42-07:00")
 
     def test_warning_pagecount(self):
         with all_corrupt_pdf_files["bad-page-count.pdf"].get_window() as buffer:

@@ -128,16 +128,7 @@ def on_stream(buffer: BufferStream, state: ParsingState, token: TokenKeyword):
                     isinstance(next_token, TokenKeyword)
                     and next_token.value == b"endstream"
                 ):
-                    if i > 0:
-                        stream.length.value = next_token.start_loc - stream.offset
-                        state.health_report.write(
-                            issue_name="InvalidPDFStreamLength",
-                            additional_info=f"""
-                            start_token={token}
-                            end_token={next_token}
-                            object_dictionary={obj}
-                        """,
-                        )
+                    stream.length.value = next_token.start_loc - stream.offset
                     break
             if not (
                 isinstance(next_token, TokenKeyword)

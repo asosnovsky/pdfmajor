@@ -1,6 +1,7 @@
 from typing import Any, Optional, Set
 
 from pdfmajor.document.pages import PDFPageTreeNode
+from pdfmajor.document.parsers.metadata import get_metadata
 from pdfmajor.parser.objects import (
     IndirectObject,
     ObjectRef,
@@ -50,7 +51,6 @@ def get_catalog(pctx: PDFParsingContext) -> PDFDocumentCatalog:
         pages_obj = cat_obj["Pages"]
     except KeyError:
         raise InvalidCatalogObj(f"Missing Pages entry {cat_obj}")
-    pctx.convert_pdfdict_to_validated_pythondict
     if isinstance(pages_obj, ObjectRef):
         pages = pctx.get_object_from_ref(pages_obj).get_object()
         if not isinstance(pages, PDFDictionary):
@@ -59,7 +59,10 @@ def get_catalog(pctx: PDFParsingContext) -> PDFDocumentCatalog:
         pages = pages_obj
     else:
         raise InvalidCatalogObj(f"Invalid pages entry {pages_obj}")
-
+    if cat_obj.get("Metadata"):
+        validated_fields["metadata"] = get_metadata(pctx, cat_obj["Metadata"])
+    else:
+        validated_fields["metadata"] = None
     validated_fields["pages"] = PDFPageTreeNode.from_pdfdict(pages)
     validated_fields["raw"] = cat_obj
     return PDFDocumentCatalog(**validated_fields)

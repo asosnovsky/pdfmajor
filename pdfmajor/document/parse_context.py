@@ -13,7 +13,6 @@ from pdfmajor.parser.objects import (
     PDFInteger,
     PDFObject,
     PDFReal,
-    PDFStream,
     validate_number_or_none,
     validate_object_or_none,
 )
@@ -179,7 +178,9 @@ class PDFParsingContext:
         with self.buffer.get_window() as buffer:
             return self.xrefdb.get_obj(obj_num, gen_num, buffer)
 
-    def validated_and_iter_stream(self, obj_ref: PDFObject) -> PDFStream:
+    def validated_and_iter_stream(
+        self, obj_ref: PDFObject
+    ) -> Tuple[PDFDictionary, bytes]:
         if isinstance(obj_ref, ObjectRef):
             obj = self.get_object_from_ref(obj_ref)
         elif isinstance(obj_ref, IndirectObject):
@@ -190,7 +191,12 @@ class PDFParsingContext:
         if obj.stream is None:
             raise BrokenFilePDF(f"Expected a pdf-stream, instead found {obj}")
         else:
-            stream_buffer = BufferStream.from_bytes(
-                decode_stream(obj.stream, self.buffer)
-            )
-            return stream_buffer
+            obj_def = obj.get_object()
+            if not isinstance(obj_def, PDFDictionary):
+                self.health_report.write_error(
+                    BrokenFilePDF(
+                        f"Stream object is missing a defining dictionary {obj_def} {obj_def}"
+                    )
+                )
+                obj_def = PDFDictionary()
+            return obj_def, decode_stream(obj.stream, self.buffer)

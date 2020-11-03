@@ -1,5 +1,6 @@
 from typing import Any, Dict, NamedTuple, Optional
 
+from pdfmajor.document.metadata import PDFMetadata
 from pdfmajor.document.pages import PDFPageTreeNode
 from pdfmajor.parser.objects import PDFDictionary, PDFName
 
@@ -12,6 +13,6 @@ class PDFDocumentCatalog(NamedTuple):
     page_labels: Optional[PDFDictionary]
     page_layout: Optional[PDFName]
     page_mode: Optional[PDFName]
-    metadata: Optional[PDFDictionary]
+    metadata: Optional[PDFMetadata]
 
     raw: Dict[str, Any]  # for other properties
