@@ -46,7 +46,7 @@ class PDFDictionary(Dict[str, PDFObject], PDFContextualObject):
 
     @property
     def last_item_value(self):
-        return self[self.last_name]
+        return self[self.last_name.value]
 
     def pass_item(self, item: PDFObject):
         if self.name is None:

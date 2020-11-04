@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, BinaryIO, Dict, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from pdfmajor.document.exceptions import BrokenFilePDF
-from pdfmajor.document.parsers.stream import decode_stream
+from pdfmajor.document.parsers.stream import decode_stream, iter_filters_in_stream
 from pdfmajor.document.structures import PDFRectangle
 from pdfmajor.healthlog import PDFHealthReport
 from pdfmajor.pdf_parser.objects import (
@@ -212,7 +212,7 @@ class PDFParsingContext:
                     )
                 )
                 obj_def = PDFDictionary()
-            return obj_def, decode_stream(obj.stream, self.buffer)
+            return obj_def, self.decode_stream(obj.stream)
 
     def decode_stream(self, stream: PDFStream) -> bytes:
         """Decode the bytes associated with the PDF-Stream
@@ -223,4 +223,15 @@ class PDFParsingContext:
         Returns:
             bytes
         """
-        return decode_stream(stream, self.buffer)
+        offset = stream.offset
+        length_ref = stream.length
+        if isinstance(length_ref, ObjectRef):
+            length_obj = self.get_object_from_ref(length_ref).get_object()
+            if not isinstance(length_obj, PDFInteger):
+                raise BrokenFilePDF(f"Length should be an int not {length_obj}")
+        else:
+            length_obj = length_ref
+        length = length_obj.value
+        return decode_stream(
+            offset, length, iter_filters_in_stream(stream), self.buffer
+        )

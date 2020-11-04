@@ -24,7 +24,7 @@ class Filters(TestCase):
 class CCIT(TestCase):
     def get_parser(self, bits):
         parser = CCITTG4Parser(len(bits))
-        parser._curline = [int(c) for c in bits]
+        parser._curline = [int(c) for c in bits]  # type: ignore
         parser._reset_line()
         return parser
 

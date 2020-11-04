@@ -187,7 +187,7 @@ def _deal_with_inheritance(
     field_dict: Dict[str, Optional[PDFObject]],
     lastpage: Optional[PDFRawFields],
     allow_missing: bool = False,
-):
+) -> Dict[str, Any]:
     _deal_with_inheritance_for_field("resources", field_dict, lastpage, PDFDictionary())
     _deal_with_inheritance_for_field(
         "rotate", field_dict, lastpage, PDFInteger(0, 0, 0)

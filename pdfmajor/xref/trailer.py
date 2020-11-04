@@ -1,4 +1,4 @@
-from typing import List, NamedTuple, Optional, Set
+from typing import List, NamedTuple, Optional, Set, Union
 
 from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.token import TokenKeyword
@@ -46,7 +46,7 @@ class PDFFileTrailer(NamedTuple):
 
     size: PDFInteger
     root: Optional[ObjectRef]
-    prev: Optional[PDFInteger]
+    prev: Optional[Union[PDFInteger, ObjectRef]]
     info: Optional[ObjectRef]
     encrypt: Optional[PDFObject]
     encrypt_id: Optional[PDFArray]

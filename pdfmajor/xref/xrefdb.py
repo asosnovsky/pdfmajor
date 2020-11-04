@@ -43,7 +43,7 @@ class XRefDB:
                     elif isinstance(trailer.prev, ObjectRef):
                         obj = self.get_obj(
                             trailer.prev.obj_num, trailer.prev.gen_num, buffer=buffer
-                        )
+                        ).get_object()
                         if not isinstance(obj, PDFInteger):
                             raise BrokenFile(
                                 f"trailer had an invalid prev options {trailer.prev}"

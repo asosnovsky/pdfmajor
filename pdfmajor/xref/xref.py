@@ -1,4 +1,4 @@
-from typing import Iterator, Literal, NamedTuple, Union
+from typing import Iterator, NamedTuple
 
 from pdfmajor.lexer import iter_tokens
 from pdfmajor.lexer.token import TokenInteger, TokenKeyword
@@ -15,7 +15,7 @@ class XRefRow(NamedTuple):
     offset: int
     obj_num: int
     gen_num: int
-    use: Union[Literal["n"], Literal["f"]]
+    use: bytes
 
 
 def find_start_of_xref(buffer: BufferStream, strict: bool = False) -> int:
@@ -123,7 +123,7 @@ def iter_over_standard_xref(
                 raise PDFNoValidXRef(
                     f"Invalid 'use' value for xref {use!r}: pos={pos} line={line!r}"
                 )
-            yield XRefRow(offset=pos, obj_num=obj_num, gen_num=gen_num, use=use)  # type: ignore
+            yield XRefRow(offset=pos, obj_num=obj_num, gen_num=gen_num, use=use)
 
 
 # def construct_indobj_collection(

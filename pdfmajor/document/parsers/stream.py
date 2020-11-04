@@ -1,30 +1,24 @@
 from itertools import chain
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterator
 
-from pdfmajor.filters import process_filters_on_data
+from pdfmajor.filters import FilterPair, process_filters_on_data
 from pdfmajor.pdf_parser.exceptions import IncompleteStream
 from pdfmajor.pdf_parser.objects import PDFDictionary, PDFName, PDFStream
 from pdfmajor.streambuffer import BufferStream
 
 
-def decode_stream(stream: PDFStream, buffer: BufferStream) -> bytes:
-    """Decode the bytes associated with the PDF-Stream
+def iter_filters_in_stream(stream: PDFStream) -> Iterator[FilterPair]:
+    """loops over all filters and their params in the stream
 
     Args:
         stream (PDFStream)
-        buffer (BufferStream)
 
-    Returns:
-        bytes
+    Raises:
+        IncompleteStream: if a filter-name is invalid
+
+    Yields:
+        Iterator[FilterPair]
     """
-    length = stream.length.to_python()
-    if length is None:
-        raise IncompleteStream(f"Cannot decode stream as it has no specified length")
-    with buffer.get_window():
-        buffer.seek(stream.offset)
-        data = buffer.read(length).data
-    filters: List[str] = []
-    decode_parms: List[Dict[str, Any]] = []
     for f, dp in chain(
         zip(stream.filter, stream.decode_parms),
         zip(stream.ffilter, stream.fdecode_parms),
@@ -33,10 +27,29 @@ def decode_stream(stream: PDFStream, buffer: BufferStream) -> bytes:
             raise IncompleteStream(f"Invalid filter name {f}")
         else:
             filter_name = f.value
-        params = {}
+        params: Dict[str, Any] = {}
         if isinstance(dp, PDFDictionary):
             params = dp.to_python()
-        filters.append(filter_name)
-        decode_parms.append(params)
-    data = process_filters_on_data(data, filters, decode_parms)
+        yield filter_name, params
+
+
+def decode_stream(
+    offset: int, length: int, it_filters: Iterator[FilterPair], buffer: BufferStream
+) -> bytes:
+    """Decode the bytes associated with the PDF-Stream
+
+    Args:
+        offset (int)
+        length (int)
+        it_filters (Iterator[FilterPair])
+        buffer (BufferStream)
+
+    Returns:
+        bytes
+    """
+    with buffer.get_window():
+        buffer.seek(offset)
+        data = buffer.read(length).data
+
+    data = process_filters_on_data(data, it_filters)
     return data

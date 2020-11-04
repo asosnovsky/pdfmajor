@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, Iterator, List, Optional, Type
 
 from .decoders import (
     ASCII85Decode,
@@ -8,7 +8,7 @@ from .decoders import (
     LZWDecode,
     RunLengthDecode
 )
-from .types import PDFFilterDecoder
+from .types import FilterPair, PDFFilterDecoder
 
 _filter_type_name_mapping: Dict[str, Optional[Type[PDFFilterDecoder]]] = {
     "FlateDecode": FlateDecode,
@@ -33,8 +33,7 @@ _filter_type_name_mapping: Dict[str, Optional[Type[PDFFilterDecoder]]] = {
 
 def process_filters_on_data(
     data: bytes,
-    filters: Optional[List[str]],
-    decode_params: Optional[List[Dict[str, Any]]],
+    it_filters: Iterator[FilterPair],
 ) -> bytes:
     """runs the filters provided by the list with the provided params against the data
 
@@ -46,13 +45,9 @@ def process_filters_on_data(
     Returns:
         bytes
     """
-    if filters is not None:
-        if decode_params is None:
-            decode_params = [{}] * len(filters)
-        for i, f in enumerate(filters):
-            params = decode_params[i]
-            decoder = detect_decoder_type(f)
-            data = decoder.decode(data, **params)
+    for f, params in it_filters:
+        decoder = detect_decoder_type(f)
+        data = decoder.decode(data, **params)
     return data
 
 

@@ -16,7 +16,7 @@ class PDFObject(metaclass=ABCMeta):
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, self.__class__):
             return False
-        return o.to_python() == self.to_python()
+        return o.to_python() == self.to_python()  # type: ignore
 
     def __repr__(self) -> str:
         return "{cls}({data})".format(

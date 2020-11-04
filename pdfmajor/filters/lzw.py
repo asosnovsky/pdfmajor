@@ -12,7 +12,7 @@ class LZWDecoder(object):
         self.buff: int = 0
         self.bpos: int = 8
         self.nbits: int = 9
-        self.table: Optional[List[bytes]] = None
+        self.table: Optional[List[Optional[bytes]]] = None
         self.prevbuf: Optional[bytes] = None
         return
 
@@ -54,15 +54,15 @@ class LZWDecoder(object):
         elif not self.prevbuf:
             x = self.prevbuf = self.table[code]
         else:
-            if code < len(self.table):
+            if code < len(self.table):  # type: ignore
                 x = self.table[code]
                 self.table.append(self.prevbuf + x[:1])
-            elif code == len(self.table):
+            elif code == len(self.table):  # type: ignore
                 self.table.append(self.prevbuf + self.prevbuf[:1])
                 x = self.table[code]
             else:
                 raise DecodeFailed("LZW")
-            l = len(self.table)
+            l = len(self.table)  # type: ignore
             if l == 511:
                 self.nbits = 10
             elif l == 1023:
@@ -84,7 +84,7 @@ class LZWDecoder(object):
 
 
 # lzwdecode
-def lzwdecode(data: bytes):
+def lzwdecode(data: bytes) -> bytes:
     fp = BytesIO(data)
     s = LZWDecoder(fp).run()
-    return b"".join(s)
+    return b"".join(s)  # type: ignore

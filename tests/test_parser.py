@@ -214,7 +214,7 @@ endobj
         )
         for obj in iter_objects(buffer):
             self.assertIsInstance(obj, IndirectObject)
-            self.assertIsInstance(obj.get_object(), PDFDictionary)
+            self.assertIsInstance(obj.get_object(), PDFDictionary)  # type: ignore
             self.assertIsInstance(obj.stream, PDFStream)  # type: ignore
             self.assertDictEqual(
                 obj.stream.to_python(),  # type: ignore
@@ -230,7 +230,7 @@ endobj
                 },
             )
             self.assertDictEqual(
-                obj.get_object().to_python(),
+                obj.get_object().to_python(),  # type: ignore
                 {
                     "Filter": "/FlateDecode",
                     "Length": 123,
@@ -252,7 +252,7 @@ endobj
         )
         for obj in iter_objects(buffer):
             self.assertIsInstance(obj, IndirectObject)
-            self.assertIsInstance(obj.get_object(), PDFDictionary)
+            self.assertIsInstance(obj.get_object(), PDFDictionary)  # type: ignore
             self.assertIsInstance(obj.stream, PDFStream)  # type: ignore
             self.assertDictEqual(
                 obj.stream.to_python(),  # type: ignore
@@ -268,7 +268,7 @@ endobj
                 },
             )
             self.assertDictEqual(
-                obj.get_object().to_python(),
+                obj.get_object().to_python(),  # type: ignore
                 {
                     "Filter": "/FlateDecode",
                     "Length": 123 + 4,

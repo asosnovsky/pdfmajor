@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Union
 
-from pdfmajor.pdf_parser.exceptions import IncompleteStream
+from pdfmajor.pdf_parser.exceptions import BrokenFileParserError, IncompleteStream
 from pdfmajor.util import get_single_or_list
 
 from .base import PDFObject
@@ -63,13 +63,16 @@ class PDFStream:
         fdecode_parms = get_single_or_list(item.get("FDecodeParms", None))
         if len(fdecode_parms) == 0:
             fdecode_parms = [PDFNull()] * len(ffilter)
+        length = item["Length"]
+        if not isinstance(length, PDFInteger) and not isinstance(length, ObjectRef):
+            raise BrokenFileParserError(f"length has an invalid type {length}")
         stream = cls(
             offset,
-            item["Length"],
+            length,
             filter=filters,
-            decode_parms=decode_parms,
+            decode_parms=decode_parms,  # type: ignore
             ffilter=ffilter,
-            fdecode_parms=fdecode_parms,
+            fdecode_parms=fdecode_parms,  # type: ignore
             f=item.get("F", None),
             dl=item.get("DL", None),
         )

@@ -166,7 +166,13 @@ class ParsingState(TestCase):
                         }
                     )
                 ),
-                page_labels={"Nums": [PDFInteger(0, 0, 0), ObjectRef(140, 0)]},
+                page_labels=PDFDictionary.from_dict(
+                    {
+                        "Nums": PDFArray.from_list(
+                            [PDFInteger(0, 0, 0), ObjectRef(140, 0)]
+                        )
+                    }
+                ),
                 page_layout=None,
                 page_mode=None,
                 metadata=PDFMetadata(
@@ -258,6 +264,8 @@ class ParsingState(TestCase):
             parser = PDFDocument(buffer)
             with warnings.catch_warnings(record=True) as w:
                 actual_pages = len(list(parser.iter_pages()))
+                if w is None:
+                    raise AssertionError
                 self.assertEqual(len(w), 1)
             self.assertNotEqual(actual_pages, parser.num_pages)
 
@@ -283,7 +291,7 @@ class Structures(TestCase):
             [
                 PDFReal(Decimal("0.23"), 0, 0),
                 PDFInteger(10, 0, 0),
-                PDFInteger(Decimal("3.3"), 0, 0),
+                PDFReal(Decimal("3.3"), 0, 0),
                 PDFInteger(3, 0, 0),
             ],
             PDFRectangle(Decimal("0.23"), Decimal(10), Decimal("3.3"), Decimal(3)),
@@ -294,10 +302,10 @@ class Structures(TestCase):
             PDFRectangle.from_pdfarray(
                 PDFArray.from_list(
                     [
-                        PDFString("h0", 0, 0),
-                        PDFString("h0", 0, 0),
-                        PDFString("h0", 0, 0),
-                        PDFString("h0", 0, 0),
+                        PDFString(b"h0", 0, 0),
+                        PDFString(b"h0", 0, 0),
+                        PDFString(b"h0", 0, 0),
+                        PDFString(b"h0", 0, 0),
                     ]
                 )
             )

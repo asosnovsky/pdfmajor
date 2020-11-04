@@ -28,7 +28,7 @@ class BitParser(object):
         return
 
     @classmethod
-    def add(klass, root, v, bits):
+    def add(cls, root, v, bits):
         p = root
         b = None
         for i in range(len(bits)):
@@ -532,10 +532,10 @@ class CCITTFaxDecoder(CCITTG4Parser):
     def __init__(self, width, bytealign=False, reversed=False):
         CCITTG4Parser.__init__(self, width, bytealign=bytealign)
         self.reversed = reversed
-        self._buf = b""
+        self._buf: bytes = b""
         return
 
-    def close(self):
+    def close(self) -> bytes:
         return self._buf
 
     def output_line(self, y, bits):
