@@ -1,6 +1,8 @@
 from decimal import Decimal
 from typing import List, NamedTuple
 
+import numpy as np
+
 from pdfmajor.document.exceptions import BrokenFilePDF, TooManyRectField
 from pdfmajor.pdf_parser.objects import PDFArray, PDFInteger, PDFReal
 
@@ -30,3 +32,17 @@ class PDFRectangle(NamedTuple):
                 f"Insufficient number of fields for rectangle {arr} {vals}"
             )
         return cls(*vals)
+
+    def to_numpy(self) -> np.ndarray:
+        """convert the rectangle to a numpy array
+
+        Returns:
+            np.ndarray[np.float64]
+        """
+        return np.array(
+            [
+                [np.float64(self.llx), np.float64(self.lly)],
+                [np.float64(self.urx), np.float64(self.ury)],
+            ],
+            dtype=np.float64,
+        )

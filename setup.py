@@ -12,7 +12,7 @@ with open("README.md") as readme_file:
         "name": "pdfmajor",
         "version": "1.3.13",
         "packages": find_packages(include=["pdfmajor*"]),
-        "install_requires": ["numpy==1.19.4", "typing-extensions==3.7.4.3"],
+        "install_requires": ["numpy==1.19.4", "data-science-types==0.2.19"],
         "extras_require": {
             "dev": [
                 "tqdm==4.32.1",
