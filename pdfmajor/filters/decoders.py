@@ -33,7 +33,7 @@ class LZWDecode(PDFFilterDecoder):
 class FlateDecode(PDFFilterDecoder):
     @staticmethod
     def decode(data: bytes, **decode_params: Any) -> bytes:
-        return zlib.decompress(data)
+        return zlib.decompress(data.strip(b"\r\n"))
 
 
 class RunLengthDecode(PDFFilterDecoder):
