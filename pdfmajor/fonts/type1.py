@@ -4,7 +4,7 @@ from .base import PDFFont
 from . import standard14
 
 
-class PDFType1(PDFFont):
+class PDFFontType1(PDFFont):
     """A standard font in the PDF, as is defined by PDF spec 1.7 section 9.6.2"""
 
     def __init__(
@@ -24,9 +24,14 @@ class PDFType1(PDFFont):
             encoding=encoding,
             to_unicode=to_unicode,
         )
+        self.base_font = base_font
+        self.widths = widths
+        self.font_descriptor = font_descriptor
+        self.encoding = encoding
+        self.to_unicode = to_unicode
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "PDFType1":
+    def from_dict(cls, d: Dict[str, Any]) -> "PDFFontType1":
         base_font = str(d["BaseFont"])
         stnd_font = standard14.get_ifexists(base_font)
         encoding = d.get("Encoding", None)
