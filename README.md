@@ -6,7 +6,7 @@
 - [ ] Encryption
 - [ ] Support all stream filters
 - [ ] Font support
-- [ ] Type 3 fond support
+- [ ] Add Type 3/0/CID support
 - [ ] Color spacing
 
 
