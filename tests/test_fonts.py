@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pdfmajor.fonts import standard14, PDFFontType1
+from pdfmajor.fonts import standard14, PDFSimpleFont
 
 
 class Standard14(TestCase):
@@ -159,7 +159,7 @@ class Parser(TestCase):
                 333,
             ],
         }
-        font = PDFFontType1.from_dict(raw)
+        font = PDFSimpleFont.from_dict(raw)
         self.assertEqual(font.subtype, "Type1")
         self.assertEqual(font.base_font, "TimesNewRomanPS-ItalicMT")
         self.assertEqual(font.encoding, "WinAnsiEncoding")
@@ -174,8 +174,8 @@ class Parser(TestCase):
         )
 
     def test_type1_known(self):
-        raw = {"BaseFont": "Symbol", "Encoding": "WinAnsiEncoding"}
-        font = PDFFontType1.from_dict(raw)
+        raw = {"BaseFont": "Symbol", "Encoding": "WinAnsiEncoding", "Subtype": "Type1"}
+        font = PDFSimpleFont.from_dict(raw)
         self.assertEqual(font.subtype, "Type1")
         self.assertEqual(font.base_font, "Symbol")
         self.assertEqual(font.encoding, "WinAnsiEncoding")

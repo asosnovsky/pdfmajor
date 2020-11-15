@@ -6,6 +6,7 @@
 - [ ] Encryption
 - [ ] Support all stream filters
 - [ ] Font support
+- [ ] Type 3 fond support
 - [ ] Color spacing
 
 

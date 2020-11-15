@@ -4,11 +4,12 @@ from .base import PDFFont
 from . import standard14
 
 
-class PDFFontType1(PDFFont):
+class PDFSimpleFont(PDFFont):
     """A standard font in the PDF, as is defined by PDF spec 1.7 section 9.6.2"""
 
     def __init__(
         self,
+        subtype: str,
         base_font: str,
         widths: Dict[int, int],
         font_descriptor: Dict[str, int],
@@ -17,7 +18,7 @@ class PDFFontType1(PDFFont):
     ) -> None:
         PDFFont.__init__(
             self,
-            "Type1",
+            subtype,
             base_font=base_font,
             widths=widths,
             font_descriptor=font_descriptor,
@@ -31,13 +32,15 @@ class PDFFontType1(PDFFont):
         self.to_unicode = to_unicode
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "PDFFontType1":
+    def from_dict(cls, d: Dict[str, Any]) -> "PDFSimpleFont":
+        subtype = str(d["Subtype"])
         base_font = str(d["BaseFont"])
         stnd_font = standard14.get_ifexists(base_font)
         encoding = d.get("Encoding", None)
         to_unicode = d.get("ToUnicode", None)
         if stnd_font is not None:
             return cls(
+                subtype=subtype,
                 base_font=base_font,
                 widths={k: v for k, v in zip(stnd_font.char_codes, stnd_font.widths)},
                 font_descriptor=stnd_font.descriptor,
@@ -53,6 +56,7 @@ class PDFFontType1(PDFFont):
                 widths_array = (0 for _ in range((last_char - first_char + 1)))
             font_descriptor = dict(d["FontDescriptor"])  # type: Any
             return cls(
+                subtype=subtype,
                 base_font=base_font,
                 widths={(i + first_char): w for (i, w) in enumerate(widths_array)},
                 font_descriptor=font_descriptor,
