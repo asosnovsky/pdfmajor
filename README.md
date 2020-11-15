@@ -1,3 +1,18 @@
+
+# TODO:
+
+
+- [ ] Re-write docs
+- [ ] Encryption
+- [ ] Support all stream filters
+- [ ] Font support
+- [ ] Color spacing
+
+
+
+
+
+
 # PDFMajor 
 
 <table>
